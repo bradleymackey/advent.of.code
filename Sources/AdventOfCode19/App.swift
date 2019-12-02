@@ -1,5 +1,5 @@
 //
-//  ArgumentParser.swift
+//  App.swift
 //  AdventOfCode
 //
 //  Created by Bradley Mackey on 01/12/2019.
@@ -8,19 +8,23 @@
 
 import Foundation
 
-struct ArgumentParser {
+struct App {
     
     static func parseConfigurations() -> [Configuration] {
         
         let arguments = CommandLine.arguments
+        
+        print("""
+        Advent of Code '19
+        by Bradley Mackey
+        -------------------------------
+
+        """)
 
         guard
             arguments.count > 2
         else {
             print("""
-            Advent of Code '19
-            by Bradley Mackey
-            -------------------------------
             Pass a day and a directory containing
             files to execute.
             Files should be of the form:
@@ -33,13 +37,6 @@ struct ArgumentParser {
             """)
             exit(0)
         }
-        
-        print("""
-        Advent of Code '19
-        by Bradley Mackey
-        -------------------------------
-
-        """)
 
         guard
             let dayNumber = Int(arguments[1]),

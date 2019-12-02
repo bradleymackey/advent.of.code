@@ -9,7 +9,7 @@
 import Foundation
 
 do {
-    let configs = ArgumentParser.parseConfigurations()
+    let configs = App.parseConfigurations()
     for config in configs {
         print("Solving day \(config.day)...")
 //        print("Input file \(config.filePath)")
