@@ -8,15 +8,16 @@
 
 protocol Day {
     init(input: String)
-    func solvePartOne() -> String
-    func solvePartTwo() -> String
+    var answerMetric: String { get }
+    func solvePartOne() -> CustomStringConvertible
+    func solvePartTwo() -> CustomStringConvertible
 }
 
 extension Day {
     
     func solveAll() {
-        print("Part 1: \(solvePartOne())")
-        print("Part 2: \(solvePartTwo())")
+        print("Part 1: \(solvePartOne()) \(answerMetric)")
+        print("Part 2: \(solvePartTwo()) \(answerMetric)")
     }
     
 }

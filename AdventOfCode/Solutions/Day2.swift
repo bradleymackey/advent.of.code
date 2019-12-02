@@ -10,11 +10,15 @@ struct Day2: Day {
     
     let input: String
     
-    func solvePartOne() -> String {
+    var answerMetric: String {
+        "units"
+    }
+    
+    func solvePartOne() -> CustomStringConvertible {
         "?"
     }
     
-    func solvePartTwo() -> String {
+    func solvePartTwo() -> CustomStringConvertible {
         "?"
     }
     

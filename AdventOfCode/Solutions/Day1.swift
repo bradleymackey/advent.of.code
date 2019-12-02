@@ -17,18 +17,20 @@ struct Day1: Day {
             .compactMap(Int.init)
     }
     
-    func solvePartOne() -> String {
-        let total = fuelValues
-            .compactMap { Fuel($0).next() }
-            .reduce(0, +)
-        return "\(total) fuel units"
+    var answerMetric: String {
+        "fuel units"
     }
     
-    func solvePartTwo() -> String {
-        let total = fuelValues
+    func solvePartOne() -> CustomStringConvertible {
+        fuelValues
+            .compactMap { Fuel($0).next() }
+            .reduce(0, +)
+    }
+    
+    func solvePartTwo() -> CustomStringConvertible {
+        fuelValues
             .flatMap(Fuel.init)
             .reduce(0, +)
-        return "\(total) fuel units"
     }
     
 }
