@@ -14,7 +14,9 @@ struct ArgumentParser {
         
         let arguments = CommandLine.arguments
 
-        guard arguments.count > 2 else {
+        guard
+            arguments.count > 2
+        else {
             print("""
             Advent of Code '19
             by Bradley Mackey
@@ -29,7 +31,10 @@ struct ArgumentParser {
             exit(0)
         }
 
-        guard let dayNumber = Int(arguments[1]) else {
+        guard
+            let dayNumber = Int(arguments[1]),
+            (1...25).contains(dayNumber)
+        else {
             print("""
             ERROR
             -------------------------------
@@ -49,14 +54,15 @@ struct ArgumentParser {
         )
     }
     
-    static func filename(day: Int) -> String {
+    static func filename(for day: Int) -> String {
         "day\(day).txt"
     }
     
     private static func read(day: Int, directory: String) -> (path: String, contents: String) {
         do {
             let directoryURL = URL(fileURLWithPath: directory, isDirectory: true)
-            let fileURL = directoryURL.appendingPathComponent(filename(day: day))
+            let dayFilename = filename(for: day)
+            let fileURL = directoryURL.appendingPathComponent(dayFilename)
             let contents = try String(contentsOf: fileURL, encoding: .utf8)
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             return (fileURL.absoluteString, contents)
