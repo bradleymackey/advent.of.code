@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		97245962239494C4003361A6 /* DaySolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97245961239494C4003361A6 /* DaySolver.swift */; };
+		97245964239497A2003361A6 /* Day2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97245963239497A2003361A6 /* Day2.swift */; };
 		97EDF3492394744700C67202 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EDF3482394744700C67202 /* main.swift */; };
 		97EDF353239474B600C67202 /* Day1.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EDF352239474B600C67202 /* Day1.swift */; };
 		97EDF36523947B8400C67202 /* Day.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97EDF36423947B8400C67202 /* Day.swift */; };
@@ -29,6 +30,7 @@
 
 /* Begin PBXFileReference section */
 		97245961239494C4003361A6 /* DaySolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DaySolver.swift; sourceTree = "<group>"; };
+		97245963239497A2003361A6 /* Day2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Day2.swift; sourceTree = "<group>"; };
 		97EDF3452394744700C67202 /* AdventOfCode */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = AdventOfCode; sourceTree = BUILT_PRODUCTS_DIR; };
 		97EDF3482394744700C67202 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		97EDF352239474B600C67202 /* Day1.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Day1.swift; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				97EDF352239474B600C67202 /* Day1.swift */,
+				97245963239497A2003361A6 /* Day2.swift */,
 			);
 			path = Solutions;
 			sourceTree = "<group>";
@@ -168,6 +171,7 @@
 				97EDF353239474B600C67202 /* Day1.swift in Sources */,
 				97245962239494C4003361A6 /* DaySolver.swift in Sources */,
 				97EDF36D23947EAC00C67202 /* Configuration.swift in Sources */,
+				97245964239497A2003361A6 /* Day2.swift in Sources */,
 				97EDF3492394744700C67202 /* main.swift in Sources */,
 				97EDF36523947B8400C67202 /* Day.swift in Sources */,
 				97EDF36B23947E8000C67202 /* ArgumentParser.swift in Sources */,

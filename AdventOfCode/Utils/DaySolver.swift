@@ -20,6 +20,7 @@ struct DaySolver {
     
     let days: [Int: Day.Type] = [
         1: Day1.self,
+        2: Day2.self,
     ]
     
     func solveAll(for day: Int, providing input: String) throws {

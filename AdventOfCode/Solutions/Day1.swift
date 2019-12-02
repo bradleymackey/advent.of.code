@@ -10,28 +10,11 @@ struct Day1: Day {
     
     let input: String
     
-    init(input: String) {
-        self.input = input
-    }
-    
     var fuelValues: [Int] {
         input
             .split(separator: "\n")
             .map(String.init)
             .compactMap(Int.init)
-    }
-    
-    final class Fuel: Sequence, IteratorProtocol {
-        var current: Int
-        init(_ initial: Int) {
-            self.current = initial
-        }
-        func next() -> Int? {
-            let result = current/3 - 2
-            if result < 0 { return nil }
-            current = result
-            return result
-        }
     }
     
     func solvePartOne() -> String {
@@ -46,6 +29,27 @@ struct Day1: Day {
             .map { Fuel($0).reduce(0, +) }
             .reduce(0, +)
         return "\(total) fuel units"
+    }
+    
+}
+
+extension Day1 {
+    
+    final class Fuel: Sequence, IteratorProtocol {
+        
+        var current: Int
+        
+        init(_ initial: Int) {
+            self.current = initial
+        }
+        
+        func next() -> Int? {
+            let result = current/3 - 2
+            if result < 0 { return nil }
+            current = result
+            return result
+        }
+        
     }
     
 }
