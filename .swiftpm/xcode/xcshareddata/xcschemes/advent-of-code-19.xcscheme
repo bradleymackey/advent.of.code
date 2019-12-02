@@ -14,10 +14,24 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "97EDF3442394744700C67202"
-               BuildableName = "AdventOfCode"
-               BlueprintName = "AdventOfCode"
-               ReferencedContainer = "container:AdventOfCode.xcodeproj">
+               BlueprintIdentifier = "advent-of-code-19"
+               BuildableName = "advent-of-code-19"
+               BlueprintName = "advent-of-code-19"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "advent-of-code-19Tests"
+               BuildableName = "advent-of-code-19Tests"
+               BlueprintName = "advent-of-code-19Tests"
+               ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -28,6 +42,16 @@
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "advent-of-code-19Tests"
+               BuildableName = "advent-of-code-19Tests"
+               BlueprintName = "advent-of-code-19Tests"
+               ReferencedContainer = "container:">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -44,19 +68,19 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "97EDF3442394744700C67202"
-            BuildableName = "AdventOfCode"
-            BlueprintName = "AdventOfCode"
-            ReferencedContainer = "container:AdventOfCode.xcodeproj">
+            BlueprintIdentifier = "advent-of-code-19"
+            BuildableName = "advent-of-code-19"
+            BlueprintName = "advent-of-code-19"
+            ReferencedContainer = "container:">
          </BuildableReference>
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "2"
+            argument = "1"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "&quot;${PROJECT_DIR}/AdventOfCode/Inputs/&quot;"
+            argument = "&quot;./advent-of-code-19/Sources/advent-of-code-19/Inputs&quot;"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
@@ -71,10 +95,10 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "97EDF3442394744700C67202"
-            BuildableName = "AdventOfCode"
-            BlueprintName = "AdventOfCode"
-            ReferencedContainer = "container:AdventOfCode.xcodeproj">
+            BlueprintIdentifier = "advent-of-code-19"
+            BuildableName = "advent-of-code-19"
+            BlueprintName = "advent-of-code-19"
+            ReferencedContainer = "container:">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

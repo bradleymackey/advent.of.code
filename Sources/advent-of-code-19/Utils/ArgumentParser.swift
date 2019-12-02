@@ -44,7 +44,7 @@ struct ArgumentParser {
             exit(1)
         }
         
-        let directoryPath = arguments[2]
+        let directoryPath = FileManager.default.currentDirectoryPath
         let (path, contents) = read(day: dayNumber, directory: directoryPath)
         
         return Configuration(
@@ -72,6 +72,8 @@ struct ArgumentParser {
             -------------------------------
             Could not read file.
             \(error.localizedDescription)
+            Tried to read from directory:
+            \(directory)
             """)
             exit(1)
         }
