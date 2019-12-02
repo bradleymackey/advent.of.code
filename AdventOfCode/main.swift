@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Files
 
 let configuration = ArgumentParser.parseConfiguration()
 print("Solving day \(configuration.day)...")
