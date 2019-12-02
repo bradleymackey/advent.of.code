@@ -18,7 +18,10 @@ do {
         day.solveAll()
         print()
     }
+    print("Completed! Have a great day! 👨‍💻")
+    exit(0)
 } catch {
     print(error.localizedDescription)
+    exit(1)
 }
 
