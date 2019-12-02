@@ -57,8 +57,9 @@ struct ArgumentParser {
         do {
             let directoryURL = URL(fileURLWithPath: directory, isDirectory: true)
             let fileURL = directoryURL.appendingPathComponent(filename(day: day))
-            let str = try String(contentsOf: fileURL, encoding: .utf8)
-            return (fileURL.absoluteString, str.trimmingCharacters(in: .whitespacesAndNewlines))
+            let contents = try String(contentsOf: fileURL, encoding: .utf8)
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return (fileURL.absoluteString, contents)
         } catch {
             print("""
             ERROR
