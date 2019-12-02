@@ -17,11 +17,11 @@ final class Day2: Day {
     }
     
     var answerMetric: String {
-        "final"
+        "at index 0"
     }
     
     private lazy var data: [Int] = {
-        return input
+        input
             .split(separator: ",")
             .map(String.init)
             .compactMap(Int.init)

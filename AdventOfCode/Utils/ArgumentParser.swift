@@ -19,8 +19,12 @@ struct ArgumentParser {
             Advent of Code '19
             by Bradley Mackey
             -------------------------------
-            Pass a day and a test file to compute.
-            For example '$ aoc 4 input.txt'.
+            Pass a day and a directory containing
+            files to execute.
+            Files should be of the form:
+            'day1.txt', 'day2.txt', ...
+
+            For example '$ aoc 4 /Desktop'.
             """)
             exit(0)
         }
@@ -35,20 +39,26 @@ struct ArgumentParser {
             exit(1)
         }
         
-        let filePath = arguments[2]
-        let fileContents = read(file: filePath)
+        let directoryPath = arguments[2]
+        let (path, contents) = read(day: dayNumber, directory: directoryPath)
         
         return Configuration(
             day: dayNumber,
-            filePath: filePath,
-            fileContents: fileContents
+            filePath: path,
+            fileContents: contents
         )
     }
     
-    private static func read(file path: String) -> String {
+    static func filename(day: Int) -> String {
+        "day\(day).txt"
+    }
+    
+    private static func read(day: Int, directory: String) -> (path: String, contents: String) {
         do {
-            let str = try String(contentsOfFile: path, encoding: .utf8)
-            return str.trimmingCharacters(in: .whitespacesAndNewlines)
+            let directoryURL = URL(fileURLWithPath: directory, isDirectory: true)
+            let fileURL = directoryURL.appendingPathComponent(filename(day: day))
+            let str = try String(contentsOf: fileURL, encoding: .utf8)
+            return (fileURL.absoluteString, str.trimmingCharacters(in: .whitespacesAndNewlines))
         } catch {
             print("""
             ERROR

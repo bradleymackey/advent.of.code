@@ -21,6 +21,7 @@ struct Resolver {
     private static let days: [Int: Day.Type] = [
         1: Day1.self,
         2: Day2.self,
+        3: Day3.self,
     ]
     
     let day: Int
