@@ -47,7 +47,8 @@ struct ArgumentParser {
     
     private static func read(file path: String) -> String {
         do {
-            return try String(contentsOfFile: path, encoding: .utf8)
+            let str = try String(contentsOfFile: path, encoding: .utf8)
+            return str.trimmingCharacters(in: .whitespacesAndNewlines)
         } catch {
             print("""
             ERROR

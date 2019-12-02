@@ -52,11 +52,11 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "1"
+            argument = "2"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "&quot;${PROJECT_DIR}/AdventOfCode/Inputs/day1.txt&quot;"
+            argument = "&quot;${PROJECT_DIR}/AdventOfCode/Inputs/day2.txt&quot;"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

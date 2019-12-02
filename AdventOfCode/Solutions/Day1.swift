@@ -6,9 +6,13 @@
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
 //
 
-struct Day1: Day {
+final class Day1: Day {
     
     let input: String
+    
+    init(input: String) {
+        self.input = input
+    }
     
     var fuelValues: [Int] {
         input
