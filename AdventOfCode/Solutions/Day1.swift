@@ -26,7 +26,7 @@ struct Day1: Day {
     
     func solvePartTwo() -> String {
         let total = fuelValues
-            .map { Fuel($0).reduce(0, +) }
+            .flatMap(Fuel.init)
             .reduce(0, +)
         return "\(total) fuel units"
     }
