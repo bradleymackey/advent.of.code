@@ -49,8 +49,8 @@ final class Day2: Day {
     func solvePartTwo() -> CustomStringConvertible {
         var result = -1
         DispatchQueue.concurrentPerform(iterations: 100) { i in
-            guard result == -1 else { return }
             for j in 0..<100 {
+                guard result == -1 else { return }
                 let solution = self.solve(i, j)
                 if solution.description == "19690720" {
                     result = 100 * i + j
