@@ -1,7 +1,7 @@
 import XCTest
 import class Foundation.Bundle
 
-final class advent_of_code_19Tests: XCTestCase {
+final class AdventOfCode19Tests: XCTestCase {
     func testExample() throws {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
@@ -12,7 +12,7 @@ final class advent_of_code_19Tests: XCTestCase {
             return
         }
 
-        let fooBinary = productsDirectory.appendingPathComponent("advent-of-code-19")
+        let fooBinary = productsDirectory.appendingPathComponent("AdventOfCode19")
 
         let process = Process()
         process.executableURL = fooBinary
