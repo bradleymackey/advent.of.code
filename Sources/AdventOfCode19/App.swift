@@ -15,7 +15,7 @@ struct App {
         let arguments = CommandLine.arguments
         
         print("""
-        Advent of Code '19
+        🎄 Advent of Code '19
         by Bradley Mackey
         -------------------------------
 

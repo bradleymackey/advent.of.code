@@ -76,8 +76,8 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "0"
-            isEnabled = "NO">
+            argument = "2"
+            isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/bradleymackey/Development/open-source/aoc-19-inputs"
