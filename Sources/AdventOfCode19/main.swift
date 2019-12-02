@@ -16,6 +16,7 @@ do {
         let resolver = Resolver(day: config.day)
         let day = try resolver.resolve(with: config.fileContents)
         day.solveAll()
+        print()
     }
 } catch {
     print(error.localizedDescription)
