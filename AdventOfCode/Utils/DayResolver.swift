@@ -1,5 +1,5 @@
 //
-//  DaySolver.swift
+//  DayResolver.swift
 //  AdventOfCode
 //
 //  Created by Bradley Mackey on 02/12/2019.
@@ -16,18 +16,20 @@ enum DaySolveError: Error {
     }
 }
 
-struct DaySolver {
+struct DayResolver {
     
-    let days: [Int: Day.Type] = [
+    private static let days: [Int: Day.Type] = [
         1: Day1.self,
         2: Day2.self,
     ]
     
-    func solveAll(for day: Int, providing input: String) throws {
-        guard let selectedDay = days[day] else {
+    let day: Int
+    
+    func resolve(with input: String) throws -> Day {
+        guard let selectedDay = Self.days[day] else {
             throw DaySolveError.dayNotFound
         }
-        selectedDay.init(input: input).solveAll()
+        return selectedDay.init(input: input)
     }
     
 }
