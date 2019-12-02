@@ -33,7 +33,9 @@ struct App {
             If the day is 0, all challenges will be
             executed.
 
-            For example '$ aoc 4 /Desktop'.
+            For example:
+            '$ AdventOfCode19 4 /challenge-folder'
+            
             """)
             exit(0)
         }
