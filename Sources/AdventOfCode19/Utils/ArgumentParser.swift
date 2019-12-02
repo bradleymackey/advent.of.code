@@ -44,7 +44,7 @@ struct ArgumentParser {
             exit(1)
         }
         
-        let directoryPath = FileManager.default.currentDirectoryPath
+        let directoryPath = arguments[2]
         let (path, contents) = read(day: dayNumber, directory: directoryPath)
         
         return Configuration(

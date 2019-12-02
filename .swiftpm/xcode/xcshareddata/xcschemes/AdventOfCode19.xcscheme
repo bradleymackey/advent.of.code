@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "advent-of-code-19"
-               BuildableName = "advent-of-code-19"
-               BlueprintName = "advent-of-code-19"
+               BlueprintIdentifier = "AdventOfCode19"
+               BuildableName = "AdventOfCode19"
+               BlueprintName = "AdventOfCode19"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -28,9 +28,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "advent-of-code-19Tests"
-               BuildableName = "advent-of-code-19Tests"
-               BlueprintName = "advent-of-code-19Tests"
+               BlueprintIdentifier = "AdventOfCode19Tests"
+               BuildableName = "AdventOfCode19Tests"
+               BlueprintName = "AdventOfCode19Tests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </BuildActionEntry>
@@ -46,9 +46,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "advent-of-code-19Tests"
-               BuildableName = "advent-of-code-19Tests"
-               BlueprintName = "advent-of-code-19Tests"
+               BlueprintIdentifier = "AdventOfCode19Tests"
+               BuildableName = "AdventOfCode19Tests"
+               BlueprintName = "AdventOfCode19Tests"
                ReferencedContainer = "container:">
             </BuildableReference>
          </TestableReference>
@@ -68,9 +68,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "advent-of-code-19"
-            BuildableName = "advent-of-code-19"
-            BlueprintName = "advent-of-code-19"
+            BlueprintIdentifier = "AdventOfCode19"
+            BuildableName = "AdventOfCode19"
+            BlueprintName = "AdventOfCode19"
             ReferencedContainer = "container:">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -80,7 +80,7 @@
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "&quot;./advent-of-code-19/Sources/advent-of-code-19/Inputs&quot;"
+            argument = "/Users/bradleymackey/Development/open-source/aoc-19-inputs"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>
@@ -95,9 +95,9 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "advent-of-code-19"
-            BuildableName = "advent-of-code-19"
-            BlueprintName = "advent-of-code-19"
+            BlueprintIdentifier = "AdventOfCode19"
+            BuildableName = "AdventOfCode19"
+            BlueprintName = "AdventOfCode19"
             ReferencedContainer = "container:">
          </BuildableReference>
       </BuildableProductRunnable>
