@@ -1,3 +1,4 @@
 # advent-of-code-19
 
-A description of this package.
+At attempt at Advent of Code 2019 using only Swift!
+Feel free to look around and fork.
