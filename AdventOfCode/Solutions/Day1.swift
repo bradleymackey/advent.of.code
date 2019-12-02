@@ -37,6 +37,8 @@ extension Day1 {
     
     final class Fuel: Sequence, IteratorProtocol {
         
+        let reduction: (Int) -> Int = { $0/3 - 2 }
+        
         var current: Int
         
         init(_ initial: Int) {
@@ -44,10 +46,8 @@ extension Day1 {
         }
         
         func next() -> Int? {
-            let result = current/3 - 2
-            if result < 0 { return nil }
-            current = result
-            return result
+            current = reduction(current)
+            return current < 0 ? nil : current
         }
         
     }
