@@ -8,14 +8,15 @@
 
 import Foundation
 
-let config = ArgumentParser.parseConfiguration()
-print("Solving day \(config.day)...")
-print("Input file \(config.filePath)")
-
 do {
-    let resolver = Resolver(day: config.day)
-    let day = try resolver.resolve(with: config.fileContents)
-    day.solveAll()
+    let configs = ArgumentParser.parseConfigurations()
+    for config in configs {
+        print("Solving day \(config.day)...")
+//        print("Input file \(config.filePath)")
+        let resolver = Resolver(day: config.day)
+        let day = try resolver.resolve(with: config.fileContents)
+        day.solveAll()
+    }
 } catch {
     print(error.localizedDescription)
 }
