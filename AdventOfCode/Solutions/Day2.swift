@@ -27,13 +27,13 @@ final class Day2: Day {
             .compactMap(Int.init)
     }()
     
-    private func solve(noun: Int, verb: Int) -> CustomStringConvertible {
+    private func solve(_ noun: Int, _ verb: Int) -> CustomStringConvertible {
         var memory = data
         memory[1] = noun
         memory[2] = verb
         let ops = (0...).lazy
             .map { $0 * 4 }
-            .map { ($0, OpCode(rawValue: memory[$0])) }
+            .map { ($0, Opcode(rawValue: memory[$0])) }
         for (i, op) in ops {
             guard let code = op else { return "invalid opcode \(memory[i])" }
             guard let operation = code.operation else { break }
@@ -43,14 +43,14 @@ final class Day2: Day {
     }
     
     func solvePartOne() -> CustomStringConvertible {
-        solve(noun: 12, verb: 2)
+        solve(12, 2)
     }
     
     func solvePartTwo() -> CustomStringConvertible {
         var result = -1
         DispatchQueue.concurrentPerform(iterations: 100) { i in
             for j in 0..<100 {
-                let solution = self.solve(noun: i, verb: j)
+                let solution = self.solve(i, j)
                 if solution.description == "19690720" { result = 100 * i + j }
             }
         }
@@ -61,7 +61,7 @@ final class Day2: Day {
 
 extension Day2 {
 
-    enum OpCode: Int {
+    enum Opcode: Int {
         
         typealias Operation = (Int, Int) -> Int
         
