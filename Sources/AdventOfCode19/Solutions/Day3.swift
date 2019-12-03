@@ -18,6 +18,10 @@ final class Day3: Day {
         self.input = input
     }
     
+    var answerMetric: String {
+        "distance"
+    }
+    
     lazy var wires = input
         .split(separator: "\n")
     
@@ -29,18 +33,16 @@ final class Day3: Day {
         .split(separator: ",")
         .compactMap(Direction.from)
     
-    var answerMetric: String {
-        "distance"
-    }
+    lazy var intersectionPoints = sharedPoints(wire1, wire2)
     
     func solvePartOne() -> CustomStringConvertible {
-        sharedPoints(wire1, wire2)
+        intersectionPoints
             .min(by: { $0.key.distance < $1.key.distance })!
             .key.distance
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        sharedPoints(wire1, wire2)
+        intersectionPoints
             .min(by: { $0.value < $1.value })!
             .value
     }
