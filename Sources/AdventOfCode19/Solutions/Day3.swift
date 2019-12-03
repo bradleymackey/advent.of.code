@@ -74,11 +74,11 @@ extension Day3 {
     private func sharedPoints(_ wire1: [Direction], _ wire2: [Direction]) -> [CO: Int] {
         let points1 = points(from: wire1)
         let points2 = points(from: wire2)
-        let keys1 = Set(points1.keys)
-        let keys2 = Set(points2.keys)
-        var both = keys1.intersection(keys2)
-        both.remove(.zero)
+        let both = Set(points1.keys)
+            .intersection(Set(points2.keys))
+            .subtracting([.zero])
         var totalDistances = [CO: Int]()
+        totalDistances.reserveCapacity(both.count)
         for key in both {
             totalDistances[key] = points1[key]! + points2[key]!
         }
