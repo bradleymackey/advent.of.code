@@ -6,6 +6,10 @@
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
 //
 
+/// --- Day 1: The Tyranny of the Rocket Equation ---
+/// - we model the fuel reduction using an Iterator, which gives
+/// a very nice callsite in both part 1 and 2. these callsites also highlight
+/// how similar both of the problems are
 final class Day1: Day {
     
     let input: String

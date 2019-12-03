@@ -8,6 +8,9 @@
 
 import Dispatch
 
+/// --- Day 2: 1202 Program Alarm ---
+/// - simple memory simlulation following very simple  rules
+/// for part 2, we can parallelise for massive speedups
 final class Day2: Day {
     
     let input: String

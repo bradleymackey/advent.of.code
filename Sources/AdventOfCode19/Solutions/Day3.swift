@@ -6,6 +6,10 @@
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
 //
 
+/// --- Day 3: Crossed Wires ---
+/// - a brute-force approach that determines all visited points by both wires,
+/// then determines the intersection of all these points
+/// (probably a faster and smarter way, but this still works, and is fast)
 final class Day3: Day {
     
     let input: String
@@ -26,7 +30,7 @@ final class Day3: Day {
         .compactMap(Direction.from)
     
     var answerMetric: String {
-        "units"
+        "distance"
     }
     
     func solvePartOne() -> CustomStringConvertible {
@@ -48,6 +52,7 @@ extension Day3 {
     private func points(from wire: [Direction]) -> [CO: Int] {
         var currentSteps = 0
         var points = [CO: Int]()
+        points.reserveCapacity(100_000)
         var currentCoordinate = CO(x: 0, y: 0)
         for point in wire {
             let (visited, final) = point.coordinatesVisited(
