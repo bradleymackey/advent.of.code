@@ -134,6 +134,7 @@ extension Day3 {
             currentSteps: inout Int
         ) -> (points: [CO: Int], final: CO) {
             var result = [CO: Int]()
+            result.reserveCapacity(distance)
             var current = point
             for _ in 0..<distance {
                 currentSteps += 1
