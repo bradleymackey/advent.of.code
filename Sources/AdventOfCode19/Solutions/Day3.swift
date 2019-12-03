@@ -54,7 +54,10 @@ extension Day3 {
     private func points(from wire: [Direction]) -> [CO: Int] {
         var currentSteps = 0
         var points = [CO: Int]()
-        points.reserveCapacity(100_000)
+        let entries = wire
+            .map { $0.distance }
+            .reduce(0, +)
+        points.reserveCapacity(entries)
         var currentCoordinate = CO(x: 0, y: 0)
         for point in wire {
             let (visited, final) = point.coordinatesVisited(
