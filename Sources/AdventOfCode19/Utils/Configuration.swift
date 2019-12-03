@@ -6,8 +6,6 @@
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
 //
 
-import Foundation
-
 struct Configuration {
     let day: Int
     let filePath: String
