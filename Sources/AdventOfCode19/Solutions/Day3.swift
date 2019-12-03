@@ -37,8 +37,8 @@ final class Day3: Day {
     
     func solvePartOne() -> CustomStringConvertible {
         intersectionPoints
-            .min(by: { $0.key.distance < $1.key.distance })!
-            .key.distance
+            .min(by: { $0.key.distanceToOrigin < $1.key.distanceToOrigin })!
+            .key.distanceToOrigin
     }
     
     func solvePartTwo() -> CustomStringConvertible {
@@ -55,7 +55,7 @@ extension Day3 {
         var currentSteps = 0
         var points = [CO: Int]()
         let entries = wire
-            .map { $0.distance }
+            .map { $0.length }
             .reduce(0, +)
         points.reserveCapacity(entries)
         var currentCoordinate = CO(x: 0, y: 0)
@@ -82,12 +82,12 @@ extension Day3 {
         let both = Set(points1.keys)
             .intersection(Set(points2.keys))
             .subtracting([.zero])
-        var totalDistances = [CO: Int]()
-        totalDistances.reserveCapacity(both.count)
+        var intersectingPoints = [CO: Int]()
+        intersectingPoints.reserveCapacity(both.count)
         for key in both {
-            totalDistances[key] = points1[key]! + points2[key]!
+            intersectingPoints[key] = points1[key]! + points2[key]!
         }
-        return totalDistances
+        return intersectingPoints
     }
     
 }
@@ -103,7 +103,7 @@ extension Day3 {
             CO(x: 0, y: 0)
         }
         
-        var distance: Int {
+        var distanceToOrigin: Int {
             abs(x) + abs(y)
         }
     }
@@ -117,16 +117,16 @@ extension Day3 {
         static func from<T: StringProtocol>(_ code: T) -> Direction? {
             guard let direction = code.first else { return nil }
             let secondIndex = code.index(code.startIndex, offsetBy: 1)
-            guard let dist = Int(code[secondIndex...]) else { return nil }
+            guard let len = Int(code[secondIndex...]) else { return nil }
             switch direction {
             case "R":
-                return .right(dist)
+                return .right(len)
             case "L":
-                return .left(dist)
+                return .left(len)
             case "U":
-                return .up(dist)
+                return .up(len)
             case "D":
-                return .down(dist)
+                return .down(len)
             default:
                 return nil
             }
@@ -137,9 +137,9 @@ extension Day3 {
             currentSteps: inout Int
         ) -> (points: [CO: Int], final: CO) {
             var result = [CO: Int]()
-            result.reserveCapacity(distance)
+            result.reserveCapacity(length)
             var current = point
-            for _ in 0..<distance {
+            for _ in 0..<length {
                 currentSteps += 1
                 current.x += deltaX
                 current.y += deltaY
@@ -172,13 +172,13 @@ extension Day3 {
             }
         }
         
-        var distance: Int {
+        var length: Int {
             switch self {
-            case .left(let d),
-                 .right(let d),
-                 .up(let d),
-                 .down(let d):
-                return d
+            case .left(let l),
+                 .right(let l),
+                 .up(let l),
+                 .down(let l):
+                return l
             }
         }
     }
