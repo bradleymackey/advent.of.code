@@ -29,23 +29,25 @@ final class Day4: Day {
         "possible combinations"
     }
     
+    typealias Rule = (String) -> Bool
+    
+    let isSorted: Rule = { String($0.sorted) == $0 }
+    let containsDuplicates: Rule = { Set($0).count != $0.count }
+    let containsOnlyTwoOfAnyCharacter: Rule = {
+        $0.reduce(into: [:]) { counts, word in
+            counts[word, default: 0] += 1
+        }.values.contains(2)
+    }
+    
     func solvePartOne() -> CustomStringConvertible {
         range
-            .filter {
-                String($0.sorted()) == $0 &&
-                Set($0).count != $0.count
-            }
+            .filter { isSorted($0) && containsDuplicates($0) }
             .count
     }
     
     func solvePartTwo() -> CustomStringConvertible {
         range
-            .filter {
-                guard String($0.sorted()) == $0 else { return false }
-                return $0.reduce(into: [:]) { counts, word in
-                    counts[word, default: 0] += 1
-                }.values.contains(2)
-            }
+            .filter { isSorted($0) && containsOnlyTwoOfAnyCharacter($0) }
             .count
     }
     
