@@ -38,9 +38,9 @@ final class Day4: Day {
         range
             .filter {
                 guard String($0.sorted()) == $0 else { return false }
-                var occs = [Character: Int]()
-                $0.forEach { chr in occs[chr, default: 0] += 1 }
-                return occs.values.contains(2)
+                return $0.reduce(into: [:]) { counts, word in
+                    counts[word, default: 0] += 1
+                }.values.contains(2)
             }
             .count
     }
