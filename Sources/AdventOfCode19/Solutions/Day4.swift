@@ -14,16 +14,35 @@ final class Day4: Day {
         self.input = input
     }
     
+    lazy var nums = input
+        .split(separator: "-")
+        .map(String.init)
+        .compactMap(Int.init)
+    
+    lazy var range = (nums[0]...nums[1]).lazy.map(String.init)
+    
     var answerMetric: String {
-        "units"
+        "possible"
     }
     
     func solvePartOne() -> CustomStringConvertible {
-        "?"
+        range
+            .filter {
+                String($0.sorted()) == $0 &&
+                Set($0).count != $0.count
+            }
+            .count
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        "?"
+        range
+            .filter {
+                guard String($0.sorted()) == $0 else { return false }
+                var occs = [Character: Int]()
+                $0.forEach { chr in occs[chr, default: 0] += 1 }
+                return occs.values.contains(2)
+            }
+            .count
     }
     
 }
