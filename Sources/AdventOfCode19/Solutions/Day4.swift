@@ -6,6 +6,10 @@
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
 //
 
+/// --- Day 4: Secure Container ---
+/// - brute-force to figure out the combinations as there aren't too many
+/// simple rules means we can express this as a simple filter operation on
+/// the full range, then just count the valid results
 final class Day4: Day {
     
     let input: String
@@ -22,7 +26,7 @@ final class Day4: Day {
     lazy var range = (nums[0]...nums[1]).lazy.map(String.init)
     
     var answerMetric: String {
-        "possible"
+        "possible combinations"
     }
     
     func solvePartOne() -> CustomStringConvertible {

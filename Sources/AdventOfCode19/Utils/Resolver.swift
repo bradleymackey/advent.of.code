@@ -23,6 +23,7 @@ struct Resolver {
         2: Day2.self,
         3: Day3.self,
         4: Day4.self,
+        5: Day5.self,
     ]
     
     let day: Int
