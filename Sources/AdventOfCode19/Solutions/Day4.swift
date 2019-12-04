@@ -31,7 +31,7 @@ final class Day4: Day {
     
     typealias Rule = (String) -> Bool
     
-    let isSorted: Rule = { String($0.sorted) == $0 }
+    let isSorted: Rule = { String($0.sorted()) == $0 }
     let containsDuplicates: Rule = { Set($0).count != $0.count }
     let containsOnlyTwoOfAnyCharacter: Rule = {
         $0.reduce(into: [:]) { counts, word in
@@ -41,13 +41,13 @@ final class Day4: Day {
     
     func solvePartOne() -> CustomStringConvertible {
         range
-            .filter { isSorted($0) && containsDuplicates($0) }
+            .filter { self.isSorted($0) && self.containsDuplicates($0) }
             .count
     }
     
     func solvePartTwo() -> CustomStringConvertible {
         range
-            .filter { isSorted($0) && containsOnlyTwoOfAnyCharacter($0) }
+            .filter { self.isSorted($0) && self.containsOnlyTwoOfAnyCharacter($0) }
             .count
     }
     
