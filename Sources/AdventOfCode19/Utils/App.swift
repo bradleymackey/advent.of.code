@@ -12,15 +12,14 @@ struct App {
     
     static func parseConfigurations() -> [Configuration] {
         
-        let arguments = CommandLine.arguments
-        
         print("""
         🎄 Advent of Code '19
         by Bradley Mackey
         -------------------------------
 
         """)
-
+        
+        let arguments = CommandLine.arguments
         guard
             arguments.count > 2
         else {
