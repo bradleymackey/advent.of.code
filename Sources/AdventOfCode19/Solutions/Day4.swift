@@ -31,8 +31,12 @@ final class Day4: Day {
     
     typealias Rule = (String) -> Bool
     
-    let isSorted: Rule = { String($0.sorted()) == $0 }
-    let containsDuplicates: Rule = { Set($0).count != $0.count }
+    let isSorted: Rule = {
+        String($0.sorted()) == $0
+    }
+    let containsDuplicates: Rule = {
+        Set($0).count != $0.count
+    }
     let containsOnlyTwoOfAnyCharacter: Rule = {
         $0.reduce(into: [:]) { counts, word in
             counts[word, default: 0] += 1
