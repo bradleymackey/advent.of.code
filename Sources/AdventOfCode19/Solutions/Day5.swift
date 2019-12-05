@@ -178,7 +178,7 @@ extension Day5 {
             consuming inputs: inout [Int],
             producing outputs: inout [Int]) throws
         {
-            var modifiedPointer = false
+            var shouldStride = true
             switch code {
             case .add:
                 computeWriteOperation(on: &memory, +)
@@ -193,9 +193,9 @@ extension Day5 {
                 let readValue = memory[readFrom]
                 outputs.append(readValue)
             case .jumpTrue:
-                modifiedPointer = computeJumpOperation(on: &memory, with: &pointer, !=)
+                shouldStride = computeJumpOperation(on: &memory, with: &pointer, (!=, 0))
             case .jumpFalse:
-                modifiedPointer = computeJumpOperation(on: &memory, with: &pointer, ==)
+                shouldStride = computeJumpOperation(on: &memory, with: &pointer, (==, 0))
             case .lessThan:
                 comparisonWriteOperation(on: &memory, <)
             case .equals:
@@ -203,7 +203,7 @@ extension Day5 {
             case .halt:
                 throw ExecutionError.halt
             }
-            if !modifiedPointer {
+            if shouldStride {
                 pointer += code.stride
             }
         }
@@ -211,13 +211,13 @@ extension Day5 {
         private func computeJumpOperation(
             on memory: inout Intcode,
             with pointer: inout Int,
-            _ operation: (Int, Int) -> Bool
+            _ operation: (((Int, Int) -> Bool), Int)
         ) -> Bool {
             let checkVal = parameters[0].value(using: memory)
-            guard operation(checkVal, 0) else { return false }
+            guard operation.0(checkVal, operation.1) else { return true }
             let setToVal = parameters[1].value(using: memory)
             pointer = setToVal
-            return true
+            return false
         }
         
         private func computeWriteOperation(
