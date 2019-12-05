@@ -21,7 +21,9 @@ final class Day5: Day {
         "output"
     }
     
-    private lazy var data: [Int] = {
+    typealias Intcode = [Int]
+    
+    private lazy var data: Intcode = {
         input
             .split(separator: ",")
             .map(String.init)
@@ -30,7 +32,7 @@ final class Day5: Day {
     
     /// - parameter inputs: the inputs to the program, which are consumed front to back
     /// (starting at index `0`), like a stack-style of execution
-    private func solve(_ inputs: [Int]) -> [Int] {
+    private func solve(_ inputs: Intcode) -> [Int] {
         var memory = data
         var pointer = 0
         var inputs = inputs
@@ -41,8 +43,8 @@ final class Day5: Day {
                 try ins.perform(
                     with: &pointer,
                     on: &memory,
-                    inputs: &inputs,
-                    outputs: &outputs
+                    consuming: &inputs,
+                    producing: &outputs
                 )
             } catch Instruction.ExecutionError.halt {
                 break
@@ -151,7 +153,7 @@ extension Day5 {
         let code: Code
         let parameters: [Parameter]
         
-        static func from(pointer: Int, in memory: [Int]) throws -> Instruction {
+        static func from(pointer: Int, in memory: Intcode) throws -> Instruction {
             guard pointer >= 0 && pointer < memory.count else { throw ParseError.invalidPointer }
             let fullCode = memory[pointer]
             let rawCodeNumber = fullCode % 100
@@ -168,25 +170,20 @@ extension Day5 {
             }
             return Instruction(code: code, parameters: parameters)
         }
+    
         
         func perform(
             with pointer: inout Int,
-            on memory: inout [Int],
-            inputs: inout [Int],
-            outputs: inout [Int]) throws
+            on memory: inout Intcode,
+            consuming inputs: inout [Int],
+            producing outputs: inout [Int]) throws
         {
             var modifiedPointer = false
             switch code {
             case .add:
-                let first = parameters[0].value(using: memory)
-                let second = parameters[1].value(using: memory)
-                let saveTo = parameters[2].value
-                memory[saveTo] = first + second
+                computeWriteOperation(on: &memory, +)
             case .multiply:
-                let first = parameters[0].value(using: memory)
-                let second = parameters[1].value(using: memory)
-                let saveTo = parameters[2].value
-                memory[saveTo] = first * second
+                computeWriteOperation(on: &memory, *)
             case .input:
                 let input = inputs.remove(at: 0)
                 let saveTo = parameters[0].value
@@ -196,35 +193,52 @@ extension Day5 {
                 let readValue = memory[readFrom]
                 outputs.append(readValue)
             case .jumpTrue:
-                let checkVal = parameters[0].value(using: memory)
-                guard checkVal != 0 else { break }
-                let setToVal = parameters[1].value(using: memory)
-                pointer = setToVal
-                modifiedPointer = true
+                modifiedPointer = computeJumpOperation(on: &memory, with: &pointer, !=)
             case .jumpFalse:
-                let checkVal = parameters[0].value(using: memory)
-                guard checkVal == 0 else { break }
-                let setToVal = parameters[1].value(using: memory)
-                pointer = setToVal
-                modifiedPointer = true
+                modifiedPointer = computeJumpOperation(on: &memory, with: &pointer, ==)
             case .lessThan:
-                let first = parameters[0].value(using: memory)
-                let second = parameters[1].value(using: memory)
-                let storeAt = parameters[2].value
-                let storeValue = first < second ? 1 : 0
-                memory[storeAt] = storeValue
+                comparisonWriteOperation(on: &memory, <)
             case .equals:
-                let first = parameters[0].value(using: memory)
-                let second = parameters[1].value(using: memory)
-                let storeAt = parameters[2].value
-                let storeValue = first == second ? 1 : 0
-                memory[storeAt] = storeValue
+                comparisonWriteOperation(on: &memory, ==)
             case .halt:
                 throw ExecutionError.halt
             }
             if !modifiedPointer {
                 pointer += code.stride
             }
+        }
+        
+        private func computeJumpOperation(
+            on memory: inout Intcode,
+            with pointer: inout Int,
+            _ operation: (Int, Int) -> Bool
+        ) -> Bool {
+            let checkVal = parameters[0].value(using: memory)
+            guard operation(checkVal, 0) else { return false }
+            let setToVal = parameters[1].value(using: memory)
+            pointer = setToVal
+            return true
+        }
+        
+        private func computeWriteOperation(
+            on memory: inout Intcode,
+            _ operation: (Int, Int) -> Int
+        ) {
+            let first = parameters[0].value(using: memory)
+            let second = parameters[1].value(using: memory)
+            let saveTo = parameters[2].value
+            memory[saveTo] = operation(first, second)
+        }
+        
+        private func comparisonWriteOperation(
+            on memory: inout Intcode,
+            _ operation: (Int, Int) -> Bool
+        ) {
+            let first = parameters[0].value(using: memory)
+            let second = parameters[1].value(using: memory)
+            let storeAt = parameters[2].value
+            let storeValue = operation(first, second) ? 1 : 0
+            memory[storeAt] = storeValue
         }
         
     }
