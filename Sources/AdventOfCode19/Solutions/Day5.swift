@@ -29,14 +29,15 @@ final class Day5: Day {
     }()
     
     /// - parameter inputs: the inputs to the program, which are consumed front to back
-    /// (starting at index `0`)
+    /// (starting at index `0`), like a stack-style of execution
     private func solve(_ inputs: [Int]) -> [Int] {
         var memory = data
         var pointer = 0
         var inputs = inputs
         var outputs = [Int]()
-        while let ins = try? Instruction.from(pointer: pointer, in: memory) {
+        while true {
             do {
+                let ins = try Instruction.from(pointer: pointer, in: memory)
                 try ins.perform(
                     with: &pointer,
                     on: &memory,
@@ -46,7 +47,7 @@ final class Day5: Day {
             } catch Instruction.ExecutionError.halt {
                 break
             } catch {
-                print("INPUT ERROR! \(error)")
+                print("PROGRAM ERROR! \(error)")
                 break
             }
         }
