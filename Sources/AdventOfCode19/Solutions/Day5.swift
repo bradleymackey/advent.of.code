@@ -108,9 +108,12 @@ extension Day5 {
                 case immediate = 1
                 
                 /// - parameter rawValue: a number like 011, which indicates modes that paramters should use
+                /// - parameter totalDesired: the number of parameters required. this is an option because semantics
+                /// indicate if no mode number is specified, it is a positional argument
                 static func modesFrom(rawValue: Int, totalDesired: Int) -> [Mode] {
                     guard totalDesired > 0 else { return [] }
-                    // because codes are read right-to-left, reverse them
+                    // because codes are read right-to-left, reverse them so we get
+                    // the first one first
                     var parameterModes = String(rawValue)
                         .reversed()
                         .map(String.init)
