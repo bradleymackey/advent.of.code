@@ -22,13 +22,14 @@ final class Day5: Day {
     }
     
     private lazy var data: [Int] = {
-        // add 10 to our input, then output it
         input
             .split(separator: ",")
             .map(String.init)
             .compactMap(Int.init)
     }()
     
+    /// - parameter inputs: the inputs to the program, which are consumed front to back
+    /// (starting at index `0`)
     private func solve(_ inputs: [Int]) -> [Int] {
         var memory = data
         var pointer = 0
@@ -36,11 +37,17 @@ final class Day5: Day {
         var outputs = [Int]()
         while let ins = try? Instruction.from(pointer: pointer, in: memory) {
             do {
-                try ins.perform(with: &pointer, on: &memory, inputs: &inputs, outputs: &outputs)
+                try ins.perform(
+                    with: &pointer,
+                    on: &memory,
+                    inputs: &inputs,
+                    outputs: &outputs
+                )
             } catch Instruction.ExecutionError.halt {
                 break
             } catch {
-                print("ERROR! \(error)")
+                print("INPUT ERROR! \(error)")
+                break
             }
         }
         return outputs
