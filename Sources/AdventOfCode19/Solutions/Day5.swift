@@ -6,10 +6,9 @@
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
 //
 
-import Dispatch
-
 /// --- Day 5: Sunny with a Chance of Asteroids ---
 /// - copied and adapted from Part 2
+/// extensible data modelling allows for new instructions to be easily added
 final class Day5: Day {
     
     let input: String
@@ -111,6 +110,7 @@ extension Day5 {
                 /// - parameter rawValue: a number like 011, which indicates modes that paramters should use
                 static func modesFrom(rawValue: Int, totalDesired: Int) -> [Mode] {
                     guard totalDesired > 0 else { return [] }
+                    // because codes are read right-to-left, reverse them
                     var parameterModes = String(rawValue)
                         .reversed()
                         .map(String.init)
@@ -149,7 +149,7 @@ extension Day5 {
             let rawParameterCodes = fullCode / 100
             let parameterModes = Parameter.Mode.modesFrom(
                 rawValue: rawParameterCodes,
-                totalDesired: code.stride - 1
+                totalDesired: code.desiredParameters
             )
             let parameterValues = Array(memory[pointer+1...(pointer+code.desiredParameters)])
             let parameters = zip(parameterModes, parameterValues).map {
