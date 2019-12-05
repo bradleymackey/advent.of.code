@@ -145,13 +145,13 @@ extension Day5 {
             let fullCode = memory[pointer]
             let rawCodeNumber = fullCode % 100
             guard let code = Code(rawValue: rawCodeNumber) else { throw ParseError.invalidOpcode }
-            if case .halt = code { return Instruction(code: code, parameters: []) }
             let rawParameterCodes = fullCode / 100
             let parameterModes = Parameter.Mode.modesFrom(
                 rawValue: rawParameterCodes,
                 totalDesired: code.desiredParameters
             )
-            let parameterValues = Array(memory[pointer+1...(pointer+code.desiredParameters)])
+            let offset = pointer + 1
+            let parameterValues = Array(memory[offset..<(offset+code.desiredParameters)])
             let parameters = zip(parameterModes, parameterValues).map {
                 Parameter(mode: $0, value: $1)
             }
