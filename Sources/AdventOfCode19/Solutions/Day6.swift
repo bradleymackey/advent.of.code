@@ -55,7 +55,7 @@ extension Day6 {
         func leafDepthTotal(from source: Node, depth: Int = 0) -> Int {
             if self[source].isEmpty { return depth }
             return depth + self[source].reduce(0) { subtotal, neighbour in
-                subtotal + leafDepths(source: neighbour, depth: depth + 1)
+                subtotal + leafDepthTotal(from: neighbour, depth: depth + 1)
             }
         }
         
