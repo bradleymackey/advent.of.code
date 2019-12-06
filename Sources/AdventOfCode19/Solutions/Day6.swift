@@ -34,7 +34,7 @@ final class Day6: Day {
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        graph.orbitalTransfers(from: "YOU", to: "SAN", root: "COM")
+        graph.orbitalTransfers(from: "YOU", to: "SAN", root: "COM") ?? "invalid"
     }
     
 }
@@ -68,11 +68,11 @@ extension Day6 {
             }.first // we only care about the first possible path to an object
         }
         
-        func orbitalTransfers(from source: Node, to target: Node, root: Node) -> Int {
+        func orbitalTransfers(from source: Node, to target: Node, root: Node) -> Int? {
             guard
                 let youPath = path(from: root, to: source),
                 let sanPath = path(from: root, to: target)
-            else { return -1 }
+            else { return nil }
             let sharedStartLength = Set(youPath).intersection(sanPath).count
             let youDist = youPath.count - sharedStartLength - 1 // -1 because ignore YOU
             let sanDist = sanPath.count - sharedStartLength - 1 // -1 because ignore SAN
