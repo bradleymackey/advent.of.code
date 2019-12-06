@@ -20,10 +20,9 @@ final class Day6: Day {
     lazy var graph = input
         .split(separator: "\n")
         .reduce(into: Graph<String>()) { (graph, edge) in
-            let edgeLabels = edge.split(separator: ")").map(String.init)
-            let from = edgeLabels[0]
-            let to = edgeLabels[1]
-            graph[from] = graph[from].union([to])
+            let nodes = edge.split(separator: ")").map(String.init)
+            let (from, to) = (nodes[0], nodes[1])
+            graph[from].insert(to)
         }
 
     var answerMetric: String {
@@ -72,27 +71,14 @@ extension Day6 {
         func orbitalTransfers(from source: Node, to target: Node, root: Node) -> Int {
             guard
                 let youPath = path(from: root, to: source),
-                let sanPath = path(from: root, to: target),
-                let (youSharedIndex, sanSharedIndex) = youPath.lastSharedIndexes(with: sanPath)
+                let sanPath = path(from: root, to: target)
             else { return -1 }
-            let youDist = (youPath.count - 1) - youSharedIndex
-            let sanDist = (sanPath.count - 1) - sanSharedIndex
+            let sharedStartLength = Set(youPath).intersection(sanPath).count
+            let youDist = youPath.count - sharedStartLength
+            let sanDist = sanPath.count - sharedStartLength
             return youDist + sanDist - 2 // only go to the orbital points
         }
         
-    }
-    
-}
-
-extension Array where Element: Hashable {
-    
-    func lastSharedIndexes(with other: Array<Element>) -> (ours: Index, theirs: Index)? {
-        let shared = Set(self).intersection(other)
-        guard
-            let firstIndex = self.lastIndex(where: { shared.contains($0) }),
-            let secondIndex = other.lastIndex(where: { shared.contains($0) })
-        else { return nil }
-        return (firstIndex, secondIndex)
     }
     
 }
