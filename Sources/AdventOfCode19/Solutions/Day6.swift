@@ -69,11 +69,7 @@ extension Day6 {
             }.first // we only care about the first possible path to an object
         }
         
-        func orbitalTransfers(
-            from source: Node,
-            to target: Node,
-            root: Node
-        ) -> Int {
+        func orbitalTransfers(from source: Node, to target: Node, root: Node) -> Int {
             guard
                 let youPath = path(from: root, to: source),
                 let sanPath = path(from: root, to: target),
