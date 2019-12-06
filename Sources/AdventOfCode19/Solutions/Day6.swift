@@ -74,9 +74,9 @@ extension Day6 {
                 let sanPath = path(from: root, to: target)
             else { return -1 }
             let sharedStartLength = Set(youPath).intersection(sanPath).count
-            let youDist = youPath.count - sharedStartLength
-            let sanDist = sanPath.count - sharedStartLength
-            return youDist + sanDist - 2 // only go to the orbital points
+            let youDist = youPath.count - sharedStartLength - 1 // -1 because ignore YOU
+            let sanDist = sanPath.count - sharedStartLength - 1 // -1 because ignore SAN
+            return youDist + sanDist
         }
         
     }
