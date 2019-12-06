@@ -60,11 +60,11 @@ extension Day6 {
         
         /// dfs to determine path to a node
         /// - returns: the path via all nodes, inclusive of boundries, or `nil` if there is no path
-        func path(from source: Node, to target: Node, currentPath: [Node]? = []) -> [Node]? {
+        func path(from source: Node, to target: Node, currentPath: [Node] = []) -> [Node]? {
             if source == target { return currentPath }
-            guard let current = currentPath, !self[source].isEmpty else { return nil }
+            if self[source].isEmpty { return nil }
             return self[source].compactMap { neighbour in
-                path(from: neighbour, to: target, currentPath: current + [neighbour])
+                path(from: neighbour, to: target, currentPath: currentPath + [neighbour])
             }.first // we only care about the first possible path to an object
         }
         
