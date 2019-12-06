@@ -31,7 +31,7 @@ final class Day6: Day {
     }
     
     func solvePartOne() -> CustomStringConvertible {
-        graph.leafDepths(source: "COM")
+        graph.leafDepthTotal(from: "COM")
     }
     
     func solvePartTwo() -> CustomStringConvertible {
@@ -52,7 +52,7 @@ extension Day6 {
         }
         
         /// dfs to find the distance of the leaves from the source
-        func leafDepths(source: Node, depth: Int = 0) -> Int {
+        func leafDepthTotal(from source: Node, depth: Int = 0) -> Int {
             if self[source].isEmpty { return depth }
             return depth + self[source].reduce(0) { subtotal, neighbour in
                 subtotal + leafDepths(source: neighbour, depth: depth + 1)
