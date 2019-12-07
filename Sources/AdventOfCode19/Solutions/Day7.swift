@@ -18,7 +18,7 @@ final class Day7: Day {
     }
     
     var answerMetric: String {
-        "output"
+        "amplitude"
     }
     
     private lazy var data: Day5.Intcode = {
@@ -30,10 +30,10 @@ final class Day7: Day {
     
     func solvePartOne() -> CustomStringConvertible {
         let amplitudes = (0...4).permute()
-            .map { config -> Int in
+            .map { modes -> Int in
                 var feedback = 0
-                for i in config {
-                    let outputs = Day5.Computer(program: data, inputs: [i, feedback])
+                for ampMode in modes {
+                    let outputs = Day5.Computer(program: data, inputs: [ampMode, feedback])
                     feedback = outputs.reversed().first! // last output item is the output
                 }
                 return feedback
@@ -41,32 +41,36 @@ final class Day7: Day {
         return amplitudes.max() ?? "?"
     }
     
+    typealias AmpMachine = Int
+    typealias Pointer = Int
+    
     func solvePartTwo() -> CustomStringConvertible {
         let amplitudes = (5...9).permute()
-            .map { config -> Int in
-                var feedbackValue = 0
+            .map { modes -> Int in
+                var feedback = 0
                 // the current machine index we are operating on
                 // (loops around and around as we feedback)
                 var ampMachine = 0
                 // save pointer and state for each machine
-                var states = [Int: (Int, Day5.Intcode)]()
+                var states = [AmpMachine: (Pointer, Day5.Intcode)]()
                 while true {
-                    let ampMode = config[ampMachine]
+                    let ampMode = modes[ampMachine]
+                    // restore previous state and pointer or start from scratch
                     let (ptr, state) = states[ampMachine] ?? (0, data)
                     // only input ampmode and input value on first time, then just use the input value
-                    let inputToMachine = states[ampMachine] == nil ? [ampMode, feedbackValue] : [feedbackValue]
+                    let inputData = states[ampMachine] == nil ? [ampMode, feedback] : [feedback]
 
-                    let computer = Day5.Computer(program: state, inputs: inputToMachine)
+                    let computer = Day5.Computer(program: state, inputs: inputData)
                     computer.ptr = ptr
                     guard let output = computer.next() else {
                         break
                     }
                     states[ampMachine] = (computer.ptr, computer.program)
-                    feedbackValue = output
-
+                    feedback = output
+                    // loop round all the machines until we break out
                     ampMachine = (ampMachine + 1) % 5
                 }
-                return feedbackValue
+                return feedback
             }
         return amplitudes.max() ?? "?"
     }
@@ -77,7 +81,7 @@ final class Day7: Day {
 
 extension Collection {
     
-    /// no native permute in swift
+    /// no native permute in swift, we this this implementation
     /// algorithm from: https://stackoverflow.com/a/34969388/3261161
     func permute() -> [[Iterator.Element]] {
         var scratch = Array(self) // This is a scratch space for Heap's algorithm
