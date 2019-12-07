@@ -26,7 +26,7 @@ struct Resolver {
         5: Day5.self,
         6: Day6.self,
         7: Day7.self,
-//        8: Day8.self,
+        8: Day8.self,
 //        9: Day9.self,
 //        10: Day10.self,
 //        11: Day11.self,
@@ -40,6 +40,10 @@ struct Resolver {
 //        19: Day19.self,
 //        20: Day20.self,
 //        21: Day21.self,
+//        22: Day22.self,
+//        23: Day23.self,
+//        24: Day24.self,
+//        25: Day25.self,
     ]
     
     let day: Int

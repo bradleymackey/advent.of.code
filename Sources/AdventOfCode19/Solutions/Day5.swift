@@ -30,38 +30,49 @@ final class Day5: Day {
             .compactMap(Int.init)
     }()
     
-    /// - parameter inputs: the inputs to the program, which are consumed front to back
-    /// (starting at index `0`), like a stack-style of execution
-    private func solve(_ inputs: Intcode) -> [Int] {
-        var memory = data
-        var pointer = 0
-        var inputs = inputs
-        var outputs = [Int]()
-        while true {
-            do {
-                let ins = try Instruction.from(pointer: pointer, in: memory)
-                try ins.perform(
-                    with: &pointer,
-                    on: &memory,
-                    consuming: &inputs,
-                    producing: &outputs
-                )
-            } catch Instruction.ExecutionError.halt {
-                break
-            } catch {
-                print("PROGRAM ERROR! \(error)")
-                break
-            }
-        }
-        return outputs
-    }
-    
     func solvePartOne() -> CustomStringConvertible {
-        solve([1])
+        Computer(program: data, inputs: [1]).reversed()
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        solve([5])
+        Computer(program: data, inputs: [5]).reversed()
+    }
+    
+}
+
+extension Day5 {
+    
+    final class Computer: Sequence, IteratorProtocol {
+        
+        var program: Intcode
+        var inputs: [Int]
+        var ptr: Int = 0
+        
+        init(program: Intcode, inputs: [Int]) {
+            self.program = program
+            self.inputs = inputs
+        }
+        
+        func next() -> Int? {
+            while true {
+                do {
+                    let ins = try Instruction.from(pointer: ptr, in: program)
+                    let result = ins.perform(with: &ptr, on: &program, consuming: &inputs)
+                    switch result {
+                    case .continuing:
+                        continue
+                    case .outputAndContinue(let out):
+                        return out
+                    case .halt:
+                        return nil
+                    }
+                } catch {
+                    print("ERROR RUNNING PROGRAM SEQUENCE: \(error)")
+                    return nil
+                }
+            }
+        }
+        
     }
     
 }
@@ -70,12 +81,14 @@ extension Day5 {
     
     struct Instruction {
         
-        enum ExecutionError: Error {
+        enum ProgramResult {
+            case continuing
+            case outputAndContinue(Int)
             case halt
         }
-        
+
         enum ParseError: Error {
-            case invalidOpcode
+            case invalidOpcode(Int)
             case invalidPointer
         }
         
@@ -152,12 +165,14 @@ extension Day5 {
         
         let code: Code
         let parameters: [Parameter]
+        let instructionStartPosition: Int
         
+        /// parses an instruction given the pointer into the memory
         static func from(pointer: Int, in memory: Intcode) throws -> Instruction {
             guard pointer >= 0 && pointer < memory.count else { throw ParseError.invalidPointer }
             let fullCode = memory[pointer]
             let rawCodeNumber = fullCode % 100
-            guard let code = Code(rawValue: rawCodeNumber) else { throw ParseError.invalidOpcode }
+            guard let code = Code(rawValue: rawCodeNumber) else { throw ParseError.invalidOpcode(rawCodeNumber) }
             let rawParameterCodes = fullCode / 100
             let parameterModes = Parameter.Mode.modesFrom(
                 rawValue: rawParameterCodes,
@@ -168,77 +183,67 @@ extension Day5 {
             let parameters = zip(parameterModes, parameterValues).map {
                 Parameter(mode: $0, value: $1)
             }
-            return Instruction(code: code, parameters: parameters)
+            return Instruction(code: code, parameters: parameters, instructionStartPosition: pointer)
         }
     
         
         func perform(
-            with pointer: inout Int,
-            on memory: inout Intcode,
-            consuming inputs: inout [Int],
-            producing outputs: inout [Int]) throws
-        {
-            var shouldStride = true
+            with pc: inout Int,
+            on mem: inout Intcode,
+            consuming inputs: inout [Int]
+        ) -> ProgramResult {
             switch code {
             case .add:
-                computeWriteOperation(on: &memory, +)
+                let total = load(&pc, mem) + load(&pc, mem)
+                store(val: total, &pc, &mem)
             case .multiply:
-                computeWriteOperation(on: &memory, *)
+                let total = load(&pc, mem) * load(&pc, mem)
+                store(val: total, &pc, &mem)
             case .input:
                 let input = inputs.remove(at: 0)
-                let saveTo = parameters[0].value
-                memory[saveTo] = input
+                store(val: input, &pc, &mem)
             case .output:
-                let readFrom = parameters[0].value
-                let readValue = memory[readFrom]
-                outputs.append(readValue)
+                let output = load(&pc, mem)
+                pc += 1
+                return .outputAndContinue(output)
             case .jumpTrue:
-                shouldStride = computeJumpOperation(on: &memory, with: &pointer, (!=, 0))
+                if load(&pc, mem) != 0 {
+                    pc = load(&pc, mem)
+                    return .continuing
+                } else {
+                    pc += 1
+                }
             case .jumpFalse:
-                shouldStride = computeJumpOperation(on: &memory, with: &pointer, (==, 0))
+                if load(&pc, mem) == 0 {
+                    pc = load(&pc, mem)
+                    return .continuing
+                } else {
+                    pc += 1
+                }
             case .lessThan:
-                comparisonWriteOperation(on: &memory, <)
+                let value = load(&pc, mem) < load(&pc, mem) ? 1 : 0
+                store(val: value, &pc, &mem)
             case .equals:
-                comparisonWriteOperation(on: &memory, ==)
+                let value = load(&pc, mem) == load(&pc, mem) ? 1 : 0
+                store(val: value, &pc, &mem)
             case .halt:
-                throw ExecutionError.halt
+                return .halt
             }
-            if shouldStride {
-                pointer += code.stride
-            }
+            pc += 1 // to next instruction
+            return .continuing
         }
         
-        private func computeJumpOperation(
-            on memory: inout Intcode,
-            with pointer: inout Int,
-            _ operation: (((Int, Int) -> Bool), Int)
-        ) -> Bool {
-            let checkVal = parameters[0].value(using: memory)
-            guard operation.0(checkVal, operation.1) else { return true }
-            let setToVal = parameters[1].value(using: memory)
-            pointer = setToVal
-            return false
+        private func load(_ ptr: inout Int, _ mem: Intcode) -> Int {
+            defer { ptr += 1 }
+            let offset = ptr - instructionStartPosition
+            return parameters[offset].value(using: mem)
         }
         
-        private func computeWriteOperation(
-            on memory: inout Intcode,
-            _ operation: (Int, Int) -> Int
-        ) {
-            let first = parameters[0].value(using: memory)
-            let second = parameters[1].value(using: memory)
-            let saveTo = parameters[2].value
-            memory[saveTo] = operation(first, second)
-        }
-        
-        private func comparisonWriteOperation(
-            on memory: inout Intcode,
-            _ operation: (Int, Int) -> Bool
-        ) {
-            let first = parameters[0].value(using: memory)
-            let second = parameters[1].value(using: memory)
-            let storeAt = parameters[2].value
-            let storeValue = operation(first, second) ? 1 : 0
-            memory[storeAt] = storeValue
+        private func store(val: Int, _ ptr: inout Int, _ mem: inout Intcode) {
+            defer { ptr += 1 }
+            let offset = ptr - instructionStartPosition
+            let storeAt = parameters[offset].value // immediate only for storing
+            mem[storeAt] = val
         }
         
     }
