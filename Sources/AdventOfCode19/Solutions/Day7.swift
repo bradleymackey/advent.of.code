@@ -33,8 +33,8 @@ final class Day7: Day {
             .map { modes -> Int in
                 var feedback = 0
                 for ampMode in modes {
-                    let outputs = Day5.OutputSequence(data: data, inputs: [ampMode, feedback])
-                    feedback = outputs.reversed().first! // last output item is the output
+                    let outputter = Day5.OutputSequence(data: data, inputs: [ampMode, feedback])
+                    feedback = outputter.reversed().first! // last output item is the output
                 }
                 return feedback
             }
@@ -60,11 +60,11 @@ final class Day7: Day {
                     // only input ampmode and input value on first time, then just use the input value
                     let inputData = states[ampMachine] == nil ? [ampMode, feedback] : [feedback]
 
-                    let computer = Day5.OutputSequence(data: state, inputs: inputData, pointer: ptr)
-                    guard let output = computer.next() else {
+                    let outputter = Day5.OutputSequence(data: state, inputs: inputData, pointer: ptr)
+                    guard let output = outputter.next() else {
                         break
                     }
-                    states[ampMachine] = (computer.computer.pointer, computer.computer.data)
+                    states[ampMachine] = (outputter.computer.pointer, outputter.computer.data)
                     feedback = output
                     // loop round all the machines until we break out
                     ampMachine = (ampMachine + 1) % 5
