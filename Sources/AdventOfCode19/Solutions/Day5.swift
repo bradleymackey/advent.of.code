@@ -29,11 +29,13 @@ final class Day5: Day {
     }()
     
     func solvePartOne() -> CustomStringConvertible {
-        OutputSequence(data: data, inputs: [1]).reversed()
+        let computer = Intcode(data: data, inputs: [1])
+        return OutputSequence(from: computer).reversed()
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        OutputSequence(data: data, inputs: [5]).reversed()
+        let computer = Intcode(data: data, inputs: [5])
+        return OutputSequence(from: computer).reversed()
     }
     
 }
@@ -44,8 +46,8 @@ extension Day5 {
         
         let computer: Intcode
         
-        init(data: [Int], inputs: [Int], pointer: Int = 0) {
-            self.computer = Intcode(data: data, inputs: inputs, pointer: pointer)
+        init(from computer: Intcode) {
+            self.computer = computer
         }
         
         // gets the next computer 'output'
@@ -53,7 +55,7 @@ extension Day5 {
             while true {
                 do {
                     let instruction = try computer.nextInstruction()
-                    let result = computer.execute(instruction: instruction)
+                    let result = computer.execute(instruction)
                     switch result {
                     case .continuing:
                         continue
@@ -120,7 +122,7 @@ extension Day5 {
             return Instruction(code: code, parameters: parameters, instructionStartPosition: pointer)
         }
         
-        func execute(instruction i: Instruction) -> ProgramResult {
+        func execute(_ i: Instruction) -> ProgramResult {
             switch i.code {
             case .add:
                 let total = load(i) + load(i)
