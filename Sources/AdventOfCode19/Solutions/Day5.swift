@@ -162,16 +162,16 @@ extension Day5 {
             return .continuing
         }
         
-        private func load(_ ins: Instruction) -> Int {
+        private func load(_ i: Instruction) -> Int {
             defer { pointer += 1 }
-            let offset = pointer - ins.instructionStartPosition
-            return value(from: ins.parameters[offset])
+            let offset = pointer - i.instructionStartPosition
+            return value(from: i.parameters[offset])
         }
         
-        private func store(val: Int, _ ins: Instruction) {
+        private func store(val: Int, _ i: Instruction) {
             defer { pointer += 1 }
-            let offset = pointer - ins.instructionStartPosition
-            let storeAt = ins.parameters[offset].value // immediate only for storing
+            let offset = pointer - i.instructionStartPosition
+            let storeAt = i.parameters[offset].value // immediate only for storing
             data[storeAt] = val
         }
         
