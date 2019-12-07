@@ -21,7 +21,7 @@ final class Day7: Day {
         "amplitude"
     }
     
-    private lazy var data: Day5.Intcode = {
+    private lazy var data: [Int] = {
         input
             .split(separator: ",")
             .map(String.init)
@@ -33,7 +33,7 @@ final class Day7: Day {
             .map { modes -> Int in
                 var feedback = 0
                 for ampMode in modes {
-                    let outputs = Day5.Computer(program: data, inputs: [ampMode, feedback])
+                    let outputs = Day5.OutputSequence(data: data, inputs: [ampMode, feedback])
                     feedback = outputs.reversed().first! // last output item is the output
                 }
                 return feedback
@@ -52,7 +52,7 @@ final class Day7: Day {
                 // (loops around and around as we feedback)
                 var ampMachine = 0
                 // save pointer and state for each machine
-                var states = [AmpMachine: (Pointer, Day5.Intcode)]()
+                var states = [AmpMachine: (Pointer, [Int])]()
                 while true {
                     let ampMode = modes[ampMachine]
                     // restore previous state and pointer or start from scratch
@@ -60,12 +60,11 @@ final class Day7: Day {
                     // only input ampmode and input value on first time, then just use the input value
                     let inputData = states[ampMachine] == nil ? [ampMode, feedback] : [feedback]
 
-                    let computer = Day5.Computer(program: state, inputs: inputData)
-                    computer.ptr = ptr
+                    let computer = Day5.OutputSequence(data: state, inputs: inputData, pointer: ptr)
                     guard let output = computer.next() else {
                         break
                     }
-                    states[ampMachine] = (computer.ptr, computer.program)
+                    states[ampMachine] = (computer.computer.pointer, computer.computer.data)
                     feedback = output
                     // loop round all the machines until we break out
                     ampMachine = (ampMachine + 1) % 5

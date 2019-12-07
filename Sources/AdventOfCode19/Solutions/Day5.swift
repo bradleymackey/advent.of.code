@@ -21,9 +21,7 @@ final class Day5: Day {
         "output"
     }
     
-    typealias Intcode = [Int]
-    
-    private lazy var data: Intcode = {
+    private lazy var data: [Int] = {
         input
             .split(separator: ",")
             .map(String.init)
@@ -31,34 +29,31 @@ final class Day5: Day {
     }()
     
     func solvePartOne() -> CustomStringConvertible {
-        Computer(program: data, inputs: [1]).reversed()
+        OutputSequence(data: data, inputs: [1]).reversed()
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        Computer(program: data, inputs: [5]).reversed()
+        OutputSequence(data: data, inputs: [5]).reversed()
     }
     
 }
 
 extension Day5 {
     
-    final class Computer: Sequence, IteratorProtocol {
+    final class OutputSequence: Sequence, IteratorProtocol {
         
-        var program: Intcode
-        var inputs: [Int]
-        var ptr: Int = 0
+        let computer: Intcode
         
-        init(program: Intcode, inputs: [Int]) {
-            self.program = program
-            self.inputs = inputs
+        init(data: [Int], inputs: [Int], pointer: Int = 0) {
+            self.computer = Intcode(data: data, inputs: inputs, pointer: pointer)
         }
         
         // gets the next computer 'output'
         func next() -> Int? {
             while true {
                 do {
-                    let ins = try Instruction.from(pointer: ptr, in: program)
-                    let result = ins.perform(with: &ptr, on: &program, consuming: &inputs)
+                    let instruction = try computer.nextInstruction()
+                    let result = computer.execute(instruction: instruction)
                     switch result {
                     case .continuing:
                         continue
@@ -80,18 +75,122 @@ extension Day5 {
 
 extension Day5 {
     
-    struct Instruction {
+    final class Intcode {
         
         enum ProgramResult {
             case continuing
             case outputAndContinue(Int)
             case halt
         }
-
+        
         enum ParseError: Error {
             case invalidOpcode(Int)
             case invalidPointer
         }
+        
+        var data: [Int]
+        var inputs: [Int]
+        var pointer: Int
+        
+        init(data: [Int], inputs: [Int], pointer: Int = 0) {
+            self.data = data
+            self.inputs = inputs
+            self.pointer = pointer
+        }
+        
+        func nextInstruction() throws -> Instruction {
+            guard pointer >= 0 && pointer < data.count else {
+                throw ParseError.invalidPointer
+            }
+            let fullCode = data[pointer]
+            let rawCodeNumber = fullCode % 100
+            guard let code = Instruction.Code(rawValue: rawCodeNumber) else {
+                throw ParseError.invalidOpcode(rawCodeNumber)
+            }
+            let rawParameterCodes = fullCode / 100
+            let parameterModes = Instruction.Parameter.Mode.modesFrom(
+                rawValue: rawParameterCodes,
+                totalDesired: code.desiredParameters
+            )
+            let offset = pointer + 1
+            let parameterValues = Array(data[offset..<(offset+code.desiredParameters)])
+            let parameters = zip(parameterModes, parameterValues).map {
+                Instruction.Parameter(mode: $0, value: $1)
+            }
+            return Instruction(code: code, parameters: parameters, instructionStartPosition: pointer)
+        }
+        
+        func execute(instruction i: Instruction) -> ProgramResult {
+            switch i.code {
+            case .add:
+                let total = load(i) + load(i)
+                store(val: total, i)
+            case .multiply:
+                let total = load(i) * load(i)
+                store(val: total, i)
+            case .input:
+                let input = inputs.remove(at: 0)
+                store(val: input, i)
+            case .output:
+                let output = load(i)
+                pointer += 1
+                return .outputAndContinue(output)
+            case .jumpTrue:
+                if load(i) != 0 {
+                    pointer = load(i)
+                    return .continuing // exit now, do not want to increment pc
+                } else {
+                    pointer += 1 // skip jump parameter
+                }
+            case .jumpFalse:
+                if load(i) == 0 {
+                    pointer = load(i)
+                    return .continuing // exit now, do not want to increment pc
+                } else {
+                    pointer += 1 // skip jump parameter
+                }
+            case .lessThan:
+                let value = load(i) < load(i) ? 1 : 0
+                store(val: value, i)
+            case .equals:
+                let value = load(i) == load(i) ? 1 : 0
+                store(val: value, i)
+            case .halt:
+                return .halt
+            }
+            pointer += 1 // ready for next instruction
+            return .continuing
+        }
+        
+        private func load(_ ins: Instruction) -> Int {
+            defer { pointer += 1 }
+            let offset = pointer - ins.instructionStartPosition
+            return value(from: ins.parameters[offset])
+        }
+        
+        private func store(val: Int, _ ins: Instruction) {
+            defer { pointer += 1 }
+            let offset = pointer - ins.instructionStartPosition
+            let storeAt = ins.parameters[offset].value // immediate only for storing
+            data[storeAt] = val
+        }
+        
+        func value(from parameter: Instruction.Parameter) -> Int {
+            switch parameter.mode {
+            case .immediate:
+                return parameter.value
+            case .position:
+                return data[parameter.value]
+            }
+        }
+        
+    }
+    
+}
+
+extension Day5.Intcode {
+    
+    struct Instruction {
         
         enum Code: Int {
             
@@ -153,103 +252,11 @@ extension Day5 {
             let mode: Mode
             let value: Int
             
-            func value(using memory: [Int]) -> Int {
-                switch mode {
-                case .position:
-                    return memory[value]
-                case .immediate:
-                    return value
-                }
-            }
-            
         }
         
         let code: Code
         let parameters: [Parameter]
         let instructionStartPosition: Int
-        
-        /// parses an instruction given the pointer into the memory
-        static func from(pointer: Int, in memory: Intcode) throws -> Instruction {
-            guard pointer >= 0 && pointer < memory.count else {
-                throw ParseError.invalidPointer
-            }
-            let fullCode = memory[pointer]
-            let rawCodeNumber = fullCode % 100
-            guard let code = Code(rawValue: rawCodeNumber) else {
-                throw ParseError.invalidOpcode(rawCodeNumber)
-            }
-            let rawParameterCodes = fullCode / 100
-            let parameterModes = Parameter.Mode.modesFrom(
-                rawValue: rawParameterCodes,
-                totalDesired: code.desiredParameters
-            )
-            let offset = pointer + 1
-            let parameterValues = Array(memory[offset..<(offset+code.desiredParameters)])
-            let parameters = zip(parameterModes, parameterValues).map {
-                Parameter(mode: $0, value: $1)
-            }
-            return Instruction(code: code, parameters: parameters, instructionStartPosition: pointer)
-        }
-    
-        
-        func perform(
-            with pc: inout Int,
-            on mem: inout Intcode,
-            consuming inputs: inout [Int]
-        ) -> ProgramResult {
-            switch code {
-            case .add:
-                let total = load(&pc, mem) + load(&pc, mem)
-                store(val: total, &pc, &mem)
-            case .multiply:
-                let total = load(&pc, mem) * load(&pc, mem)
-                store(val: total, &pc, &mem)
-            case .input:
-                let input = inputs.remove(at: 0)
-                store(val: input, &pc, &mem)
-            case .output:
-                let output = load(&pc, mem)
-                pc += 1
-                return .outputAndContinue(output)
-            case .jumpTrue:
-                if load(&pc, mem) != 0 {
-                    pc = load(&pc, mem)
-                    return .continuing // exit now, do not want to increment pc
-                } else {
-                    pc += 1 // skip jump parameter
-                }
-            case .jumpFalse:
-                if load(&pc, mem) == 0 {
-                    pc = load(&pc, mem)
-                    return .continuing // exit now, do not want to increment pc
-                } else {
-                    pc += 1 // skip jump parameter
-                }
-            case .lessThan:
-                let value = load(&pc, mem) < load(&pc, mem) ? 1 : 0
-                store(val: value, &pc, &mem)
-            case .equals:
-                let value = load(&pc, mem) == load(&pc, mem) ? 1 : 0
-                store(val: value, &pc, &mem)
-            case .halt:
-                return .halt
-            }
-            pc += 1 // to next instruction
-            return .continuing
-        }
-        
-        private func load(_ ptr: inout Int, _ mem: Intcode) -> Int {
-            defer { ptr += 1 }
-            let offset = ptr - instructionStartPosition
-            return parameters[offset].value(using: mem)
-        }
-        
-        private func store(val: Int, _ ptr: inout Int, _ mem: inout Intcode) {
-            defer { ptr += 1 }
-            let offset = ptr - instructionStartPosition
-            let storeAt = parameters[offset].value // immediate only for storing
-            mem[storeAt] = val
-        }
         
     }
     
