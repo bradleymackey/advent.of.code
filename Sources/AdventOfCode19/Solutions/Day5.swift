@@ -53,6 +53,7 @@ extension Day5 {
             self.inputs = inputs
         }
         
+        // gets the next computer 'output'
         func next() -> Int? {
             while true {
                 do {
@@ -169,10 +170,14 @@ extension Day5 {
         
         /// parses an instruction given the pointer into the memory
         static func from(pointer: Int, in memory: Intcode) throws -> Instruction {
-            guard pointer >= 0 && pointer < memory.count else { throw ParseError.invalidPointer }
+            guard pointer >= 0 && pointer < memory.count else {
+                throw ParseError.invalidPointer
+            }
             let fullCode = memory[pointer]
             let rawCodeNumber = fullCode % 100
-            guard let code = Code(rawValue: rawCodeNumber) else { throw ParseError.invalidOpcode(rawCodeNumber) }
+            guard let code = Code(rawValue: rawCodeNumber) else {
+                throw ParseError.invalidOpcode(rawCodeNumber)
+            }
             let rawParameterCodes = fullCode / 100
             let parameterModes = Parameter.Mode.modesFrom(
                 rawValue: rawParameterCodes,
@@ -209,16 +214,16 @@ extension Day5 {
             case .jumpTrue:
                 if load(&pc, mem) != 0 {
                     pc = load(&pc, mem)
-                    return .continuing
+                    return .continuing // exit now, do not want to increment pc
                 } else {
-                    pc += 1
+                    pc += 1 // skip jump parameter
                 }
             case .jumpFalse:
                 if load(&pc, mem) == 0 {
                     pc = load(&pc, mem)
-                    return .continuing
+                    return .continuing // exit now, do not want to increment pc
                 } else {
-                    pc += 1
+                    pc += 1 // skip jump parameter
                 }
             case .lessThan:
                 let value = load(&pc, mem) < load(&pc, mem) ? 1 : 0
