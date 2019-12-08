@@ -58,7 +58,7 @@ final class Day8: Day {
         // initalise result array
         var result: [[Pixel]] = Array(repeating: [], count: imageHeight)
         for i in 0..<imageHeight {
-            result[i] = Array(repeating: .uninitalised, count: imageWidth)
+            result[i] = Array(repeating: .transparent, count: imageWidth)
         }
         // combine pixels from all layers (bottom layer to top)
         for l in (0..<data.count).reversed() {
@@ -84,7 +84,6 @@ final class Day8: Day {
 extension Day8 {
     
     enum Pixel: Int {
-        case uninitalised = -1
         case black = 0
         case white = 1
         case transparent = 2
@@ -93,14 +92,14 @@ extension Day8 {
             switch upper {
             case .black, .white:
                 return upper
-            case .transparent, .uninitalised:
+            case .transparent:
                 return self
             }
         }
         
         var printValue: String {
             switch self {
-            case .uninitalised, .transparent, .black:
+            case .transparent, .black:
                 return "  "
             case .white:
                 return "# "
