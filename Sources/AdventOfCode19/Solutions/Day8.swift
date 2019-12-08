@@ -43,14 +43,14 @@ final class Day8: Day {
             let (index, layer) = arg
             let zeros = layer
                 .flatMap { $0 }
-                .filter { $0 == .black }
+                .filter { $0.rawValue == 0 }
                 .count
             return (index, zeros)
         }
         guard let (minLayerIndex, _) = layerZeros.min(by: { $0.1 < $1.1 }) else { return "?" }
         guard let layerData = data[minLayerIndex]?.flatMap({ $0 }) else { return "?" }
-        let oneDigits = layerData.filter({ $0 == .white }).count
-        let twoDigits = layerData.filter({ $0 == .transparent }).count
+        let oneDigits = layerData.filter({ $0.rawValue == 1 }).count
+        let twoDigits = layerData.filter({ $0.rawValue == 2 }).count
         return oneDigits * twoDigits
     }
     
