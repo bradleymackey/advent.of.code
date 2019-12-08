@@ -31,7 +31,12 @@ final class Day4: Day {
     typealias Rule = (String) -> Bool
     
     let isSorted: Rule = {
-        String($0.sorted()) == $0
+        var last: Character = "\u{00}" // low unicode to start
+        for c in $0 {
+            guard c >= last else { return false }
+            last = c
+        }
+        return true
     }
     let containsDuplicates: Rule = {
         Set($0).count != $0.count
