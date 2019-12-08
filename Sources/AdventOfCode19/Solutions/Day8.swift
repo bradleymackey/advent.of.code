@@ -55,7 +55,7 @@ final class Day8: Day {
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        // initalise result
+        // initalise result array
         var result: [[Pixel]] = Array(repeating: [], count: imageHeight)
         for i in 0..<imageHeight {
             result[i] = Array(repeating: .uninitalised, count: imageWidth)
