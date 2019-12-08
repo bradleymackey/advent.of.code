@@ -2,7 +2,6 @@
 //  Day7.swift
 //  AdventOfCode
 //
-//  Created by Bradley Mackey on 06/12/2019.
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
 //
 
