@@ -63,8 +63,9 @@ struct App {
             """)
             return (1...25)
             .compactMap { day in
+                let file = challengeFilename(for: day)
                 guard
-                    let (path, contents) = try? self.read(day: day, directory: directoryPath)
+                    let (path, contents) = try? self.read(file, in: directoryPath)
                 else {
                     return nil
                 }
@@ -74,7 +75,8 @@ struct App {
         }
         
         do {
-            let (path, contents) = try read(day: dayNumber, directory: directoryPath)
+            let file = challengeFilename(for: dayNumber)
+            let (path, contents) = try read(file, in: directoryPath)
             let config = Configuration(day: dayNumber, filePath: path, fileContents: contents)
             return [config]
         } catch {
@@ -83,7 +85,7 @@ struct App {
             -------------------------------
             Could not read file.
             \(error.localizedDescription)
-            Tried to read \(filename(for: dayNumber)) from directory:
+            Tried to read \(challengeFilename(for: dayNumber)) from directory:
             \(directoryPath)
             """)
             exit(1)
@@ -92,14 +94,13 @@ struct App {
         
     }
     
-    static func filename(for day: Int) -> String {
+    static func challengeFilename(for day: Int) -> String {
         "day\(day).txt"
     }
     
-    private static func read(day: Int, directory: String) throws -> (path: String, contents: String) {
+    static func read(_ file: String, in directory: String) throws -> (path: String, contents: String) {
         let directoryURL = URL(fileURLWithPath: directory, isDirectory: true)
-        let dayFilename = filename(for: day)
-        let fileURL = directoryURL.appendingPathComponent(dayFilename)
+        let fileURL = directoryURL.appendingPathComponent(file)
         let contents = try String(contentsOf: fileURL, encoding: .utf8)
             .trimmingCharacters(in: .whitespacesAndNewlines)
         return (fileURL.absoluteString, contents)
