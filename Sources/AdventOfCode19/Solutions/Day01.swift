@@ -1,5 +1,5 @@
 //
-//  Day1.swift
+//  Day01.swift
 //  AdventOfCode
 //
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
@@ -9,7 +9,7 @@
 /// - we model the fuel reduction using an Iterator, which gives
 /// a very nice callsite in both part 1 and 2. these callsites also highlight
 /// how similar both of the problems are
-final class Day1: Day {
+final class Day01: Day {
     
     let input: String
     
@@ -42,7 +42,7 @@ final class Day1: Day {
     
 }
 
-extension Day1 {
+extension Day01 {
     
     final class Fuel: Sequence, IteratorProtocol {
         

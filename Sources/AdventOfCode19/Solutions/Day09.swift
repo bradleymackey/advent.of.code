@@ -1,11 +1,11 @@
 //
-//  Day9.swift
+//  Day09.swift
 //  AdventOfCode
 //
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
 //
 
-final class Day9: Day {
+final class Day09: Day {
     
     let input: String
     

@@ -19,15 +19,15 @@ enum ResolveError: Error {
 struct Resolver {
     
     private static let days: [Int: Day.Type] = [
-        1: Day1.self,
-        2: Day2.self,
-        3: Day3.self,
-        4: Day4.self,
-        5: Day5.self,
-        6: Day6.self,
+        1: Day01.self,
+        2: Day02.self,
+        3: Day03.self,
+        4: Day04.self,
+        5: Day05.self,
+        6: Day06.self,
         7: Day7.self,
-        8: Day8.self,
-        9: Day9.self,
+        8: Day08.self,
+        9: Day09.self,
         10: Day10.self,
 //        11: Day11.self,
 //        12: Day12.self,

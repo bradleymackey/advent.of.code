@@ -1,11 +1,13 @@
 //
-//  Day8.swift
+//  Day08.swift
 //  AdventOfCode
 //
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
 //
 
-final class Day8: Day {
+/// --- Day 8: Space Image Format ---
+/// not much to say, there's probably a more consise way to format this though
+final class Day08: Day {
     
     let input: String
     
@@ -81,9 +83,10 @@ final class Day8: Day {
     
 }
 
-extension Day8 {
+extension Day08 {
     
     enum Pixel: Int {
+        
         case black = 0
         case white = 1
         case transparent = 2

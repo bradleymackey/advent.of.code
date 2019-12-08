@@ -1,5 +1,5 @@
 //
-//  Day3.swift
+//  Day03.swift
 //  AdventOfCode
 //
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
@@ -9,7 +9,7 @@
 /// - a brute-force approach that determines all visited points by both wires,
 /// then determines the intersection of all these points
 /// (probably a faster and smarter way, but this still works, and is fast)
-final class Day3: Day {
+final class Day03: Day {
     
     let input: String
     
@@ -48,7 +48,7 @@ final class Day3: Day {
     
 }
 
-extension Day3 {
+extension Day03 {
     
     private func points(from wire: [Direction]) -> [CO: Int] {
         var currentSteps = 0
@@ -92,7 +92,7 @@ extension Day3 {
 }
 
 
-extension Day3 {
+extension Day03 {
     
     struct CO: Hashable, Equatable {
         var x: Int

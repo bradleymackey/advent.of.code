@@ -1,5 +1,5 @@
 //
-//  Day6.swift
+//  Day06.swift
 //  AdventOfCode
 //
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
@@ -8,7 +8,7 @@
 /// --- Day 6: Universal Orbit Map ---
 /// recursion allows us to have really simple logic for complex
 /// graph traversals!
-final class Day6: Day {
+final class Day06: Day {
     
     let input: String
     
@@ -38,7 +38,7 @@ final class Day6: Day {
     
 }
 
-extension Day6 {
+extension Day06 {
     
     struct Graph<Node> where Node: Hashable {
     

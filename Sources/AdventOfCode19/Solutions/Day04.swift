@@ -1,5 +1,5 @@
 //
-//  Day4.swift
+//  Day04.swift
 //  AdventOfCode
 //
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
@@ -9,7 +9,7 @@
 /// - brute-force to figure out the combinations as there aren't too many
 /// simple rules means we can express this as a simple filter operation on
 /// the full range, then just count the valid results
-final class Day4: Day {
+final class Day04: Day {
     
     let input: String
     

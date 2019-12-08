@@ -1,5 +1,5 @@
 //
-//  Day5.swift
+//  Day05.swift
 //  AdventOfCode
 //
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
@@ -8,7 +8,7 @@
 /// --- Day 5: Sunny with a Chance of Asteroids ---
 /// - copied and adapted from Part 2
 /// extensible data modelling allows for new instructions to be easily added
-final class Day5: Day {
+final class Day05: Day {
     
     let input: String
     
@@ -39,7 +39,7 @@ final class Day5: Day {
     
 }
 
-extension Day5 {
+extension Day05 {
     
     final class OutputSequence: Sequence, IteratorProtocol {
         
@@ -74,7 +74,7 @@ extension Day5 {
     
 }
 
-extension Day5 {
+extension Day05 {
     
     final class Intcode {
         
@@ -189,7 +189,7 @@ extension Day5 {
     
 }
 
-extension Day5.Intcode {
+extension Day05.Intcode {
     
     struct Instruction {
         

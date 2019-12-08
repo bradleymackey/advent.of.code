@@ -1,5 +1,5 @@
 //
-//  Day2.swift
+//  Day02.swift
 //  AdventOfCode
 //
 //  Copyright © 2019 Bradley Mackey. All rights reserved.
@@ -10,7 +10,7 @@ import Dispatch
 /// --- Day 2: 1202 Program Alarm ---
 /// - simple memory simlulation following very simple  rules
 /// for part 2, we can parallelise for massive speedups
-final class Day2: Day {
+final class Day02: Day {
     
     let input: String
     
@@ -62,7 +62,7 @@ final class Day2: Day {
     
 }
 
-extension Day2 {
+extension Day02 {
 
     enum Opcode: Int {
         

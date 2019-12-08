@@ -32,8 +32,8 @@ final class Day7: Day {
             .map { modes -> Int in
                 var feedback = 0
                 for ampMode in modes {
-                    let computer = Day5.Intcode(data: data, inputs: [ampMode, feedback])
-                    let outputter = Day5.OutputSequence(from: computer)
+                    let computer = Day05.Intcode(data: data, inputs: [ampMode, feedback])
+                    let outputter = Day05.OutputSequence(from: computer)
                     feedback = outputter.reversed().first! // last output item is the output
                 }
                 return feedback
@@ -61,8 +61,8 @@ final class Day7: Day {
                     let inputData = states[ampMachine] == nil ? [ampMode, feedback] : [feedback]
                     
                     // get the next output value from the computer's state
-                    let computer = Day5.Intcode(data: state, inputs: inputData, pointer: ptr)
-                    let outputter = Day5.OutputSequence(from: computer)
+                    let computer = Day05.Intcode(data: state, inputs: inputData, pointer: ptr)
+                    let outputter = Day05.OutputSequence(from: computer)
                     guard let output = outputter.next() else {
                         break
                     }
