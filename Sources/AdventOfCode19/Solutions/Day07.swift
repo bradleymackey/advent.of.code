@@ -32,8 +32,9 @@ final class Day7: Day {
             .map { modes -> Int in
                 var feedback = 0
                 for ampMode in modes {
-                    let computer = Day05.Intcode(data: data, inputs: [ampMode, feedback])
-                    let outputter = Day05.OutputSequence(from: computer)
+                    let input = Intcode.sparseInput(from: data)
+                    let computer = Intcode(data: input, inputs: [ampMode, feedback])
+                    let outputter = Intcode.OutputSequence(from: computer)
                     feedback = outputter.reversed().first! // last output item is the output
                 }
                 return feedback
@@ -52,17 +53,17 @@ final class Day7: Day {
                 // (loops around and around as we feedback)
                 var ampMachine = 0
                 // save pointer and state for each machine
-                var states = [AmpMachine: (Pointer, [Int])]()
+                var states = [AmpMachine: (Pointer, [Int: Int])]()
                 while true {
                     // restore previous state and pointer or start from scratch
-                    let (ptr, state) = states[ampMachine] ?? (0, data)
+                    let (ptr, state) = states[ampMachine] ?? (0, Intcode.sparseInput(from: data))
                     // only input ampmode and feedback value on first time, then just use the feedback value
                     let ampMode = modes[ampMachine]
                     let inputData = states[ampMachine] == nil ? [ampMode, feedback] : [feedback]
                     
                     // get the next output value from the computer's state
-                    let computer = Day05.Intcode(data: state, inputs: inputData, pointer: ptr)
-                    let outputter = Day05.OutputSequence(from: computer)
+                    let computer = Intcode(data: state, inputs: inputData, pointer: ptr)
+                    let outputter = Intcode.OutputSequence(from: computer)
                     guard let output = outputter.next() else {
                         break
                     }
