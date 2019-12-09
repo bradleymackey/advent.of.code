@@ -32,6 +32,7 @@ final class Intcode {
     }
     
     /// data is input as a dictionary of index to value. this allows for sparse, unbouded memory
+    /// use the static `Intcode.sparseInput()` method to ensure that your memory is in the correct format
     init(data: [Int: Int], inputs: [Int], pointer: Int = 0, relativeBase: Int = 0) {
         self.data = data
         self.inputs = inputs
