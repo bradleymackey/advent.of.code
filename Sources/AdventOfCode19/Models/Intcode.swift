@@ -209,14 +209,13 @@ extension Intcode {
                     guard totalDesired > 0 else { return [] }
                     // because codes are read right-to-left, reverse them so we get
                     // the first one first
-                    var parameterModes = String(rawValue)
+                    let parsedModes = String(rawValue)
                         .reversed()
                         .map(String.init)
                         .compactMap(Int.init)
                         .compactMap(Parameter.Mode.init)
-                    let remainingParameters = totalDesired - parameterModes.count
-                    parameterModes += Array(repeating: .position, count: remainingParameters)
-                    return parameterModes
+                    let remaining = totalDesired - parsedModes.count
+                    return parsedModes + Array(repeating: .position, count: remaining)
                 }
                 
             }
