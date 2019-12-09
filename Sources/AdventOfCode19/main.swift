@@ -12,7 +12,6 @@ do {
     let configs = App.parseConfigurations()
     for config in configs {
         print("Solving day \(config.day)...")
-//        print("Input file \(config.filePath)")
         let resolver = Resolver(day: config.day)
         let day = try resolver.resolve(with: config.fileContents)
         day.solveAll()

@@ -57,7 +57,6 @@ final class Intcode {
             else {
                 throw ParseError.invalidPointer
         }
-        
         let rawCodeNumber = fullCode % 100
         guard let code = Instruction.Code(rawValue: rawCodeNumber) else {
             throw ParseError.invalidOpcode(rawCodeNumber)

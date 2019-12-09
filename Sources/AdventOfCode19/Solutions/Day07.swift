@@ -8,7 +8,7 @@
 /// --- Day 7: Amplification Circuit ---
 /// - had to adapt the day 5 computer to produce outputs into
 /// a sequence rather than just outputting them all at the end, other than that, it was not too bad
-final class Day7: Day {
+final class Day07: Day {
     
     let input: String
     
