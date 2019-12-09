@@ -2,7 +2,7 @@
 //  Day13.swift
 //  AdventOfCode
 //
-//  Copyright © 2019 Bradley Mackey. All rights reserved.
+//  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
 final class Day13: Day {

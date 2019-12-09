@@ -2,7 +2,7 @@
 //  Intcode.swift
 //  AdventOfCode
 //
-//  Copyright © 2019 Bradley Mackey. All rights reserved.
+//  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
 /// a full, turing complete intcode computer

@@ -2,7 +2,7 @@
 //  Day03.swift
 //  AdventOfCode
 //
-//  Copyright © 2019 Bradley Mackey. All rights reserved.
+//  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
 /// --- Day 3: Crossed Wires ---
