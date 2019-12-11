@@ -34,7 +34,7 @@ final class Day11: Day {
     func solvePartTwo() -> CustomStringConvertible {
         let painter = Painter(program: data, startColor: .white)
         painter.run()
-        return "\n" + painter.asciiArt
+        return "\n" + painter.asciiArt()
     }
     
 }
@@ -123,19 +123,21 @@ extension Day11 {
             }
         }
         
+        // initial conditions
+        let initialProgram: [Int]
+        let startColor: Color
+        
+        // painter state
         var facing: Direction = .up
         var coordinate: Coordinate = Coordinate(x: 0, y: 0)
         var visited = [Coordinate: Color]()
         
-        let computer: Intcode
-        
         init(program: [Int], startColor: Color) {
-            let input = Intcode.sparseInput(from: program)
-            let computer = Intcode(data: input, inputs: [startColor.rawValue])
-            self.computer = computer
+            self.initialProgram = program
+            self.startColor = startColor
         }
         
-        var asciiArt: String {
+        func asciiArt(flipVertical: Bool = true) -> String {
             // figure out the region that is actually filled in,
             // so we can allocate an array of the right size
             let minX = visited.keys.min(by: { $0.x < $1.x })!
@@ -145,16 +147,17 @@ extension Day11 {
             let maxY = visited.keys.min(by: { $0.y > $1.y })!
             let rangeY = maxY.y - minY.y + 1
             // intialise output area
-            var output: [[Color]] = Array(repeating: [], count: rangeY)
-            for i in 0..<output.count {
-                output[i] = Array(repeating: .black, count: rangeX)
-            }
+            var output: [[Color]] = Array(
+                repeating: Array(repeating: .black, count: rangeX),
+                count: rangeY
+            )
             // fill it in!
             for (coor, color) in visited {
                 let adjX = coor.x - minX.x
                 let adjY = coor.y - minY.y
                 output[adjY][adjX] = color
             }
+            if flipVertical { output.reverse() }
             // map 2D array to viewable string
             return output.map { row in
                 row.map {
@@ -164,6 +167,12 @@ extension Day11 {
         }
         
         func run() {
+            coordinate = Coordinate(x: 0, y: 0)
+            facing = .up
+            visited = [:]
+            let input = Intcode.sparseInput(from: initialProgram)
+            let computer = Intcode(data: input, inputs: [startColor.rawValue])
+            
             var outBuffer = [Int]()
             while true {
                 do {
