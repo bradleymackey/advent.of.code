@@ -63,27 +63,24 @@ extension Day11 {
         }
         
         enum Turn: Int {
-            case left90 = 0
-            case right90 = 1
+            case left  = 0
+            case right = 1
         }
         
         enum Direction {
             
             case up, down, left, right
         
-            func turn(_ direction: Turn, moving coor: inout Coordinate) -> Direction {
-                let newDirection: Direction
+            func turn(_ direction: Turn) -> Direction {
                 switch direction {
-                case .left90:
-                    newDirection = self.turnLeft()
-                case .right90:
-                    newDirection = self.turnRight()
+                case .left:
+                    return turnLeft()
+                case .right:
+                    return turnRight()
                 }
-                newDirection.move(coordinate: &coor)
-                return newDirection
             }
             
-            private func move(coordinate: inout Coordinate) {
+            func moveForward(_ coordinate: inout Coordinate) {
                 switch self {
                 case .up:
                     coordinate.y += 1
@@ -187,7 +184,8 @@ extension Day11 {
                         let paintColor = Color(rawValue: outBuffer[0])!
                         let move = Turn(rawValue: outBuffer[1])!
                         visited[coordinate] = paintColor
-                        facing = facing.turn(move, moving: &coordinate)
+                        facing = facing.turn(move)
+                        facing.moveForward(&coordinate)
                         if let existingColor = visited[coordinate] {
                             computer.inputs.append(existingColor.rawValue)
                         } else {
