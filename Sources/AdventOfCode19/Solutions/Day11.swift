@@ -27,13 +27,13 @@ final class Day11: Day {
     
     func solvePartOne() -> CustomStringConvertible {
         let painter = Painter(program: data, startColor: .black)
-        painter.run()
+        painter.paint()
         return painter.visited.count
     }
     
     func solvePartTwo() -> CustomStringConvertible {
         let painter = Painter(program: data, startColor: .white)
-        painter.run()
+        painter.paint()
         return "\n" + painter.asciiArt()
     }
     
@@ -163,7 +163,7 @@ extension Day11 {
             }.joined(separator: "\n")
         }
         
-        func run() {
+        func paint() {
             coordinate = Coordinate(x: 0, y: 0)
             facing = .up
             visited = [:]
