@@ -171,37 +171,22 @@ extension Day11 {
             let computer = Intcode(data: input, inputs: [startColor.rawValue])
             
             var outBuffer = [Int]()
-            while true {
-                do {
-                    let instruction = try computer.nextInstruction()
-                    let result = computer.execute(instruction)
-                    switch result {
-                    case .continuing:
-                        continue
-                    case .outputAndContinue(let out):
-                        outBuffer.append(out)
-                        guard outBuffer.count == 2 else { continue }
-                        let paintColor = Color(rawValue: outBuffer[0])!
-                        let move = Turn(rawValue: outBuffer[1])!
-                        visited[coordinate] = paintColor
-                        facing = facing.turn(move)
-                        facing.moveForward(&coordinate)
-                        if let existingColor = visited[coordinate] {
-                            computer.inputs.append(existingColor.rawValue)
-                        } else {
-                            computer.inputs.append(Color.black.rawValue)
-                        }
-                        outBuffer = []
-                    case .halt:
-                        return
-                    }
-                } catch {
-                    print("ERROR PARSING INTCODE INSTRUCTION")
-                    print("computer state: \(computer.state)")
-                    print(error)
-                    return
+            computer.runLoop { out, inputs in
+                outBuffer.append(out)
+                guard outBuffer.count == 2 else { return }
+                let paintColor = Color(rawValue: outBuffer[0])!
+                let move = Turn(rawValue: outBuffer[1])!
+                visited[coordinate] = paintColor
+                facing = facing.turn(move)
+                facing.moveForward(&coordinate)
+                if let existingColor = visited[coordinate] {
+                    inputs.append(existingColor.rawValue)
+                } else {
+                    inputs.append(Color.black.rawValue)
                 }
+                outBuffer = []
             }
+            
         }
         
     }

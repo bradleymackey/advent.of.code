@@ -19,6 +19,10 @@ final class Intcode {
         case invalidPointer
     }
     
+    enum ExecutionError: Error {
+        case pauseExecution
+    }
+    
     var data: [Int: Int]
     var inputs: [Int]
     var pointer: Int
@@ -48,6 +52,30 @@ final class Intcode {
         relBase   -> \(relativeBase)
         inputs    -> \(inputs)
         """
+    }
+    
+    func runLoop(handlingOutput handler: (Int, inout [Int]) throws -> ()) {
+        while true {
+            do {
+                let instruction = try nextInstruction()
+                let result = execute(instruction)
+                switch result {
+                case .continuing:
+                    continue
+                case .outputAndContinue(let out):
+                    try handler(out, &inputs)
+                case .halt:
+                    return
+                }
+            } catch ExecutionError.pauseExecution {
+                return
+            } catch {
+                print("ERROR PARSING INTCODE INSTRUCTION")
+                print("computer state: \(state)")
+                print(error)
+                return
+            }
+        }
     }
     
     func nextInstruction() throws -> Instruction {
@@ -250,25 +278,13 @@ extension Intcode {
         
         // gets the next computer 'output'
         func next() -> Int? {
-            while true {
-                do {
-                    let instruction = try computer.nextInstruction()
-                    let result = computer.execute(instruction)
-                    switch result {
-                    case .continuing:
-                        continue
-                    case .outputAndContinue(let out):
-                        return out
-                    case .halt:
-                        return nil
-                    }
-                } catch {
-                    print("ERROR PARSING INTCODE INSTRUCTION")
-                    print("computer state: \(computer.state)")
-                    print(error)
-                    return nil
-                }
+            var output: Int? = nil
+            computer.runLoop { out, _ in
+                output = out
+                // we need to break out of the outer loop, so we throw this error
+                throw ExecutionError.pauseExecution
             }
+            return output
         }
         
     }
