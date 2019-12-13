@@ -54,7 +54,9 @@ final class Intcode {
         """
     }
     
-    func runLoop(handlingOutput handler: (Int, inout [Int]) throws -> ()) {
+    /// runloop to handle outputs of arbitrary length, and handle all of these at once
+    func runLoop(outputLength: Int, handlingOutput handler: ([Int], inout [Int]) throws -> ()) {
+        var buffer = [Int]()
         while true {
             do {
                 let instruction = try nextInstruction()
@@ -63,7 +65,10 @@ final class Intcode {
                 case .continuing:
                     continue
                 case .outputAndContinue(let out):
-                    try handler(out, &inputs)
+                    buffer.append(out)
+                    guard buffer.count == outputLength else { continue }
+                    try handler(buffer, &inputs)
+                    buffer = []
                 case .halt:
                     return
                 }
@@ -75,6 +80,13 @@ final class Intcode {
                 print(error)
                 return
             }
+        }
+    }
+    
+    /// run loop to handle a single input and output, closure is called for every output that is produced
+    func runLoop(handlingOutput handler: (Int, inout [Int]) throws -> ()) {
+        runLoop(outputLength: 1) { (out, input) in
+            try handler(out[0], &input)
         }
     }
     

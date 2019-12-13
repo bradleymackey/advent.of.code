@@ -92,20 +92,16 @@ extension Day13 {
             objects = [:]
             let input = Intcode.sparseInput(from: program)
             let computer = Intcode(data: input, inputs: [])
-            var buf = [Int]() // instruction buffer, as data comes in threes
             var paddleX = 0
             var ballX = 0
-            computer.runLoop { out, inputs in
-                buf.append(out)
-                guard buf.count == 3 else { return }
-                defer { buf = [] }
-                let coor = Coordinate(x: buf[0], y: buf[1])
+            computer.runLoop(outputLength: 3) { (out, inputs) in
+                let coor = Coordinate(x: out[0], y: out[1])
                 guard coor != Coordinate(x: -1, y: 0) else {
                     // not a tile, this is the new score
-                    self.score = buf[2]
+                    self.score = out[2]
                     return
                 }
-                let tile = Tile(rawValue: buf[2])!
+                let tile = Tile(rawValue: out[2])!
                 objects[coor] = tile
                 guard tryToWin else { return }
                 switch tile {
