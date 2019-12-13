@@ -27,16 +27,14 @@ final class Day13: Day {
     func solvePartOne() -> CustomStringConvertible {
         let breakout = Breakout(program: data)
         breakout.play(tryToWin: false)
-        return breakout
-            .objects
+        return breakout.objects
             .filter { $0.value == .block }
             .count
     }
     
     func solvePartTwo() -> CustomStringConvertible {
         let breakout = Breakout(program: data, quarters: 2)
-        breakout.play(tryToWin: true)
-        return breakout.score
+        return breakout.play(tryToWin: true)
     }
     
 }
@@ -77,7 +75,6 @@ extension Day13 {
         
         let program: [Int]
         var objects = [Coordinate: Tile]()
-        var score = 0
         
         init(program: [Int], quarters: Int? = nil) {
             var gameProgram = program
@@ -87,33 +84,28 @@ extension Day13 {
             self.program = gameProgram
         }
         
-        func play(tryToWin: Bool) {
-            score = 0
+        @discardableResult
+        func play(tryToWin: Bool) -> Int {
             objects = [:]
+            var paddleX = 0, ballX = 0, score = 0
+            
             let input = Intcode.sparseInput(from: program)
             let computer = Intcode(data: input, inputs: [])
-            var paddleX = 0
-            var ballX = 0
-            computer.runLoop(outputLength: 3) { (out, inputs) in
+            computer.runLoop(outputLength: 3) { out, inputs in
                 let coor = Coordinate(x: out[0], y: out[1])
                 guard coor != Coordinate(x: -1, y: 0) else {
                     // not a tile, this is the new score
-                    self.score = out[2]
+                    score = out[2]
                     return
                 }
                 let tile = Tile(rawValue: out[2])!
                 objects[coor] = tile
                 guard tryToWin else { return }
-                switch tile {
-                case .paddle:
-                    paddleX = coor.x
-                case .ball:
-                    ballX = coor.x
-                default:
-                    break
-                }
+                if tile == .paddle { paddleX = coor.x }
+                if tile == .ball   { ballX = coor.x }
                 inputs = [Move.from(paddleX: paddleX, ballX: ballX).rawValue]
             }
+            return score
         }
         
     }
