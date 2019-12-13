@@ -190,6 +190,5 @@ extension Day11 {
         }
         
     }
-    
-    
+
 }

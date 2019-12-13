@@ -58,10 +58,10 @@ final class Day08: Day {
     
     func solvePartTwo() -> CustomStringConvertible {
         // initalise result array
-        var result: [[Pixel]] = Array(repeating: [], count: imageHeight)
-        for i in 0..<imageHeight {
-            result[i] = Array(repeating: .transparent, count: imageWidth)
-        }
+        var result: [[Pixel]] = Array(
+            repeating: Array(repeating: .transparent, count: imageWidth),
+            count: imageHeight
+        )
         // combine pixels from all layers (bottom layer to top)
         for l in (0..<data.count).reversed() {
             for i in 0..<imageHeight {
