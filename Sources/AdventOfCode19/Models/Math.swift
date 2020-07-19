@@ -1,5 +1,5 @@
 //
-//  Helpers.swift
+//  Math.swift
 //  
 //
 //  Created by Bradley Mackey on 19/07/2020.

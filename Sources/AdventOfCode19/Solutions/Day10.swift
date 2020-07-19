@@ -53,11 +53,17 @@ final class Day10: Day {
     
     func solvePartOne() -> CustomStringConvertible {
         guard let (asteroid, count) = field.bestMonitoringStation() else { return "?" }
-        return "Can monitor \(count) from \(asteroid.coordinate)"
+        return "👀 Can monitor \(count) from \(asteroid)"
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        "?"
+        let vaporised = field.vaporise()
+        guard vaporised.indices.contains(199) else {
+            return "ERROR: not enough asteroids vaporised"
+        }
+        let winningCoordinate = vaporised[199]
+        let result = (winningCoordinate.x * 100) + winningCoordinate.y
+        return "🔥 200th vaporised asteroid: \(result)"
     }
     
 }
@@ -70,35 +76,37 @@ extension Day10 {
     struct AsteroidField {
         let min: Coordinate = .zero // by convention, no negatives
         let max: Coordinate
-        let field: Set<Asteroid>
-        let fieldCoordinates: Set<Coordinate>
+        let asteroids: Set<Coordinate>
         
-        init(max: Coordinate, field: Set<Asteroid>) {
-            if !field.isEmpty {
-                assert(field.map(\.coordinate.x).max()! <= max.x)
-                assert(field.map(\.coordinate.y).max()! <= max.y)
+        init(max: Coordinate, asteroids: Set<Coordinate>) {
+            if !asteroids.isEmpty {
+                assert(asteroids.map(\.x).max()! <= max.x)
+                assert(asteroids.map(\.y).max()! <= max.y)
             }
             self.max = max
-            self.field = field
-            self.fieldCoordinates = Set(field.map(\.coordinate))
+            self.asteroids = asteroids
         }
         
         init(asciiMap: String) {
+            
+            enum Tile: Character {
+                case empty    = "."
+                case asteroid = "#"
+            }
+            
             var maxX = 0, maxY = 0
-            var field = Set<Asteroid>()
+            var asteroids = Set<Coordinate>()
             for (y, row) in asciiMap.split(separator: "\n").enumerated() {
                 if y > maxY { maxY = y }
                 for (x, char) in row.enumerated() {
                     if x > maxX { maxX = x }
                     guard case .asteroid = Tile(rawValue: char) else { continue }
                     let coordinate = Coordinate(x: x, y: y)
-                    let asteroid = Asteroid(coordinate: coordinate)
-                    field.insert(asteroid)
+                    asteroids.insert(coordinate)
                 }
             }
             self.max = Coordinate(x: maxX, y: maxY)
-            self.field = field
-            self.fieldCoordinates = Set(field.map(\.coordinate))
+            self.asteroids = asteroids
 //            print(" 🚀 -> [\(max.x+1)x\(max.y+1)] with \(field.count) asteroids")
         }
         
@@ -108,47 +116,32 @@ extension Day10 {
 
 extension Day10.AsteroidField {
     
-    private enum Tile: Character {
-        case empty    = "."
-        case asteroid = "#"
-    }
-    
-    struct Asteroid: Hashable, Equatable {
-        var coordinate: Coordinate
-        var x: Int { coordinate.x }
-        var y: Int { coordinate.y }
-    }
-    
-}
-
-extension Day10.AsteroidField {
-    
-    func asteroid(_ origin: Asteroid, canSee target: Asteroid) -> Bool {
-        let between = origin.coordinate.exactIntegerPointsBetween(
-            target.coordinate,
+    func asteroid(_ origin: Coordinate, canSee target: Coordinate) -> Bool {
+        let between = origin.exactIntegerPointsBetween(
+            target,
             min: min,
             max: max
         )
         // if there is an asteroid in our line of sight, we cannot see the target
-        let asteroidPoints = between.filter { fieldCoordinates.contains($0) }
+        let asteroidPoints = between.filter { asteroids.contains($0) }
         return asteroidPoints.isEmpty
     }
     
     /// - complexity: O(n log n)
-    func visibleAsteroids(from origin: Asteroid) -> Int {
-        field
+    func visibleAsteroids(from origin: Coordinate) -> Int {
+        asteroids
             .filter { $0 != origin }
             .filter { asteroid(origin, canSee: $0) }
             .count
     }
     
     /// - complexity: O(n^2)
-    func bestMonitoringStation() -> (asteroid: Asteroid, othersVisible: Int)? {
-        var scores = [Asteroid: Int]()
+    func bestMonitoringStation() -> (asteroid: Coordinate, othersVisible: Int)? {
+        var scores = [Coordinate: Int]()
         let scoreLock = NSLock()
-        let asteroids = Array(field)
-        DispatchQueue.concurrentPerform(iterations: asteroids.count) { (ind) in
-            let asteroid = asteroids[ind]
+        let _asteroids = Array(asteroids) // ordered so we can access concurrently
+        DispatchQueue.concurrentPerform(iterations: _asteroids.count) { (ind) in
+            let asteroid = _asteroids[ind]
             let visible = visibleAsteroids(from: asteroid)
             scoreLock.lock()
             scores[asteroid] = visible
@@ -161,6 +154,10 @@ extension Day10.AsteroidField {
             return nil
         }
         return (asteroid, highScore)
+    }
+    
+    func vaporise() -> [Coordinate] {
+        return []
     }
     
 }
