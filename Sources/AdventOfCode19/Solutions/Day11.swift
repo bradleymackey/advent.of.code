@@ -43,11 +43,6 @@ extension Day11 {
     
     final class Painter {
         
-        struct Coordinate: Hashable {
-            var x: Int
-            var y: Int
-        }
-        
         enum Color: Int {
             case black = 0
             case white = 1

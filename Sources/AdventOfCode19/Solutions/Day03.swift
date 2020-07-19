@@ -50,14 +50,14 @@ final class Day03: Day {
 
 extension Day03 {
     
-    private func points(from wire: [Direction]) -> [CO: Int] {
+    private func points(from wire: [Direction]) -> [Coordinate: Int] {
         var currentSteps = 0
-        var points = [CO: Int]()
+        var points = [Coordinate: Int]()
         let entries = wire
             .map { $0.length }
             .reduce(0, +)
         points.reserveCapacity(entries)
-        var currentCoordinate = CO(x: 0, y: 0)
+        var currentCoordinate = Coordinate(x: 0, y: 0)
         for point in wire {
             let (visited, final) = point.coordinatesVisited(
                 startingFrom: currentCoordinate,
@@ -75,13 +75,16 @@ extension Day03 {
     /// - returns: map of points visted by both and
     /// the combined number of steps for both
     /// wires to reach that point
-    private func sharedPoints(_ wire1: [Direction], _ wire2: [Direction]) -> [CO: Int] {
+    private func sharedPoints(
+        _ wire1: [Direction],
+        _ wire2: [Direction]
+    ) -> [Coordinate: Int] {
         let points1 = points(from: wire1)
         let points2 = points(from: wire2)
         let both = Set(points1.keys)
             .intersection(Set(points2.keys))
             .subtracting([.zero])
-        var intersectingPoints = [CO: Int]()
+        var intersectingPoints = [Coordinate: Int]()
         intersectingPoints.reserveCapacity(both.count)
         for key in both {
             intersectingPoints[key] = points1[key]! + points2[key]!
@@ -93,19 +96,6 @@ extension Day03 {
 
 
 extension Day03 {
-    
-    struct CO: Hashable, Equatable {
-        var x: Int
-        var y: Int
-        
-        static var zero: CO {
-            CO(x: 0, y: 0)
-        }
-        
-        var distanceToOrigin: Int {
-            abs(x) + abs(y)
-        }
-    }
     
     enum Direction {
         case right(Int)
@@ -132,10 +122,10 @@ extension Day03 {
         }
         
         func coordinatesVisited(
-            startingFrom point: CO,
+            startingFrom point: Coordinate,
             currentSteps: inout Int
-        ) -> (points: [CO: Int], final: CO) {
-            var result = [CO: Int]()
+        ) -> (points: [Coordinate: Int], final: Coordinate) {
+            var result = [Coordinate: Int]()
             result.reserveCapacity(length)
             var current = point
             for _ in 0..<length {

@@ -43,11 +43,6 @@ extension Day13 {
     
     final class Breakout {
         
-        struct Coordinate: Hashable {
-            var x: Int
-            var y: Int
-        }
-        
         enum Tile: Int {
             case empty  = 0
             case wall   = 1
