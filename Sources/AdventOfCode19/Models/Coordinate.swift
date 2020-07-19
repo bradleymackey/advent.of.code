@@ -58,6 +58,26 @@ extension Coordinate {
         return (rise/_gcd, run/_gcd)
     }
     
+    public func firstIntegerPointBetween(
+        _ other: Coordinate,
+        min: Coordinate? = nil,
+        max: Coordinate? = nil
+    ) -> Coordinate? {
+        let (rise, run) = gradient(to: other)
+        var current = self
+        let rangeX = self.x < other.x ? self.x...other.x : other.x...self.x
+        let rangeY = self.y < other.y ? self.y...other.y : other.y...self.y
+        repeat {
+            current += Coordinate(x: run, y: rise)
+            if let min = min, current.x < min.x || current.y < min.y { break }
+            if let max = max, current.x > max.x || current.y > max.y { break }
+            if run != 0, current.x >= rangeX.upperBound || current.x <= rangeX.lowerBound { break }
+            if rise != 0, current.y >= rangeY.upperBound || current.y <= rangeY.lowerBound { break }
+            return current
+        } while rangeX.contains(current.x) && rangeY.contains(current.y)
+        return nil
+    }
+    
     public func exactIntegerPointsBetween(
         _ other: Coordinate,
         min: Coordinate? = nil,
@@ -103,6 +123,12 @@ extension Coordinate {
     
     public var distanceToOrigin: Int {
         abs(x) + abs(y)
+    }
+    
+    public func distance(to other: Coordinate) -> Int {
+        let h = abs(self.x - other.x)
+        let v = abs(self.y - other.y)
+        return h + v
     }
     
 }

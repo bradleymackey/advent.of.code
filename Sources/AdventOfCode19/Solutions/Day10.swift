@@ -51,17 +51,23 @@ final class Day10: Day {
         return "\(passes)/\(total) tests passed"
     }
     
+    /// the station from which we should destroy asteroids
+    private lazy var bestMonitoringStation = field.bestMonitoringStation()
+    
     func solvePartOne() -> CustomStringConvertible {
-        guard let (asteroid, count) = field.bestMonitoringStation() else { return "?" }
+        guard let (asteroid, count) = bestMonitoringStation else { return "?" }
         return "👀 Can monitor \(count) from \(asteroid)"
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        let vaporised = field.vaporise()
-        guard vaporised.indices.contains(199) else {
+        guard let (asteroid, _) = bestMonitoringStation else {
+            return "ERROR: no best monitoring station"
+        }
+        let vaporised = field.vaporise(from: asteroid)
+        guard vaporised.indices.contains(200) else {
             return "ERROR: not enough asteroids vaporised"
         }
-        let winningCoordinate = vaporised[199]
+        let winningCoordinate = vaporised[200]
         let result = (winningCoordinate.x * 100) + winningCoordinate.y
         return "🔥 200th vaporised asteroid: \(result)"
     }
@@ -156,8 +162,32 @@ extension Day10.AsteroidField {
         return (asteroid, highScore)
     }
     
-    func vaporise() -> [Coordinate] {
-        return []
+    func vaporise(from station: Coordinate) -> [Coordinate] {
+        
+        var destroyed = [Coordinate]()
+        destroyed.reserveCapacity(asteroids.count)
+        destroyed.append(station)
+        
+        while destroyed.count != asteroids.count {
+            var closestPoints = [Coordinate: Coordinate]()
+            
+            for asteroid in asteroids {
+                if destroyed.contains(asteroid) { continue }
+                let (dy, dx) = station.gradient(to: asteroid)
+                let deltaCoord = Coordinate(x: dx, y: dy)
+                let closest = closestPoints[deltaCoord, default: Coordinate(x: 10_000, y: 10_000)]
+                if station.distance(to: asteroid) < closest.distance(to: asteroid) {
+                    closestPoints[deltaCoord] = asteroid
+                }
+            }
+            destroyed += closestPoints.map(\.value).sorted(by: {
+                -atan2(Double($0.x - station.x), Double($0.y - station.y))
+                <
+                -atan2(Double($1.x - station.x), Double($1.y - station.y))
+            })
+        }
+    
+        return destroyed
     }
     
 }
