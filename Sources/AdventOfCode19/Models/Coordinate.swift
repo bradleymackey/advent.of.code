@@ -64,7 +64,6 @@ extension Coordinate {
         max: Coordinate? = nil
     ) -> [Coordinate] {
         let (rise, run) = gradient(to: other)
-//        print("\(self) -> \(other) [grad \(rise)/\(run)]")
         var results = ContiguousArray<Coordinate>()
         var current = self
         let rangeX = self.x < other.x ? self.x...other.x : other.x...self.x
@@ -77,7 +76,6 @@ extension Coordinate {
             if rise != 0, current.y >= rangeY.upperBound || current.y <= rangeY.lowerBound { break }
             results.append(current)
         } while rangeX.contains(current.x) && rangeY.contains(current.y)
-//        print(results)
         return Array(results)
     }
     

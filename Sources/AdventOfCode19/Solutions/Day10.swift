@@ -62,18 +62,19 @@ extension Day10 {
 
     /// a field of asteroids
     struct AsteroidField {
-        let maxX: Int
-        let maxY: Int
+        let min: Coordinate = .zero // by convention, no negatives
+        let max: Coordinate
         let field: Set<Asteroid>
+        let fieldCoordinates: Set<Coordinate>
         
-        init(maxX: Int, maxY: Int, field: Set<Asteroid>) {
+        init(max: Coordinate, field: Set<Asteroid>) {
             if !field.isEmpty {
-                assert(field.map(\.coordinate.x).max()! <= maxX)
-                assert(field.map(\.coordinate.y).max()! <= maxY)
+                assert(field.map(\.coordinate.x).max()! <= max.x)
+                assert(field.map(\.coordinate.y).max()! <= max.y)
             }
-            self.maxX = maxX
-            self.maxY = maxY
+            self.max = max
             self.field = field
+            self.fieldCoordinates = Set(field.map(\.coordinate))
         }
         
         init(asciiMap: String) {
@@ -89,10 +90,10 @@ extension Day10 {
                     field.insert(asteroid)
                 }
             }
-            self.maxX = maxX
-            self.maxY = maxY
+            self.max = Coordinate(x: maxX, y: maxY)
             self.field = field
-            print(" 🚀 -> [\(maxX+1)x\(maxY+1)] with \(field.count) asteroids")
+            self.fieldCoordinates = Set(field.map(\.coordinate))
+//            print(" 🚀 -> [\(max.x+1)x\(max.y+1)] with \(field.count) asteroids")
         }
         
     }
@@ -119,21 +120,20 @@ extension Day10.AsteroidField {
     func asteroid(_ origin: Asteroid, canSee target: Asteroid) -> Bool {
         let between = origin.coordinate.exactIntegerPointsBetween(
             target.coordinate,
-            min: .zero,
-            max: Coordinate(x: maxX, y: maxY)
+            min: min,
+            max: max
         )
         // if there is an asteroid in our line of sight, we cannot see the target
-        let asteroidPoints = between.filter { field.map(\.coordinate).contains($0) }
+        let asteroidPoints = between.filter { fieldCoordinates.contains($0) }
         return asteroidPoints.isEmpty
     }
     
     /// - complexity: O(n log n)
     func visibleAsteroids(from origin: Asteroid) -> Int {
-        var sum = 0
-        for target in field where target != origin && asteroid(origin, canSee: target) {
-            sum += 1
-        }
-        return sum
+        field
+            .filter { $0 != origin }
+            .filter { asteroid(origin, canSee: $0) }
+            .count
     }
     
     /// - complexity: O(n^2)
