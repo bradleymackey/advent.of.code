@@ -17,7 +17,11 @@ final class Day10: Day {
         self.input = input
     }
     
-    private lazy var field = AsteroidField(asciiMap: input)
+    private lazy var sanitisedInput: String = {
+        input.trimmingCharacters(in: .whitespacesAndNewlines)
+    }()
+    
+    private lazy var field = AsteroidField(asciiMap: sanitisedInput)
     
     var answerMetric: String {
         ""
@@ -28,6 +32,8 @@ final class Day10: Day {
             Self.testInput1: 8,
             Self.testInput2: 33,
             Self.testInput3: 35,
+            Self.testInput4: 41,
+            Self.testInput5: 210,
         ]
         let total = testMaps.count
         var passes = 0
@@ -200,6 +206,46 @@ extension Day10 {
         ..##....##
         ......#...
         .####.###.
+        """
+    }
+    
+    static var testInput4: String {
+        """
+        .#..#..###
+        ####.###.#
+        ....###.#.
+        ..###.##.#
+        ##.##.#.#.
+        ....###..#
+        ..#.#..#.#
+        #..#.#.###
+        .##...##.#
+        .....#.#..
+        """
+    }
+    
+    static var testInput5: String {
+        """
+        .#..##.###...#######
+        ##.############..##.
+        .#.######.########.#
+        .###.#######.####.#.
+        #####.##.#.##.###.##
+        ..#####..#.#########
+        ####################
+        #.####....###.#.#.##
+        ##.#################
+        #####.##.###..####..
+        ..######..##.#######
+        ####.##.####...##..#
+        .#####..#.######.###
+        ##...#.##########...
+        #.##########.#######
+        .####.#.###.###.#.##
+        ....##.##.###..#####
+        .#.#.###########.###
+        #.#.#.#####.####.###
+        ###.##.####.##.#..##
         """
     }
     
