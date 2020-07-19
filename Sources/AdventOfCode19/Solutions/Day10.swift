@@ -5,6 +5,7 @@
 //  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
+import Foundation
 import Dispatch
 
 /// --- Day 10: Monitoring Station ---
@@ -37,6 +38,8 @@ final class Day10: Day {
             }
             if count == expected {
                 passes += 1
+            } else {
+                print("Test failed: expected \(expected), got \(count)")
             }
         }
         return "\(passes)/\(total) tests passed"
@@ -89,7 +92,7 @@ extension Day10 {
             self.maxX = maxX
             self.maxY = maxY
             self.field = field
-            print("Parsed Field [\(maxX+1)x\(maxY+1)], \(field.count) asteroids")
+            print(" 🚀 -> [\(maxX+1)x\(maxY+1)] with \(field.count) asteroids")
         }
         
     }
@@ -136,12 +139,14 @@ extension Day10.AsteroidField {
     /// - complexity: O(n^2)
     func bestMonitoringStation() -> (asteroid: Asteroid, othersVisible: Int)? {
         var scores = [Asteroid: Int]()
+        let scoreLock = NSLock()
         let asteroids = Array(field)
         DispatchQueue.concurrentPerform(iterations: asteroids.count) { (ind) in
             let asteroid = asteroids[ind]
             let visible = visibleAsteroids(from: asteroid)
+            scoreLock.lock()
             scores[asteroid] = visible
-            print("\(asteroid.coordinate) -> \(visible) visible")
+            scoreLock.unlock()
         }
         guard
             let highScore = scores.map(\.value).max(),

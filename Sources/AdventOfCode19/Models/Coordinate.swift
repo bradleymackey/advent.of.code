@@ -76,7 +76,6 @@ extension Coordinate {
             if run != 0, current.x >= rangeX.upperBound || current.x <= rangeX.lowerBound { break }
             if rise != 0, current.y >= rangeY.upperBound || current.y <= rangeY.lowerBound { break }
             results.append(current)
-//            print(current)s
         } while rangeX.contains(current.x) && rangeY.contains(current.y)
 //        print(results)
         return Array(results)
