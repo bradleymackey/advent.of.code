@@ -76,11 +76,11 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "13"
+            argument = "10"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
-            argument = "/Users/bradleymackey/Development/open-source/AdventOfCode19/Inputs"
+            argument = "/Users/bradleymackey/dev/projects/advent-of-code-19/Inputs"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

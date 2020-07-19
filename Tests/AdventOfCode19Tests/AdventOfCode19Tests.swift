@@ -2,6 +2,7 @@ import XCTest
 import class Foundation.Bundle
 
 final class AdventOfCode19Tests: XCTestCase {
+    
     func testExample() throws {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
@@ -28,6 +29,34 @@ final class AdventOfCode19Tests: XCTestCase {
 
         XCTAssertEqual(output, "Hello, world!\n")
     }
+    
+//    func testCoordinate1() {
+//        let c1 = Coordinate(x: 4, y: 4)
+//        let c2 = Coordinate(x: 0, y: 0)
+//        let pts = c1.exactIntegerPointsBetween(c2, min: .zero, max: Coordinate(x: 4, y: 4))
+//        XCTAssert(pts.count == 3)
+//    }
+//
+//    func testCoordinate2() {
+//        let c1 = Coordinate(x: 3, y: 2)
+//        let c2 = Coordinate(x: 4, y: 0)
+//        let pts = c1.exactIntegerPointsBetween(c2, min: .zero, max: Coordinate(x: 4, y: 4))
+//        XCTAssert(pts.count == 0)
+//    }
+//
+//    func testCoordinate2() {
+//        let c1 = Coordinate(x: 2, y: 2)
+//        let c2 = Coordinate(x: 4, y: 2)
+//        let pts = c1.exactIntegerPointsBetween(c2, min: .zero, max: Coordinate(x: 4, y: 4))
+//        XCTAssert(pts.count == 1)
+//    }
+//
+//    func testCoordinate3() {
+//        let c1 = Coordinate(x: 0, y: 2)
+//        let c2 = Coordinate(x: 4, y: 0)
+//        let pts = c1.exactIntegerPointsBetween(c2, min: .zero, max: Coordinate(x: 4, y: 4))
+//        XCTAssert(pts.count == 1)
+//    }
 
     /// Returns path to the built products directory.
     var productsDirectory: URL {

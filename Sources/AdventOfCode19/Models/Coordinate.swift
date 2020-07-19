@@ -6,7 +6,7 @@
 //
 
 /// - note: for speed, arithemtic can overflow, and is unchecked
-struct Coordinate: Hashable, Equatable {
+public struct Coordinate: Hashable, Equatable {
     
     private var storage: SIMD2<Int>
     
@@ -16,15 +16,23 @@ struct Coordinate: Hashable, Equatable {
 
 }
 
+extension Coordinate: CustomStringConvertible {
+    
+    public var description: String {
+        "(\(x),\(y))"
+    }
+    
+}
+
 // MARK: - Points
 
 extension Coordinate {
     
-    init(x: Int, y: Int) {
+    public init(x: Int, y: Int) {
         self.storage = .init(x: x, y: y)
     }
     
-    var x: Int {
+    public var x: Int {
         get {
             storage.x
         }
@@ -33,7 +41,7 @@ extension Coordinate {
         }
     }
     
-    var y: Int {
+    public var y: Int {
         get {
             storage.y
         }
@@ -42,21 +50,53 @@ extension Coordinate {
         }
     }
     
+    public func gradient(to other: Coordinate) -> (rise: Int, run: Int) {
+        let rise = other.y - self.y
+        let run = other.x - self.x
+        let _gcd = gcd(rise, run)
+        guard _gcd != 0 else { return (0, 0) }
+        return (rise/_gcd, run/_gcd)
+    }
+    
+    public func exactIntegerPointsBetween(
+        _ other: Coordinate,
+        min: Coordinate? = nil,
+        max: Coordinate? = nil
+    ) -> [Coordinate] {
+        let (rise, run) = gradient(to: other)
+//        print("\(self) -> \(other) [grad \(rise)/\(run)]")
+        var results = ContiguousArray<Coordinate>()
+        var current = self
+        let rangeX = self.x < other.x ? self.x...other.x : other.x...self.x
+        let rangeY = self.y < other.y ? self.y...other.y : other.y...self.y
+        repeat {
+            current += Coordinate(x: run, y: rise)
+            if let min = min, current.x < min.x || current.y < min.y { break }
+            if let max = max, current.x > max.x || current.y > max.y { break }
+            if run != 0, current.x >= rangeX.upperBound || current.x <= rangeX.lowerBound { break }
+            if rise != 0, current.y >= rangeY.upperBound || current.y <= rangeY.lowerBound { break }
+            results.append(current)
+//            print(current)s
+        } while rangeX.contains(current.x) && rangeY.contains(current.y)
+//        print(results)
+        return Array(results)
+    }
+    
 }
 
 // MARK: - Arithmetic
 
 extension Coordinate: AdditiveArithmetic {
     
-    static var zero: Coordinate {
+    public static var zero: Coordinate {
         .init(x: 0, y: 0)
     }
     
-    static func + (lhs: Coordinate, rhs: Coordinate) -> Coordinate {
+    public static func + (lhs: Coordinate, rhs: Coordinate) -> Coordinate {
         .init(lhs.storage &+ rhs.storage)
     }
     
-    static func - (lhs: Coordinate, rhs: Coordinate) -> Coordinate {
+    public static func - (lhs: Coordinate, rhs: Coordinate) -> Coordinate {
         .init(lhs.storage &- rhs.storage)
     }
     
@@ -64,7 +104,7 @@ extension Coordinate: AdditiveArithmetic {
 
 extension Coordinate {
     
-    var distanceToOrigin: Int {
+    public var distanceToOrigin: Int {
         abs(x) + abs(y)
     }
     
