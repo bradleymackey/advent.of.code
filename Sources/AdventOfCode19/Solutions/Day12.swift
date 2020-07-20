@@ -119,7 +119,7 @@ final class Day12: Day {
             return .nextIteration
         }
 
-        return lcm(found.x, found.y, found.z)
+        return Math.lcm(found.x, found.y, found.z)
     }
     
 }

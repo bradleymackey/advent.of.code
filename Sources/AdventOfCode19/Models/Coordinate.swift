@@ -54,7 +54,7 @@ extension Coordinate {
     public func gradient(to other: Coordinate) -> (dx: Int, dy: Int) {
         let dx = other.x - self.x
         let dy = other.y - self.y
-        let _gcd = gcd(dy, dx)
+        let _gcd = Math.gcd(dy, dx)
         guard _gcd != 0 else { return (0, 0) }
         return (dx/_gcd, dy/_gcd)
     }
