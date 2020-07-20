@@ -50,50 +50,32 @@ extension Coordinate {
         }
     }
     
-    public func gradient(to other: Coordinate) -> (rise: Int, run: Int) {
-        let rise = other.y - self.y
-        let run = other.x - self.x
-        let _gcd = gcd(rise, run)
+    /// gets the gradient to the other point in the simplist possible form
+    public func gradient(to other: Coordinate) -> (dx: Int, dy: Int) {
+        let dx = other.x - self.x
+        let dy = other.y - self.y
+        let _gcd = gcd(dy, dx)
         guard _gcd != 0 else { return (0, 0) }
-        return (rise/_gcd, run/_gcd)
+        return (dx/_gcd, dy/_gcd)
     }
     
-    public func firstIntegerPointBetween(
-        _ other: Coordinate,
-        min: Coordinate? = nil,
-        max: Coordinate? = nil
-    ) -> Coordinate? {
-        let (rise, run) = gradient(to: other)
-        var current = self
-        let rangeX = self.x < other.x ? self.x...other.x : other.x...self.x
-        let rangeY = self.y < other.y ? self.y...other.y : other.y...self.y
-        repeat {
-            current += Coordinate(x: run, y: rise)
-            if let min = min, current.x < min.x || current.y < min.y { break }
-            if let max = max, current.x > max.x || current.y > max.y { break }
-            if run != 0, current.x >= rangeX.upperBound || current.x <= rangeX.lowerBound { break }
-            if rise != 0, current.y >= rangeY.upperBound || current.y <= rangeY.lowerBound { break }
-            return current
-        } while rangeX.contains(current.x) && rangeY.contains(current.y)
-        return nil
-    }
-    
+    /// - complexity: O(n), where n in the number of points between
     public func exactIntegerPointsBetween(
         _ other: Coordinate,
         min: Coordinate? = nil,
         max: Coordinate? = nil
     ) -> [Coordinate] {
-        let (rise, run) = gradient(to: other)
+        let (dx, dy) = gradient(to: other)
         var results = ContiguousArray<Coordinate>()
         var current = self
         let rangeX = self.x < other.x ? self.x...other.x : other.x...self.x
         let rangeY = self.y < other.y ? self.y...other.y : other.y...self.y
         repeat {
-            current += Coordinate(x: run, y: rise)
+            current += Coordinate(x: dx, y: dy)
             if let min = min, current.x < min.x || current.y < min.y { break }
             if let max = max, current.x > max.x || current.y > max.y { break }
-            if run != 0, current.x >= rangeX.upperBound || current.x <= rangeX.lowerBound { break }
-            if rise != 0, current.y >= rangeY.upperBound || current.y <= rangeY.lowerBound { break }
+            if dx != 0, current.x >= rangeX.upperBound || current.x <= rangeX.lowerBound { break }
+            if dy != 0, current.y >= rangeY.upperBound || current.y <= rangeY.lowerBound { break }
             results.append(current)
         } while rangeX.contains(current.x) && rangeY.contains(current.y)
         return Array(results)
@@ -107,6 +89,10 @@ extension Coordinate: AdditiveArithmetic {
     
     public static var zero: Coordinate {
         .init(x: 0, y: 0)
+    }
+    
+    public static var one: Coordinate {
+        .init(x: 1, y: 1)
     }
     
     public static func + (lhs: Coordinate, rhs: Coordinate) -> Coordinate {

@@ -137,7 +137,7 @@ extension Day10.AsteroidField {
         for asteroid in asteroids {
             if initiallySeen.contains(asteroid) { continue }
             // for this gradient, store the closest asteroid on each rotation of the gun
-            let (dy, dx) = origin.gradient(to: asteroid)
+            let (dx, dy) = origin.gradient(to: asteroid)
             let deltaCoord = Coordinate(x: dx, y: dy)
             let closest = closestPoints[deltaCoord, default: upperBound]
             if origin.distance(to: asteroid) < closest.distance(to: asteroid) {
