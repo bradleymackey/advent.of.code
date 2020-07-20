@@ -122,23 +122,34 @@ extension Day10 {
 
 extension Day10.AsteroidField {
     
-    func asteroid(_ origin: Coordinate, canSee target: Coordinate) -> Bool {
-        let between = origin.exactIntegerPointsBetween(
-            target,
-            min: min,
-            max: max
-        )
-        // if there is an asteroid in our line of sight, we cannot see the target
-        let asteroidPoints = between.filter { asteroids.contains($0) }
-        return asteroidPoints.isEmpty
-    }
-    
-    /// - complexity: O(n log n)
-    func visibleAsteroids(from origin: Coordinate) -> Int {
-        asteroids
-            .filter { $0 != origin }
-            .filter { asteroid(origin, canSee: $0) }
-            .count
+    /// - complexity: O(n)
+    func visibleAsteroids(
+        from origin: Coordinate,
+        initiallySeen: Set<Coordinate> = .init()
+    ) -> [Coordinate] {
+        
+        var initiallySeen = initiallySeen
+        initiallySeen.insert(origin)
+        
+        let upperBound = max + Coordinate(x: 10_000, y: 10_000)
+        var closestPoints = [Coordinate: Coordinate]()
+        
+        for asteroid in asteroids {
+            if initiallySeen.contains(asteroid) { continue }
+            // for this gradient, store the closest asteroid on each rotation of the gun
+            let (dy, dx) = origin.gradient(to: asteroid)
+            let deltaCoord = Coordinate(x: dx, y: dy)
+            let closest = closestPoints[deltaCoord, default: upperBound]
+            if origin.distance(to: asteroid) < closest.distance(to: asteroid) {
+                closestPoints[deltaCoord] = asteroid
+            }
+        }
+        
+        return closestPoints.map(\.value).sorted(by: {
+            -atan2(Double($0.x - origin.x), Double($0.y - origin.y))
+            <
+            -atan2(Double($1.x - origin.x), Double($1.y - origin.y))
+        })
     }
     
     /// - complexity: O(n^2)
@@ -148,7 +159,7 @@ extension Day10.AsteroidField {
         let _asteroids = Array(asteroids) // ordered so we can access concurrently
         DispatchQueue.concurrentPerform(iterations: _asteroids.count) { (ind) in
             let asteroid = _asteroids[ind]
-            let visible = visibleAsteroids(from: asteroid)
+            let visible = visibleAsteroids(from: asteroid).count
             scoreLock.lock()
             scores[asteroid] = visible
             scoreLock.unlock()
@@ -163,28 +174,15 @@ extension Day10.AsteroidField {
     }
     
     func vaporise(from station: Coordinate) -> [Coordinate] {
-        
+        // ordered list of destroyed asteroids
         var destroyed = [Coordinate]()
         destroyed.reserveCapacity(asteroids.count)
         destroyed.append(station)
         
+        // one loop per gun rotation
+        // we vaporise the maximum number of asteroids each time
         while destroyed.count != asteroids.count {
-            var closestPoints = [Coordinate: Coordinate]()
-            
-            for asteroid in asteroids {
-                if destroyed.contains(asteroid) { continue }
-                let (dy, dx) = station.gradient(to: asteroid)
-                let deltaCoord = Coordinate(x: dx, y: dy)
-                let closest = closestPoints[deltaCoord, default: Coordinate(x: 10_000, y: 10_000)]
-                if station.distance(to: asteroid) < closest.distance(to: asteroid) {
-                    closestPoints[deltaCoord] = asteroid
-                }
-            }
-            destroyed += closestPoints.map(\.value).sorted(by: {
-                -atan2(Double($0.x - station.x), Double($0.y - station.y))
-                <
-                -atan2(Double($1.x - station.x), Double($1.y - station.y))
-            })
+            destroyed += visibleAsteroids(from: station, initiallySeen: Set(destroyed))
         }
     
         return destroyed
