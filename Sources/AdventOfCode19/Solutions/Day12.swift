@@ -94,6 +94,9 @@ final class Day12: Day {
     }
     
     func solvePartTwo() -> CustomStringConvertible {
+        // this is very slow in Debug thanks to the custom addition operators used by Vector3
+        // (inlining/optimising of these operators only happens in Release so it seems)
+        // probably can speed this up by using SIMD3 directly
         print("🌓 Calculating part 2 iterations (very slow in Debug)")
 
         let initialMoons = moons
