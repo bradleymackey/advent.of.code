@@ -76,7 +76,7 @@
       </BuildableProductRunnable>
       <CommandLineArguments>
          <CommandLineArgument
-            argument = "12"
+            argument = "14"
             isEnabled = "YES">
          </CommandLineArgument>
          <CommandLineArgument
