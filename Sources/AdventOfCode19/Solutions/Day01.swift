@@ -24,20 +24,18 @@ final class Day01: Day {
             .compactMap(Int.init)
     }
     
-    var answerMetric: String {
-        "fuel units"
-    }
-    
     func solvePartOne() -> CustomStringConvertible {
-        fuelValues
+        let val = fuelValues
             .compactMap { Fuel($0).next() }
             .reduce(0, +)
+        return "🚀 \(val) fuel"
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        fuelValues
+        let val = fuelValues
             .flatMap(Fuel.init)
             .reduce(0, +)
+        return "🚀 \(val) fuel"
     }
     
 }
@@ -46,12 +44,14 @@ extension Day01 {
     
     final class Fuel: Sequence, IteratorProtocol {
         
-        let reduction: (Int) -> Int = { $0/3 - 2 }
-        
         var current: Int
         
         init(_ initial: Int) {
             self.current = initial
+        }
+        
+        func reduction(_ val: Int) -> Int {
+            val/3 - 2
         }
         
         func next() -> Int? {

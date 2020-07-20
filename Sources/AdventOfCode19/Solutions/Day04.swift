@@ -24,10 +24,6 @@ final class Day04: Day {
     
     lazy var range = (nums[0]...nums[1]).lazy.map(String.init)
     
-    var answerMetric: String {
-        "possible combinations"
-    }
-    
     typealias Rule = (String) -> Bool
     
     let isSorted: Rule = {
@@ -48,15 +44,17 @@ final class Day04: Day {
     }
     
     func solvePartOne() -> CustomStringConvertible {
-        range
+        let val = range
             .filter { self.isSorted($0) && self.containsDuplicates($0) }
             .count
+        return "\(val) combinations"
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        range
+        let val = range
             .filter { self.isSorted($0) && self.containsOnlyTwoOfAnyCharacter($0) }
             .count
+        return "\(val) combinations"
     }
     
 }

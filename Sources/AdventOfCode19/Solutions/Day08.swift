@@ -36,10 +36,6 @@ final class Day08: Day {
         return result
     }()
     
-    var answerMetric: String {
-        ""
-    }
-    
     func solvePartOne() -> CustomStringConvertible {
         let layerZeros = data.map { arg -> (Int, Int) in
             let (index, layer) = arg

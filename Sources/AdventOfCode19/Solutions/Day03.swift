@@ -17,10 +17,6 @@ final class Day03: Day {
         self.input = input
     }
     
-    var answerMetric: String {
-        "distance"
-    }
-    
     lazy var wires = input
         .split(separator: "\n")
     

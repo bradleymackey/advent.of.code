@@ -23,10 +23,6 @@ final class Day10: Day {
     
     private lazy var field = AsteroidField(asciiMap: sanitisedInput)
     
-    var answerMetric: String {
-        ""
-    }
-    
     func runTests() -> CustomStringConvertible {
         let testMaps = [
             Self.testInput1: 8,

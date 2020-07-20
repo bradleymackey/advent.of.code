@@ -8,7 +8,6 @@
 
 protocol Day {
     init(input: String)
-    var answerMetric: String { get }
     func runTests() -> CustomStringConvertible
     func solvePartOne() -> CustomStringConvertible
     func solvePartTwo() -> CustomStringConvertible
@@ -27,8 +26,8 @@ extension Day {
         } else {
             print("Tests: \(testResult)")
         }
-        print("Part 1: \(solvePartOne()) \(answerMetric)")
-        print("Part 2: \(solvePartTwo()) \(answerMetric)")
+        print("Part 1: \(solvePartOne())")
+        print("Part 2: \(solvePartTwo())")
     }
     
 }

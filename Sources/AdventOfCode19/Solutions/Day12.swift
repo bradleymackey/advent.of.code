@@ -14,10 +14,6 @@ final class Day12: Day {
         self.input = input
     }
     
-    var answerMetric: String {
-        "units"
-    }
-    
     func solvePartOne() -> CustomStringConvertible {
         "?"
     }

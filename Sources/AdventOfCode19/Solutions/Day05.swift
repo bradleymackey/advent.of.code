@@ -15,10 +15,6 @@ final class Day05: Day {
         self.input = input
     }
     
-    var answerMetric: String {
-        "output"
-    }
-    
     private lazy var data: [Int] = {
         input
             .split(separator: ",")

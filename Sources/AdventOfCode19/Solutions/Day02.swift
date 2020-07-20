@@ -18,10 +18,6 @@ final class Day02: Day {
         self.input = input
     }
     
-    var answerMetric: String {
-        "at index 0"
-    }
-    
     private lazy var data: [Int] = {
         input
             .split(separator: ",")
@@ -45,7 +41,8 @@ final class Day02: Day {
     }
     
     func solvePartOne() -> CustomStringConvertible {
-        solve(12, 2)
+        let val = solve(12, 2)
+        return "\(val) at index 0"
     }
     
     func solvePartTwo() -> CustomStringConvertible {
@@ -57,7 +54,7 @@ final class Day02: Day {
                 break
             }
         }
-        return result
+        return "\(result) at index 0"
     }
     
 }

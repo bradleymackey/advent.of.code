@@ -21,10 +21,6 @@ final class Day11: Day {
             .compactMap(Int.init)
     }()
     
-    var answerMetric: String {
-        ""
-    }
-    
     func solvePartOne() -> CustomStringConvertible {
         let painter = Painter(program: data, startColor: .black)
         painter.paint()

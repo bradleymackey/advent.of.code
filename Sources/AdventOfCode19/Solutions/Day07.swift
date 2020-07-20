@@ -16,10 +16,6 @@ final class Day07: Day {
         self.input = input
     }
     
-    var answerMetric: String {
-        "amplitude"
-    }
-    
     private lazy var data: [Int] = {
         input
             .split(separator: ",")

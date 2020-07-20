@@ -23,10 +23,6 @@ final class Day06: Day {
             let (from, to) = (nodes[0], nodes[1])
             graph[from].insert(to)
         }
-
-    var answerMetric: String {
-        "units"
-    }
     
     func solvePartOne() -> CustomStringConvertible {
         graph.leafDepthTotal(from: "COM")
