@@ -6,17 +6,20 @@
 //  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
-enum ResolveError: Error {
-    case dayNotFound
-    var localizedDescription: String {
-        switch self {
-        case .dayNotFound:
-            return "Day not found."
-        }
-    }
-}
+import Foundation
 
 struct Resolver {
+    
+    enum Error: Swift.Error, LocalizedError {
+        case dayNotFound
+        
+        var errorDescription: String? {
+            switch self {
+            case .dayNotFound:
+                return "Day not found."
+            }
+        }
+    }
     
     private static let days: [Int: Day.Type] = [
         01: Day01.self,
@@ -50,7 +53,7 @@ struct Resolver {
     
     func day(with input: String) throws -> Day {
         guard let selectedDay = Self.days[day] else {
-            throw ResolveError.dayNotFound
+            throw Error.dayNotFound
         }
         return selectedDay.init(input: input)
     }

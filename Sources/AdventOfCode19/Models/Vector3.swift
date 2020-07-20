@@ -69,10 +69,12 @@ extension Vector3: AdditiveArithmetic {
         .init(x: 1, y: 1, z: 1)
     }
     
+    @inline(__always)
     public static func + (lhs: Vector3, rhs: Vector3) -> Vector3 {
         .init(lhs.storage &+ rhs.storage)
     }
     
+    @inline(__always)
     public static func - (lhs: Vector3, rhs: Vector3) -> Vector3 {
         .init(lhs.storage &- rhs.storage)
     }
@@ -90,6 +92,11 @@ extension Vector3 {
         let v = abs(self.y - other.y)
         let d = abs(self.z - other.z)
         return h + v + d
+    }
+    
+    public static func .== (lhs: Vector3, rhs: Vector3) -> SIMD3<UInt8> {
+        let result = lhs.storage .== rhs.storage
+        return .init(x: result[0] ? 1 : 0, y: result[1] ? 1 : 0, z: result[2] ? 1 : 0)
     }
     
 }

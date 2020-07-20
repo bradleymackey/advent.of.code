@@ -10,63 +10,31 @@ import Foundation
 
 struct App {
     
-    static func parseConfigurations() -> [Configuration] {
-        
-        print("""
-        🎄 Advent of Code '19
-        by Bradley Mackey
-        -------------------------------
-
-        """)
+    static func parseConfigurations() throws -> [Configuration] {
         
         let arguments = CommandLine.arguments
-        guard
-            arguments.count > 2
-        else {
-            print("""
-            Pass a day and a directory containing
-            files to execute.
-            Files should be of the form:
-            'day1.txt', 'day2.txt', ...
-
-            If the day is 0, all challenges will be
-            executed.
-
-            For example:
-            '$ AdventOfCode19 4 /challenge-folder'
-            
-            """)
-            exit(0)
-        }
+        if arguments.count < 3 { throw Error.tooFewArguments }
+        if arguments.count > 3 { throw Error.tooManyArguments(arguments.count) }
 
         guard
             let dayNumber = Int(arguments[1]),
             (0...25).contains(dayNumber)
         else {
-            print("""
-            ERROR
-            -------------------------------
-            Day number invalid or incorrect.
-            Ensure 0 <= n <= 25.
-            """)
-            exit(1)
+            throw Error.invalidDayNumber
         }
         
         let directoryPath = arguments[2]
         
         // should run all challenges if 0!
         guard dayNumber != 0 else {
-            print("""
-            Solving all puzzles!
-            (if we can find a challenge input for them....)
-
-            """)
+            print("Day = 0 => Solve All!")
             return (1...25)
             .compactMap { day in
                 let file = challengeFilename(for: day)
                 guard
                     let (path, contents) = try? self.read(file, in: directoryPath)
                 else {
+                    print("Error reading day \(day)")
                     return nil
                 }
                 return Configuration(day: day, filePath: path, fileContents: contents)
@@ -80,17 +48,12 @@ struct App {
             let config = Configuration(day: dayNumber, filePath: path, fileContents: contents)
             return [config]
         } catch {
-            print("""
-            ERROR
-            -------------------------------
-            Could not read file.
-            \(error.localizedDescription)
-            Tried to read \(challengeFilename(for: dayNumber)) from directory:
-            \(directoryPath)
-            """)
-            exit(1)
+            throw Error.badChallengeFile(
+                internal: error,
+                filename: challengeFilename(for: dayNumber),
+                directory: directoryPath
+            )
         }
-        
         
     }
     
@@ -108,4 +71,43 @@ struct App {
     
 }
 
+// MARK: - Error
 
+extension App {
+    
+    enum Error: Swift.Error {
+        case tooFewArguments
+        case tooManyArguments(Int)
+        case invalidDayNumber
+        case badChallengeFile(internal: Swift.Error, filename: String, directory: String)
+    }
+    
+}
+
+extension App.Error: LocalizedError {
+    
+    var errorDescription: String? {
+        switch self {
+        case .tooFewArguments:
+            return nil
+        case .tooManyArguments(let num):
+            return """
+            Too many arguments (\(num)), expected at most 2.
+            Run without arguments for help.
+            """
+        case .invalidDayNumber:
+            return """
+            Day number is invalid or incorrect.
+            Ensure 0 <= n <= 25.
+            """
+        case let .badChallengeFile(internal: err, filename: file, directory: dir):
+            return """
+            Could not read file.
+            \(err.localizedDescription)
+            Tried to read \(file) from directory:
+            \(dir)
+            """
+        }
+    }
+    
+}

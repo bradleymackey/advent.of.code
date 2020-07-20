@@ -8,8 +8,33 @@
 
 import Foundation
 
+let intro = """
+🎄 Advent of Code '19
+by Bradley Mackey
+"""
+
+let help = """
+Pass a day and a directory containing
+files to execute.
+Files should be of the form:
+'day1.txt', 'day2.txt', ...
+
+If the day is 0, all challenges will be
+executed.
+
+For example:
+'$ AdventOfCode19 4 /challenge-folder'
+"""
+
+let spacer = """
+---------------------------------------
+
+"""
+
 do {
-    let configs = App.parseConfigurations()
+    print(intro)
+    print(spacer)
+    let configs = try App.parseConfigurations()
     for config in configs {
         print("Solving day \(config.day)...")
         let resolver = Resolver(day: config.day)
@@ -18,9 +43,17 @@ do {
         print()
     }
     print("Completed! Have a great day! 👨‍💻")
+    print(spacer)
     exit(0)
+} catch App.Error.tooFewArguments {
+    print(help)
+    print(spacer)
+    exit(1)
 } catch {
+    print("* ERROR *")
     print(error.localizedDescription)
+    print(spacer)
     exit(1)
 }
+
 

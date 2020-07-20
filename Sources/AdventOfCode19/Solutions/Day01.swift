@@ -33,7 +33,7 @@ final class Day01: Day {
     
     func solvePartTwo() -> CustomStringConvertible {
         let val = fuelValues
-            .flatMap(Fuel.init)
+            .flatMap(Fuel.init) // exhaust the iterator
             .reduce(0, +)
         return "🚀 \(val) fuel"
     }
