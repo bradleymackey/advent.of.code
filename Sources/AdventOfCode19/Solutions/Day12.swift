@@ -41,17 +41,21 @@ final class Day12: Day {
         let positions: [Moon]
     }
     
+    enum SimulationAction {
+        case nextStep
+        case stop
+    }
+    
     /// simulate the motion of the moons
-    /// - Parameter iterationHandler: how to handle each iteration. return `true` to stop simulation, `false`
-    /// to continue simulating
-    func simulateMoonMotion(iterationHandler: (Iteration) -> Bool) {
+    /// - Parameter iterationHandler: how to handle each iteration. return what to do next
+    func simulateMoonMotion(iterationHandler: (Iteration) -> SimulationAction) {
         // first update the velocity of every moon by applying gravity.
         // then update the position of every moon by applying velocity.
         // Time progresses by one step once all of the positions are updated.
         var activeMoons = moons
         let numMoons = moons.count
         var itr = 0
-        while true {
+        simulationLoop: while true {
             do {
                 defer { itr += 1 }
                 // -- apply gravity --
@@ -69,30 +73,33 @@ final class Day12: Day {
             }
             
             let iteration = Iteration(count: itr, positions: activeMoons)
-            // return true to stop the loop
-            if iterationHandler(iteration) { break }
+            handler: switch iterationHandler(iteration) {
+            case .stop:
+                break simulationLoop
+            case .nextStep:
+                break handler
+            }
         }
     }
     
     func solvePartOne() -> CustomStringConvertible {
         var finalPositions = [Moon]()
-        simulateMoonMotion { itr -> Bool in
-            guard itr.count == 1000 else { return false }
+        simulateMoonMotion { itr -> SimulationAction in
+            guard itr.count == 1000 else { return .nextStep }
             finalPositions = itr.positions
-            return true
+            return .stop
         }
         return finalPositions.map(\.totalEnergy).reduce(0, +)
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        print("🌕 Calculating part 2 iterations (very slow in Debug)")
+        print("🌓 Calculating part 2 iterations (very slow in Debug)")
 
         let initialMoons = moons
         var found = SIMD3(x: -1, y: -1, z: -1)
         
-        
-        simulateMoonMotion { (itr) -> Bool in
-            if found.min() != -1 { return true }
+        simulateMoonMotion { (itr) -> SimulationAction in
+            if found.min() != -1 { return .stop }
             let (eqx, eqy, eqz) = itr.positions.equalState(to: initialMoons)
             let currentItr = itr.count
             if found.x == -1, eqx {
@@ -107,7 +114,7 @@ final class Day12: Day {
                 found.z = currentItr
                 print("found z at itr", currentItr)
             }
-            return false
+            return .nextStep
         }
 
         return lcm(found.x, found.y, found.z)
@@ -195,15 +202,23 @@ extension Array where Element == Day12.Moon {
         guard self.count == other.count else { return (false, false, false) }
         var result: SIMD3<UInt8> = [1, 1, 1]
         for idx in 0..<count {
-            guard result != [0, 0, 0] else { return (false, false, false) }
+            guard result != [0, 0, 0] else { break }
             let ourMoon = self[idx]
             let theirMoon = other[idx]
             let position = ourMoon.position .== theirMoon.position
-            result = result & position
+            result = result & SIMD3(position)
             let velocity = ourMoon.velocity .== theirMoon.velocity
-            result = result & velocity
+            result = result & SIMD3(velocity)
         }
         return (result.x > 0, result.y > 0, result.z > 0)
+    }
+    
+}
+
+extension SIMD3 where Scalar == UInt8 {
+    
+    init(_ tuple: (Bool, Bool, Bool)) {
+        self = .init(x: tuple.0 ? 1 : 0, y: tuple.1 ? 1 : 0, z: tuple.2 ? 1 : 0)
     }
     
 }
