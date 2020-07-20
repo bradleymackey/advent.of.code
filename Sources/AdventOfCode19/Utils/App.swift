@@ -58,7 +58,8 @@ struct App {
     }
     
     static func challengeFilename(for day: Int) -> String {
-        "day\(day).txt"
+        let formattedNum = String(format: "%02d", day)
+        return "day\(formattedNum).txt"
     }
     
     static func read(_ file: String, in directory: String) throws -> (path: String, contents: String) {
