@@ -98,7 +98,6 @@ extension Vector3 {
     public static func .== (lhs: Vector3, rhs: Vector3) -> (x: Bool, y: Bool, z: Bool) {
         let result = lhs.storage .== rhs.storage
         return (result[0], result[1], result[2])
-//        return .init(x: result[0] ? 1 : 0, y: result[1] ? 1 : 0, z: result[2] ? 1 : 0)
     }
     
 }

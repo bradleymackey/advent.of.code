@@ -42,7 +42,7 @@ final class Day12: Day {
     }
     
     enum SimulationAction {
-        case nextStep
+        case nextIteration
         case stop
     }
     
@@ -72,11 +72,12 @@ final class Day12: Day {
                 activeMoons = updatedMoons
             }
             
+            // -- invoke handler --
             let iteration = Iteration(count: itr, positions: activeMoons)
             handler: switch iterationHandler(iteration) {
             case .stop:
                 break simulationLoop
-            case .nextStep:
+            case .nextIteration:
                 break handler
             }
         }
@@ -85,7 +86,7 @@ final class Day12: Day {
     func solvePartOne() -> CustomStringConvertible {
         var finalPositions = [Moon]()
         simulateMoonMotion { itr -> SimulationAction in
-            guard itr.count == 1000 else { return .nextStep }
+            guard itr.count == 1000 else { return .nextIteration }
             finalPositions = itr.positions
             return .stop
         }
@@ -96,11 +97,12 @@ final class Day12: Day {
         print("🌓 Calculating part 2 iterations (very slow in Debug)")
 
         let initialMoons = moons
+        // vector to hold the result values as we get them
         var found = SIMD3(x: -1, y: -1, z: -1)
         
         simulateMoonMotion { (itr) -> SimulationAction in
             if found.min() != -1 { return .stop }
-            let (eqx, eqy, eqz) = itr.positions.equalState(to: initialMoons)
+            let (eqx, eqy, eqz) = itr.positions.equalStateAxes(to: initialMoons)
             let currentItr = itr.count
             if found.x == -1, eqx {
                 found.x = currentItr
@@ -114,7 +116,7 @@ final class Day12: Day {
                 found.z = currentItr
                 print("found z at itr", currentItr)
             }
-            return .nextStep
+            return .nextIteration
         }
 
         return lcm(found.x, found.y, found.z)
@@ -198,17 +200,18 @@ extension Day12 {
 
 extension Array where Element == Day12.Moon {
     
-    func equalState(to other: [Day12.Moon]) -> (x: Bool, y: Bool, z: Bool) {
+    /// returns which axes have equal states to for all moons
+    func equalStateAxes(to other: [Day12.Moon]) -> (x: Bool, y: Bool, z: Bool) {
         guard self.count == other.count else { return (false, false, false) }
         var result: SIMD3<UInt8> = [1, 1, 1]
         for idx in 0..<count {
             guard result != [0, 0, 0] else { break }
             let ourMoon = self[idx]
             let theirMoon = other[idx]
-            let position = ourMoon.position .== theirMoon.position
-            result = result & SIMD3(position)
-            let velocity = ourMoon.velocity .== theirMoon.velocity
-            result = result & SIMD3(velocity)
+            let positionEqual = ourMoon.position .== theirMoon.position
+            result = result & SIMD3(positionEqual)
+            let velocityEqual = ourMoon.velocity .== theirMoon.velocity
+            result = result & SIMD3(velocityEqual)
         }
         return (result.x > 0, result.y > 0, result.z > 0)
     }
