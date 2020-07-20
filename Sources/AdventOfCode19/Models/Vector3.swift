@@ -85,10 +85,11 @@ extension Vector3 {
         abs(x) + abs(y) + abs(z)
     }
     
-    public func distance(to other: Coordinate) -> Int {
+    public func distance(to other: Vector3) -> Int {
         let h = abs(self.x - other.x)
         let v = abs(self.y - other.y)
-        return h + v
+        let d = abs(self.z - other.z)
+        return h + v + d
     }
     
 }
