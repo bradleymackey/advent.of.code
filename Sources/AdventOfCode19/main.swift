@@ -17,7 +17,9 @@ let help = """
 Pass a day and a directory containing
 files to execute.
 Files should be of the form:
-'day1.txt', 'day2.txt', ...
+'day01.txt', 'day02.txt', ...
+
+(note that the 2 digits are always used)
 
 If the day is 0, all challenges will be
 executed.
