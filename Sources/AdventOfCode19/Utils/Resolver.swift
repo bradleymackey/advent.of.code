@@ -19,15 +19,15 @@ enum ResolveError: Error {
 struct Resolver {
     
     private static let days: [Int: Day.Type] = [
-        1: Day01.self,
-        2: Day02.self,
-        3: Day03.self,
-        4: Day04.self,
-        5: Day05.self,
-        6: Day06.self,
-        7: Day07.self,
-        8: Day08.self,
-        9: Day09.self,
+        01: Day01.self,
+        02: Day02.self,
+        03: Day03.self,
+        04: Day04.self,
+        05: Day05.self,
+        06: Day06.self,
+        07: Day07.self,
+        08: Day08.self,
+        09: Day09.self,
         10: Day10.self,
         11: Day11.self,
         12: Day12.self,
@@ -48,7 +48,7 @@ struct Resolver {
     
     let day: Int
     
-    func resolve(with input: String) throws -> Day {
+    func day(with input: String) throws -> Day {
         guard let selectedDay = Self.days[day] else {
             throw ResolveError.dayNotFound
         }

@@ -13,7 +13,7 @@ do {
     for config in configs {
         print("Solving day \(config.day)...")
         let resolver = Resolver(day: config.day)
-        let day = try resolver.resolve(with: config.fileContents)
+        let day = try resolver.day(with: config.fileContents)
         day.solveAll()
         print()
     }
