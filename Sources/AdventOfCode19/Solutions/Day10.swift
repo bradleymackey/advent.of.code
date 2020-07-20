@@ -9,6 +9,9 @@ import Foundation
 import Dispatch
 
 /// --- Day 10: Monitoring Station ---
+/// part 1 is n^2 computation, but is trivially parallelisable
+/// part 2 encouraged a refactoring of part 1 to use the common gradient finder implementation,
+/// atan2 allows us to order by angle based on the gradient of the asteroids
 final class Day10: Day {
     
     let input: String
