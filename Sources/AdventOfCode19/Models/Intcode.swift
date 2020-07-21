@@ -98,7 +98,7 @@ final class Intcode {
         }
     }
     
-    func clone() -> Intcode {
+    func copy() -> Intcode {
         let computer = Intcode(data: data, inputs: inputs, pointer: pointer, relativeBase: relativeBase)
         return computer
     }

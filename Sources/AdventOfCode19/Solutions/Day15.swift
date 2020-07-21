@@ -84,7 +84,7 @@ extension Day15 {
                 case .wall:
                     return "#"
                 case .empty:
-                    return "."
+                    return " "
                 case .oxygen:
                     return "O"
                 }
@@ -141,21 +141,20 @@ extension Day15 {
             computer: Intcode
         ) {
             
+            /// move the droid in a direction (if possible), report what it finds
             func move(into direction: Direction, using local: Intcode) -> Item {
                 local.inputs = [direction.rawValue]
                 let output = local.nextOutput()!
                 return Item(rawValue: output)!
             }
             
-            func backstep(from direction: Direction, using local: Intcode) {
-                _ = move(into: direction.reverse, using: local)
-            }
-            
+            /// check what is in a direction without moving there
             func probe(_ direction: Direction, using local: Intcode) -> (Item, item: Coordinate) {
                 let foundItem = move(into: direction, using: local)
                 let itemLocation = direction.moving(coordinate)
                 if foundItem.canMoveInto {
-                    backstep(from: direction, using: local)
+                    // moving into a free space modifies the state of the program, so revert this
+                    _ = move(into: direction.reverse, using: local)
                 }
                 return (foundItem, itemLocation)
             }
@@ -163,37 +162,38 @@ extension Day15 {
             struct CandidatePosition: Hashable {
                 let location: Coordinate
                 let direction: Direction
-                let item: Item
             }
             
-            var explore = Set<CandidatePosition>()
+            var exploreNext = Set<CandidatePosition>()
             
             for direction in Direction.allCases {
                 let (found, itemLocation) = probe(direction, using: computer)
-                guard explored[itemLocation] == nil else {
-//                    print("already explored", found, itemLocation)
-                    continue
-                }
-//                print(direction, "found", found, "at", itemLocation)
+                guard explored[itemLocation] == nil else { continue }
+//                print(direction, "found new", found, "at", itemLocation)
                 if found == .oxygen {
                     oxygenLocation = itemLocation
                 }
                 explored[itemLocation] = found
                 if found.canMoveInto {
                     let candidate = CandidatePosition(location: itemLocation,
-                                                      direction: direction,
-                                                      item: found)
-                    explore.insert(candidate)
+                                                      direction: direction)
+                    exploreNext.insert(candidate)
                 }
             }
             
+            // @note: we copy the computer at each branch in the dfs so that each branch doesn't need to
+            // backtrack all the way once exploration is done (because it's not easy to reset the droid
+            // position otherwise)
+            // @optimisation: so that we don't copy the whole computer memory for each explored cell, we only
+            // create a copy if there is more than one possible branch, otherwise we can pass a reference to
+            // the same computer down into the next recursive call
             var isComputerDirtied = false
-            if explore.count > 1 {
+            if exploreNext.count > 1 {
                 isComputerDirtied = true
             }
             
-            for place in explore {
-                let cleanComputer = isComputerDirtied ? computer.clone() : computer
+            for place in exploreNext {
+                let cleanComputer = isComputerDirtied ? computer.copy() : computer
                 _ = move(into: place.direction, using: cleanComputer)
                 _dfsExplore(from: place.location, computer: cleanComputer)
             }
