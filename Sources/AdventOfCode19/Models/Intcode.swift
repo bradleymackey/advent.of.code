@@ -36,7 +36,16 @@ final class Intcode {
     }
     
     /// data is input as a dictionary of index to value. this allows for sparse, unbouded memory
-    /// use the static `Intcode.sparseInput()` method to ensure that your memory is in the correct format
+    /// use this method to automatically convert to sparse memory
+    init(data: [Int], inputs: [Int], pointer: Int = 0, relativeBase: Int = 0) {
+        self.data = Self.sparseInput(from: data)
+        self.inputs = inputs
+        self.pointer = pointer
+        self.relativeBase = relativeBase
+    }
+    
+    /// data is input as a dictionary of index to value. this allows for sparse, unbouded memory
+    /// use this method to initalise directly from this sparse format
     init(data: [Int: Int], inputs: [Int], pointer: Int = 0, relativeBase: Int = 0) {
         self.data = data
         self.inputs = inputs
@@ -274,6 +283,10 @@ extension Intcode {
 }
 
 extension Intcode {
+    
+    func output() -> OutputSequence {
+        OutputSequence(from: self)
+    }
     
     final class OutputSequence: Sequence, IteratorProtocol {
         

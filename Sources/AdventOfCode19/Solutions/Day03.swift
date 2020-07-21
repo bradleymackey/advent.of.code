@@ -51,7 +51,7 @@ extension Day03 {
         var points = [Coordinate: Int]()
         let entries = wire
             .map { $0.length }
-            .reduce(0, +)
+            .sum()
         points.reserveCapacity(entries)
         var currentCoordinate = Coordinate(x: 0, y: 0)
         for point in wire {

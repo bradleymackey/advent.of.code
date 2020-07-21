@@ -27,14 +27,14 @@ final class Day01: Day {
     func solvePartOne() -> CustomStringConvertible {
         let val = fuelValues
             .compactMap { Fuel($0).next() }
-            .reduce(0, +)
+            .sum()
         return "🚀 \(val) fuel"
     }
     
     func solvePartTwo() -> CustomStringConvertible {
         let val = fuelValues
             .flatMap(Fuel.init) // exhaust the iterator
-            .reduce(0, +)
+            .sum()
         return "🚀 \(val) fuel"
     }
     

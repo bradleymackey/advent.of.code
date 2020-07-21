@@ -91,7 +91,7 @@ final class Day12: Day {
             finalPositions = itr.positions
             return .stop
         }
-        return finalPositions.map(\.totalEnergy).reduce(0, +)
+        return finalPositions.map(\.totalEnergy).sum()
     }
     
     func solvePartTwo() -> CustomStringConvertible {

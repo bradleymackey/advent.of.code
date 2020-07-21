@@ -28,8 +28,7 @@ final class Day07: Day {
             .map { modes -> Int in
                 var feedback = 0
                 for ampMode in modes {
-                    let input = Intcode.sparseInput(from: data)
-                    let computer = Intcode(data: input, inputs: [ampMode, feedback])
+                    let computer = Intcode(data: data, inputs: [ampMode, feedback])
                     let outputter = Intcode.OutputSequence(from: computer)
                     feedback = outputter.reversed().first! // last output item is the output
                 }
@@ -59,13 +58,12 @@ final class Day07: Day {
                     
                     // get the next output value from the computer's state
                     let computer = Intcode(data: state, inputs: inputData, pointer: ptr)
-                    let outputter = Intcode.OutputSequence(from: computer)
-                    guard let output = outputter.next() else {
+                    guard let output = computer.output().next() else {
                         break
                     }
                     // next input is this output
                     feedback = output
-                    states[ampMachine] = (outputter.computer.pointer, outputter.computer.data)
+                    states[ampMachine] = (computer.pointer, computer.data)
                     // loop round all the machines until we break out
                     ampMachine = (ampMachine + 1) % modes.count
                 }

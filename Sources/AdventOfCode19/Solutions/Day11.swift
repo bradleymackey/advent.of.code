@@ -158,8 +158,7 @@ extension Day11 {
             coordinate = Coordinate(x: 0, y: 0)
             facing = .up
             visited = [:]
-            let input = Intcode.sparseInput(from: initialProgram)
-            let computer = Intcode(data: input, inputs: [startColor.rawValue])
+            let computer = Intcode(data: initialProgram, inputs: [startColor.rawValue])
             
             computer.runLoop(outputLength: 2) { (out, inputs) in
                 let paintColor = Color(rawValue: out[0])!

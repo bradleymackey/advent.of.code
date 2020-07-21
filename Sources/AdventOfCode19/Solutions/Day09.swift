@@ -33,9 +33,7 @@ final class Day09: Day {
     }
     
     func run(input: Int) -> String {
-        let formattedData = Intcode.sparseInput(from: data)
-        let computer = Intcode(data: formattedData, inputs: [input])
-        return Intcode.OutputSequence(from: computer).full()
+        Intcode(data: data, inputs: [input]).output().full()
     }
     
 }

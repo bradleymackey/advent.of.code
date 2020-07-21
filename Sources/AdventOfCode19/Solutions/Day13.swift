@@ -80,8 +80,7 @@ extension Day13 {
             objects = [:]
             var paddleX = 0, ballX = 0, score = 0
             
-            let input = Intcode.sparseInput(from: program)
-            let computer = Intcode(data: input, inputs: [])
+            let computer = Intcode(data: program, inputs: [])
             computer.runLoop(outputLength: 3) { out, inputs in
                 let coor = Coordinate(x: out[0], y: out[1])
                 guard coor != Coordinate(x: -1, y: 0) else {
