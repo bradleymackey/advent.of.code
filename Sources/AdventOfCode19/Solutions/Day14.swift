@@ -43,7 +43,7 @@ final class Day14: Day {
                 let recipe = menu[nextIngredient]!
                 let producedQuantity = recipe.output.quantity
                 var (multiplier, rem) = requiredQuantity.quotientAndRemainder(dividingBy: producedQuantity)
-                if rem != 0 { multiplier += 1 }
+                if rem != 0 { multiplier += 1 } // always round up
                 for input in recipe.input {
                     required.enqueue(input.multiplyingQuantity(by: multiplier))
                 }
@@ -58,12 +58,12 @@ final class Day14: Day {
     
     func solvePartOne() -> CustomStringConvertible {
         let demand = oreDemand(for: recipes)
-        return "💎 \(demand) ORE"
+        return "💰 \(demand) ORE"
     }
     
     func solvePartTwo() -> CustomStringConvertible {
         let oreBudget = 1_000_000_000_000
-        print(" -> ⛽️ ORE budget", oreBudget)
+        print(" -> 💎 ORE budget", oreBudget)
         
         let oneFuelCost = oreDemand(for: recipes, target: .fuel(amount: 1))
         // requires less than this actually, because saved material from other reactions can be reused
@@ -74,9 +74,9 @@ final class Day14: Day {
         
         let fuelOneTrill = Int(Double(initialFuelEstimate) * savingRatio)
         let actualUsedOre = oreDemand(for: recipes, target: .fuel(amount: fuelOneTrill))
-        print(" -> ⛽️ Require \(actualUsedOre) ORE, just under budget.")
+        print(" -> 💎 Require \(actualUsedOre) ORE, just under budget.")
         
-        return "🚀 \(fuelOneTrill) FUEL"
+        return "⛽️ \(fuelOneTrill) FUEL"
     }
     
 }
