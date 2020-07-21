@@ -211,9 +211,8 @@ extension Day14 {
         let parse = runParseTests()
         let ore = runOreTests()
         return """
-        
-        Parsing; \(parse.pass)/\(parse.total) passes
-        Ore Demand; \(ore.pass)/\(ore.total) passes
+         -> 📖 Parsing, \(parse.pass)/\(parse.total) passing
+         -> 💎 Ore Demand, \(ore.pass)/\(ore.total) passing
         """
     }
     

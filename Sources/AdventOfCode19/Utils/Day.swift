@@ -6,6 +6,8 @@
 //  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
+import Foundation
+
 protocol Day {
     init(input: String)
     func runTests() -> CustomStringConvertible
@@ -19,15 +21,27 @@ extension Day {
         "-"
     }
     
-    func solveAll() {
+    func solveAll(day: Int) {
+        let dayFormatted = String(format: "%02d", day)
+        print("********* DAY \(dayFormatted) ***********")
+        print()
+        defer {
+            print()
+            print("****************************")
+        }
         let testResult = runTests()
         if let result = testResult as? String, result == "-" {
             // ignore
         } else {
-            print("Tests: \(testResult)")
+            print("-- Tests")
+            print(testResult)
+            print()
         }
-        print("Part 1: \(solvePartOne())")
-        print("Part 2: \(solvePartTwo())")
+        print("-- Part 1")
+        print(solvePartOne())
+        print()
+        print("-- Part 2")
+        print(solvePartTwo())
     }
     
 }
