@@ -5,50 +5,11 @@
 //  Created by Bradley Mackey on 19/07/2020.
 //
 
-/// - note: for speed, arithemtic can overflow, and is unchecked
-public struct Coordinate: Hashable, Equatable {
-    
-    private var storage: SIMD2<Int>
-    
-    private init(_ storage: SIMD2<Int>) {
-        self.storage = storage
-    }
-
-}
-
-extension Coordinate: CustomStringConvertible {
-    
-    public var description: String {
-        "(\(x),\(y))"
-    }
-    
-}
+public typealias Coordinate = SIMD2<Int>
 
 // MARK: - Points
 
 extension Coordinate {
-    
-    public init(x: Int, y: Int) {
-        self.storage = .init(x: x, y: y)
-    }
-    
-    public var x: Int {
-        get {
-            storage.x
-        }
-        set {
-            storage.x = newValue
-        }
-    }
-    
-    public var y: Int {
-        get {
-            storage.y
-        }
-        set {
-            storage.y = newValue
-        }
-    }
     
     /// gets the gradient to the other point in the simplist possible form
     public func gradient(to other: Coordinate) -> (dx: Int, dy: Int) {
@@ -87,20 +48,24 @@ extension Coordinate {
 
 extension Coordinate: AdditiveArithmetic {
     
-    public static var zero: Coordinate {
-        .init(x: 0, y: 0)
-    }
-    
     public static var one: Coordinate {
         .init(x: 1, y: 1)
     }
     
+    static public func += (lhs: inout Coordinate, rhs: Coordinate) {
+        lhs &+= rhs
+    }
+    
     public static func + (lhs: Coordinate, rhs: Coordinate) -> Coordinate {
-        .init(lhs.storage &+ rhs.storage)
+        lhs &+ rhs
+    }
+    
+    static public func -= (lhs: inout Coordinate, rhs: Coordinate) {
+        lhs &-= rhs
     }
     
     public static func - (lhs: Coordinate, rhs: Coordinate) -> Coordinate {
-        .init(lhs.storage &- rhs.storage)
+        lhs &- rhs
     }
     
 }

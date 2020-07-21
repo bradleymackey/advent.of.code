@@ -9,6 +9,7 @@ import Foundation
 
 /// --- Day 12: The N-Body Problem ---
 /// - note: run in Release or this code can be quite slow, due to custom operators on Vector3
+/// learnings: keyPath accesses are ~10x slower than direct property accesses (at least in Debug)
 final class Day12: Day {
     
     let input: String
@@ -102,22 +103,30 @@ final class Day12: Day {
         let initialMoons = moons
         // vector to hold the result values as we get them
         var found = SIMD3(x: -1, y: -1, z: -1)
+        // uncomment below for a complier bug?
+//        {
+//            didSet {
+//
+//            }
+//        }
         
         simulateMoonMotion { (itr) -> SimulationAction in
-            if found.min() != -1 { return .stop }
             let (eqx, eqy, eqz) = itr.positions.equalStateAxes(to: initialMoons)
             let currentItr = itr.count
             if found.x == -1, eqx {
                 found.x = currentItr
-                print("found x at itr", currentItr)
+                print("  -> found x at itr", currentItr)
+                if found.min() != -1 { return .stop }
             }
             if found.y == -1, eqy {
                 found.y = currentItr
-                print("found y at itr", currentItr)
+                print("  -> found y at itr", currentItr)
+                if found.min() != -1 { return .stop }
             }
             if found.z == -1, eqz {
                 found.z = currentItr
-                print("found z at itr", currentItr)
+                print("  -> found z at itr", currentItr)
+                if found.min() != -1 { return .stop }
             }
             return .nextIteration
         }
@@ -155,7 +164,7 @@ extension Day12 {
         }
         
         mutating func applyCurrentVelocity() {
-            position += velocity
+            position &+= velocity
         }
         
         mutating func applyGravityField(from moonField: [Moon]) {
@@ -165,7 +174,7 @@ extension Day12 {
         }
         
         mutating func applyGravity(from other: Moon) {
-            velocity += velocityDelta(applyingGravityFrom: other)
+            velocity &+= velocityDelta(applyingGravityFrom: other)
         }
         
         func velocityDelta(applyingGravityFrom other: Moon) -> Vector3 {
@@ -205,10 +214,11 @@ extension Array where Element == Day12.Moon {
     
     /// returns which axes have equal states to for all moons
     func equalStateAxes(to other: [Day12.Moon]) -> (x: Bool, y: Bool, z: Bool) {
-        guard self.count == other.count else { return (false, false, false) }
+        let length = self.count
+        guard length == other.count else { return (false, false, false) }
         var result: SIMD3<UInt8> = [1, 1, 1]
-        for idx in 0..<count {
-            guard result != [0, 0, 0] else { break }
+        for idx in 0..<length {
+            if result == .zero { break } // all false, no chance of becoming true
             let ourMoon = self[idx]
             let theirMoon = other[idx]
             let positionEqual = ourMoon.position .== theirMoon.position
@@ -216,15 +226,19 @@ extension Array where Element == Day12.Moon {
             let velocityEqual = ourMoon.velocity .== theirMoon.velocity
             result = result & SIMD3(velocityEqual)
         }
-        return (result.x > 0, result.y > 0, result.z > 0)
+        return result.asBoolean()
     }
     
 }
 
 extension SIMD3 where Scalar == UInt8 {
     
-    init(_ tuple: (Bool, Bool, Bool)) {
-        self = .init(x: tuple.0 ? 1 : 0, y: tuple.1 ? 1 : 0, z: tuple.2 ? 1 : 0)
+    init(_ tuple: SIMDMask<SIMD3<Int>.MaskStorage>) {
+        self = .init(x: tuple[0] ? 1 : 0, y: tuple[1] ? 1 : 0, z: tuple[2] ? 1 : 0)
+    }
+    
+    func asBoolean() -> (x: Bool, y: Bool, z: Bool) {
+        (x > 0, y > 0, z > 0)
     }
     
 }
