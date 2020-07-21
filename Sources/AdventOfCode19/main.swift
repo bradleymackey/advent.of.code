@@ -56,5 +56,3 @@ do {
     print(spacer)
     exit(1)
 }
-
-

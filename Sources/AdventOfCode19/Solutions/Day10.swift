@@ -154,14 +154,15 @@ extension Day10.AsteroidField {
     /// - complexity: O(n^2)
     func bestMonitoringStation() -> (asteroid: Coordinate, othersVisible: Int)? {
         var scores = [Coordinate: Int]()
-        let scoreLock = NSLock()
+        let scoresSema = DispatchSemaphore(value: 0)
         let _asteroids = Array(asteroids) // ordered so we can access concurrently
         DispatchQueue.concurrentPerform(iterations: _asteroids.count) { (ind) in
             let asteroid = _asteroids[ind]
             let visible = visibleAsteroids(from: asteroid).count
-            scoreLock.lock()
+            // dict is not thread safe, control access or we may crash
+            scoresSema.wait()
             scores[asteroid] = visible
-            scoreLock.unlock()
+            scoresSema.signal()
         }
         guard
             let highScore = scores.map(\.value).max(),

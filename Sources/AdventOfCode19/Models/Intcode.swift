@@ -8,18 +8,19 @@
 /// a full, turing complete intcode computer
 final class Intcode {
     
-    enum NextAction {
-        case nextInstruction
-        case outputThenNextInstruction(Int)
+    enum Action {
+        case `continue`
+        case produceOutput(Int)
         case halt
     }
     
-    enum ParseError: Error {
+    enum Error: Swift.Error {
         case invalidOpcode(Int)
         case invalidPointer
     }
     
-    enum ExecutionError: Error {
+    /// used to change the normal running procedure of the Intcode computer
+    enum Interrupt: Swift.Error {
         case pauseExecution
     }
     
@@ -64,24 +65,29 @@ final class Intcode {
     }
     
     /// runloop to handle outputs of arbitrary length, and handle all of these at once
-    func runLoop(outputLength: Int, handlingOutput handler: ([Int], inout [Int]) throws -> ()) {
-        var buffer = [Int]()
+    func runLoop(
+        outputLength: Int,
+        handlingOutput handler: ([Int], inout [Int]) throws -> ()
+    ) {
+        var outBuffer = [Int]()
         while true {
             do {
                 let instruction = try nextInstruction()
                 let result = execute(instruction)
                 switch result {
-                case .nextInstruction:
+                case .continue:
                     continue
-                case .outputThenNextInstruction(let out):
-                    buffer.append(out)
-                    guard buffer.count == outputLength else { continue }
-                    try handler(buffer, &inputs)
-                    buffer = []
+                case .produceOutput(let out):
+                    outBuffer.append(out)
+                    guard outBuffer.count == outputLength else { continue }
+                    try handler(outBuffer, &inputs)
+                    outBuffer = []
                 case .halt:
                     return
                 }
-            } catch ExecutionError.pauseExecution {
+            } catch Interrupt.pauseExecution {
+                // thrown from user code to pause the state of the program
+                // can continue later from this state
                 return
             } catch {
                 print("ERROR PARSING INTCODE INSTRUCTION")
@@ -92,6 +98,11 @@ final class Intcode {
         }
     }
     
+    func clone() -> Intcode {
+        let computer = Intcode(data: data, inputs: inputs, pointer: pointer, relativeBase: relativeBase)
+        return computer
+    }
+    
     /// run loop to handle a single input and output, closure is called for every output that is produced
     func runLoop(handlingOutput handler: (Int, inout [Int]) throws -> ()) {
         runLoop(outputLength: 1) { (out, input) in
@@ -99,16 +110,38 @@ final class Intcode {
         }
     }
     
+    /// run the computer until a single output is produced
+    /// - returns: `nil` if no outputs are produced
+    func nextOutput() -> Int? {
+        var output: Int?
+        runLoop { (out, _) in
+            output = out
+            throw Interrupt.pauseExecution
+        }
+        return output
+    }
+    
+    /// run the computer until an output of the length specified is produced
+    /// - returns: `nil` if no outputs are produced
+    func nextOutput(length: Int) -> [Int]? {
+        var output: [Int]?
+        runLoop(outputLength: length) { (out, _) in
+            output = out
+            throw Interrupt.pauseExecution
+        }
+        return output
+    }
+    
     func nextInstruction() throws -> Instruction {
         guard
             pointer >= 0 && pointer < data.count,
             let fullCode = data[pointer]
-            else {
-                throw ParseError.invalidPointer
+        else {
+            throw Error.invalidPointer
         }
         let rawCodeNumber = fullCode % 100
         guard let code = Instruction.Code(rawValue: rawCodeNumber) else {
-            throw ParseError.invalidOpcode(rawCodeNumber)
+            throw Error.invalidOpcode(rawCodeNumber)
         }
         let rawParameterCodes = fullCode / 100
         let parameterModes = Instruction.Parameter.Mode.modesFrom(
@@ -126,7 +159,7 @@ final class Intcode {
         return Instruction(code: code, parameters: parameters, instructionStartPosition: pointer)
     }
     
-    func execute(_ i: Instruction) -> NextAction {
+    func execute(_ i: Instruction) -> Action {
         switch i.code {
         case .add:
             let total = load(i) + load(i)
@@ -140,18 +173,18 @@ final class Intcode {
         case .output:
             let output = load(i)
             pointer += 1
-            return .outputThenNextInstruction(output)
+            return .produceOutput(output)
         case .jumpTrue:
             if load(i) != 0 {
                 pointer = load(i)
-                return .nextInstruction // exit now, do not want to increment pc
+                return .continue // exit now, do not want to increment pc
             } else {
                 pointer += 1 // skip jump parameter
             }
         case .jumpFalse:
             if load(i) == 0 {
                 pointer = load(i)
-                return .nextInstruction // exit now, do not want to increment pc
+                return .continue // exit now, do not want to increment pc
             } else {
                 pointer += 1 // skip jump parameter
             }
@@ -167,7 +200,7 @@ final class Intcode {
             return .halt
         }
         pointer += 1 // ready for next instruction
-        return .nextInstruction
+        return .continue
     }
     
     private func load(_ i: Instruction) -> Int {
@@ -188,8 +221,7 @@ final class Intcode {
         case .immediate:
             return param.value
         case .position, .relative:
-            // uninitalised memory == 0
-            return data[address(from: param)] ?? 0
+            return data[address(from: param), default: 0]
         }
     }
     
@@ -303,13 +335,7 @@ extension Intcode {
         
         // gets the next computer 'output'
         func next() -> Int? {
-            var output: Int? = nil
-            computer.runLoop { out, _ in
-                output = out
-                // we need to break out of the outer loop, so we throw this error
-                throw ExecutionError.pauseExecution
-            }
-            return output
+            computer.nextOutput()
         }
         
     }
