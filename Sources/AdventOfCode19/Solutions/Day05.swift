@@ -30,9 +30,8 @@ final class Day05: Day {
         run(input: 5)
     }
     
-    func run(input: Int) -> String {
-        let computer = Intcode(data: data, inputs: [input])
-        return Intcode.OutputSequence(from: computer).full()
+    func run(input: Int) -> Int {
+        Intcode(data: data, inputs: [input]).output().reversed().first!
     }
     
 }

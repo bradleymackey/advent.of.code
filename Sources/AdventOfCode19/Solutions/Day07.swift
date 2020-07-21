@@ -29,8 +29,7 @@ final class Day07: Day {
                 var feedback = 0
                 for ampMode in modes {
                     let computer = Intcode(data: data, inputs: [ampMode, feedback])
-                    let outputter = Intcode.OutputSequence(from: computer)
-                    feedback = outputter.reversed().first! // last output item is the output
+                    feedback = computer.output().reversed().first! // last output item is the output
                 }
                 return feedback
             }

@@ -7,8 +7,7 @@
 
 /// --- Day 9: Sensor Boost ---
 /// added new instructions to the Intcode computer
-/// now uses sparse, `Dictionary` based memory, so inputs must be transformed
-/// before they can be accepted by the computer
+/// now uses sparse, `Dictionary` based memory
 final class Day09: Day {
     
     let input: String
