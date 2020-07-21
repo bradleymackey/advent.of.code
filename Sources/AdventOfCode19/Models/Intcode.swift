@@ -8,9 +8,9 @@
 /// a full, turing complete intcode computer
 final class Intcode {
     
-    enum ProgramResult {
-        case continuing
-        case outputAndContinue(Int)
+    enum NextAction {
+        case nextInstruction
+        case outputThenNextInstruction(Int)
         case halt
     }
     
@@ -71,9 +71,9 @@ final class Intcode {
                 let instruction = try nextInstruction()
                 let result = execute(instruction)
                 switch result {
-                case .continuing:
+                case .nextInstruction:
                     continue
-                case .outputAndContinue(let out):
+                case .outputThenNextInstruction(let out):
                     buffer.append(out)
                     guard buffer.count == outputLength else { continue }
                     try handler(buffer, &inputs)
@@ -126,7 +126,7 @@ final class Intcode {
         return Instruction(code: code, parameters: parameters, instructionStartPosition: pointer)
     }
     
-    func execute(_ i: Instruction) -> ProgramResult {
+    func execute(_ i: Instruction) -> NextAction {
         switch i.code {
         case .add:
             let total = load(i) + load(i)
@@ -140,18 +140,18 @@ final class Intcode {
         case .output:
             let output = load(i)
             pointer += 1
-            return .outputAndContinue(output)
+            return .outputThenNextInstruction(output)
         case .jumpTrue:
             if load(i) != 0 {
                 pointer = load(i)
-                return .continuing // exit now, do not want to increment pc
+                return .nextInstruction // exit now, do not want to increment pc
             } else {
                 pointer += 1 // skip jump parameter
             }
         case .jumpFalse:
             if load(i) == 0 {
                 pointer = load(i)
-                return .continuing // exit now, do not want to increment pc
+                return .nextInstruction // exit now, do not want to increment pc
             } else {
                 pointer += 1 // skip jump parameter
             }
@@ -167,7 +167,7 @@ final class Intcode {
             return .halt
         }
         pointer += 1 // ready for next instruction
-        return .continuing
+        return .nextInstruction
     }
     
     private func load(_ i: Instruction) -> Int {
