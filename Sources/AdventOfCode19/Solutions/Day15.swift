@@ -25,15 +25,17 @@ final class Day15: Day {
     
     func solvePartOne() -> CustomStringConvertible {
         """
-        
-        \(droid.exploredAscii())
-        
         💎 \(droid.oxygen.steps) STEPS TO O2
         """
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        "⏲️ \(droid.fillWithOxygen()) MINUTES"
+        """
+        ⏲️ \(droid.fillWithOxygen()) MINUTES
+        
+        (Maze):
+        \(droid.exploredAscii())
+        """
     }
     
 }
