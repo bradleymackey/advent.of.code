@@ -6,6 +6,7 @@
 //
 
 /// --- Day 15: Oxygen System ---
+/// dfs for part 1, bfs for part 2
 final class Day15: Day {
     
     let input: String
@@ -198,12 +199,12 @@ extension Day15 {
             // @optimisation: so that we don't copy the whole computer memory for each explored cell, we only
             // create a copy if there is more than one possible branch, otherwise we can pass a reference to
             // the same computer down into the next recursive call
-            let cloneComputer = exploreNext.count > 1
+            let shouldCloneComputer = exploreNext.count > 1
             
-            for place in exploreNext {
-                let cleanComputer = cloneComputer ? computer.copy() : computer
-                _ = move(into: place.direction, using: cleanComputer)
-                _dfsExplore(from: place.location, computer: cleanComputer, steps: steps + 1)
+            for target in exploreNext {
+                let cleanComputer = shouldCloneComputer ? computer.copy() : computer
+                _ = move(into: target.direction, using: cleanComputer)
+                _dfsExplore(from: target.location, computer: cleanComputer, steps: steps + 1)
             }
             
         }
