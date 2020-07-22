@@ -63,15 +63,13 @@ extension Day17 {
         func run() {
             let computer = Intcode(data: initialProgram, inputs: [])
             computer.runLoop { (out, inputs) in
-                handle(output: out, inputs: &inputs)
+                if handleDrawing(output: out) { return }
+                if handleSupplyRoutines(output: out, in: &inputs) { return }
+                handleUnknown(output: out)
             }
-            print(unknownBuffer.joined())
-        }
-        
-        private func handle(output: Int, inputs: inout [Int]) {
-            if handleDrawing(output: output) { return }
-            if handleSupplyRoutines(output: output, in: &inputs) { return }
-            handleUnknown(output: output)
+            let diagnostic = unknownBuffer.joined().trimmingCharacters(in: .whitespacesAndNewlines)
+            print(diagnostic)
+            unknownBuffer = []
         }
         
         private var isDrawing = false
