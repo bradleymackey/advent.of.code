@@ -19,9 +19,7 @@ final class Day12: Day {
     }
     
     static func parseMoons(from input: String) -> [Moon] {
-        input
-            .split(separator: "\n")
-            .map(String.init)
+        Parse.lines(from: input)
             .compactMap(Vector3.init)
             .enumerated()
             .reduce(into: [Moon]()) { set, payload in

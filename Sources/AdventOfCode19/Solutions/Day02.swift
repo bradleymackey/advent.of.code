@@ -18,12 +18,7 @@ final class Day02: Day {
         self.input = input
     }
     
-    private lazy var data: [Int] = {
-        input
-            .split(separator: ",")
-            .map(String.init)
-            .compactMap(Int.init)
-    }()
+    private lazy var data = Parse.integerList(from: input, separator: ",")
     
     private func solve(_ noun: Int, _ verb: Int) -> CustomStringConvertible {
         var memory = data

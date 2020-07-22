@@ -19,12 +19,8 @@ final class Day10: Day {
     init(input: String) {
         self.input = input
     }
-    
-    private lazy var sanitisedInput: String = {
-        input.trimmingCharacters(in: .whitespacesAndNewlines)
-    }()
-    
-    private lazy var field = AsteroidField(asciiMap: sanitisedInput)
+
+    private lazy var field = AsteroidField(asciiMap: Parse.trimmed(input))
     
     func runTests() -> CustomStringConvertible {
         let testMaps = [

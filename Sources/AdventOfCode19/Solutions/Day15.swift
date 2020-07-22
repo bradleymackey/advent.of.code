@@ -15,12 +15,7 @@ final class Day15: Day {
         self.input = input
     }
     
-    private lazy var data: [Int] = {
-        input
-            .split(separator: ",")
-            .map(String.init)
-            .compactMap(Int.init)
-    }()
+    private lazy var data = Parse.integerList(from: input, separator: ",")
     
     private lazy var droid = RepairDroid(program: data)
     

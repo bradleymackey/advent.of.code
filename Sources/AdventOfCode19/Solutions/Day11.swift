@@ -14,12 +14,7 @@ final class Day11: Day {
         self.input = input
     }
     
-    private lazy var data: [Int] = {
-        input
-            .split(separator: ",")
-            .map(String.init)
-            .compactMap(Int.init)
-    }()
+    private lazy var data = Parse.integerList(from: input, separator: ",")
     
     func solvePartOne() -> CustomStringConvertible {
         let painter = Painter(program: data, startColor: .black)

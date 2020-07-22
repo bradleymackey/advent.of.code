@@ -17,12 +17,7 @@ final class Day01: Day {
         self.input = input
     }
     
-    var fuelValues: [Int] {
-        input
-            .split(separator: "\n")
-            .map(String.init)
-            .compactMap(Int.init)
-    }
+    lazy var fuelValues: [Int] = Parse.lines(from: input).compactMap(Int.init)
     
     func solvePartOne() -> CustomStringConvertible {
         let val = fuelValues

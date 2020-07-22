@@ -15,9 +15,7 @@ final class Day14: Day {
     }
     
     private static func specification(from input: String) -> [Ingredient: Recipe] {
-        input.trimmingCharacters(in: .whitespacesAndNewlines)
-            .split(separator: "\n")
-            .map(String.init)
+        Parse.lines(from: input)
             .compactMap(Recipe.init)
             .recipeDictionary()
     }
