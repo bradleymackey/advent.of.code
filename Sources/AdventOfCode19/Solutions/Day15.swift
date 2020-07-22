@@ -117,19 +117,21 @@ extension Day15 {
         }
         
         private func buildMap() {
+            print(" -> Building map...")
             let computer = Intcode(data: initialProgram, inputs: [])
             explored[.zero] = .empty
             _dfsExplore(from: .zero, computer: computer)
+            print(" -> Map built!")
         }
         
         func exploredAscii() -> String {
-            let minXCoordinate = explored.keys.min(by: { $0.x < $1.x })!.x
-            let maxXCoordinate = explored.keys.max(by: { $0.x < $1.x })!.x
-            let minYCoordinate = explored.keys.min(by: { $0.y < $1.y })!.y
-            let maxYCoordinate = explored.keys.max(by: { $0.y < $1.y })!.y
+            let minXCoordinate = explored.keys.min(by: { $0.x < $1.x })!.x - 1
+            let maxXCoordinate = explored.keys.max(by: { $0.x < $1.x })!.x + 2
+            let minYCoordinate = explored.keys.min(by: { $0.y < $1.y })!.y - 1
+            let maxYCoordinate = explored.keys.max(by: { $0.y < $1.y })!.y + 2
             var map = Array(
-                repeating: Array(repeating: "0", count: abs(minXCoordinate) + maxXCoordinate + 1),
-                count: abs(minYCoordinate) + maxYCoordinate + 1
+                repeating: Array(repeating: "0", count: abs(minXCoordinate) + maxXCoordinate),
+                count: abs(minYCoordinate) + maxYCoordinate
             )
             for location in explored {
                 map[location.key.y + abs(minYCoordinate)][location.key.x + abs(minXCoordinate)] =
