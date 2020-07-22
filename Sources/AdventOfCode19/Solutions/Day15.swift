@@ -21,16 +21,19 @@ final class Day15: Day {
             .compactMap(Int.init)
     }()
     
+    private lazy var droid = RepairDroid(program: data)
+    
     func solvePartOne() -> CustomStringConvertible {
-        let droid = RepairDroid(program: data)
-        guard let oxygenLocation = droid.oxygenLocation else {
-            return "ERROR, unable to find oxygen"
-        }
-        return droid.minimumSteps(to: oxygenLocation)
+        """
+        
+        \(droid.exploredAscii())
+        
+        💎 \(droid.oxygen.steps) STEPS TO O2
+        """
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        "?"
+        "⏲️ \(droid.fillWithOxygen()) MINUTES"
     }
     
 }
@@ -100,9 +103,14 @@ extension Day15 {
             }
         }
         
+        struct Found {
+            let coordinate: Coordinate
+            let steps: Int
+        }
+        
         let initialProgram: [Int: Int]
         private(set) var explored = [Coordinate: Item]()
-        private(set) var oxygenLocation: Coordinate?
+        private(set) var oxygen: Found!
         
         /// create a repair droid and build the map
         init(program: [Int]) {
@@ -114,7 +122,6 @@ extension Day15 {
             let computer = Intcode(data: initialProgram, inputs: [])
             explored[.zero] = .empty
             _dfsExplore(from: .zero, computer: computer)
-            print(exploredAscii())
         }
         
         func exploredAscii() -> String {
@@ -130,7 +137,7 @@ extension Day15 {
                 map[location.key.y + abs(minYCoordinate)][location.key.x + abs(minXCoordinate)] =
                     location.value.symbol
             }
-            map[abs(minYCoordinate)][abs(minXCoordinate)] = "X"
+            map[abs(minYCoordinate)][abs(minXCoordinate)] = "D"
             return map.map {
                 $0.joined()
             }.joined(separator: "\n")
@@ -138,7 +145,8 @@ extension Day15 {
         
         private func _dfsExplore(
             from coordinate: Coordinate,
-            computer: Intcode
+            computer: Intcode,
+            steps: Int = 0
         ) {
             
             /// move the droid in a direction (if possible), report what it finds
@@ -151,11 +159,11 @@ extension Day15 {
             /// check what is in a direction without moving there
             func probe(_ direction: Direction, using local: Intcode) -> (Item, item: Coordinate) {
                 let foundItem = move(into: direction, using: local)
-                let itemLocation = direction.moving(coordinate)
                 if foundItem.canMoveInto {
                     // moving into a free space modifies the state of the program, so revert this
                     _ = move(into: direction.reverse, using: local)
                 }
+                let itemLocation = direction.moving(coordinate)
                 return (foundItem, itemLocation)
             }
             
@@ -171,7 +179,8 @@ extension Day15 {
                 guard explored[itemLocation] == nil else { continue }
 //                print(direction, "found new", found, "at", itemLocation)
                 if found == .oxygen {
-                    oxygenLocation = itemLocation
+                    let oxygen = Found(coordinate: itemLocation, steps: steps + 1)
+                    self.oxygen = oxygen
                 }
                 explored[itemLocation] = found
                 if found.canMoveInto {
@@ -187,21 +196,35 @@ extension Day15 {
             // @optimisation: so that we don't copy the whole computer memory for each explored cell, we only
             // create a copy if there is more than one possible branch, otherwise we can pass a reference to
             // the same computer down into the next recursive call
-            var isComputerDirtied = false
-            if exploreNext.count > 1 {
-                isComputerDirtied = true
-            }
+            let cloneComputer = exploreNext.count > 1
             
             for place in exploreNext {
-                let cleanComputer = isComputerDirtied ? computer.copy() : computer
+                let cleanComputer = cloneComputer ? computer.copy() : computer
                 _ = move(into: place.direction, using: cleanComputer)
-                _dfsExplore(from: place.location, computer: cleanComputer)
+                _dfsExplore(from: place.location, computer: cleanComputer, steps: steps + 1)
             }
             
         }
         
-        func minimumSteps(to coordinate: Coordinate) -> Int {
-            return 0
+        /// the time it takes for the whole maze to fill with oxygen
+        func fillWithOxygen() -> Int {
+            
+            var seen: Set<Coordinate> = [oxygen.coordinate]
+            let explore: Queue<(Coordinate, Int)> = [(oxygen.coordinate, 0)]
+            var time = 0
+            
+            while let (current, dist) = explore.dequeue() {
+                if dist > time { time = dist } // greatest distance is the time elapsed
+                for direction in Direction.allCases {
+                    let newCoordinate = direction.moving(current)
+                    if !seen.contains(newCoordinate), explored[newCoordinate]?.canMoveInto == true {
+                        seen.insert(newCoordinate)
+                        explore.enqueue((newCoordinate, dist + 1))
+                    }
+                }
+            }
+            
+            return time
         }
     
     }
