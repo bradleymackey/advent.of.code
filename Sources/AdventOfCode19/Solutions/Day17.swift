@@ -18,7 +18,7 @@ final class Day17: Day {
     
     func solvePartOne() -> CustomStringConvertible {
         let controller = RobotController(program: data)
-        controller.loadImage()
+        controller.run()
         print(controller.asciiMap(), "\n")
         let intersections = controller
             .scaffoldIntersections()
@@ -27,7 +27,9 @@ final class Day17: Day {
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        "?"
+        let controller = RobotController(program: data, enableRobot: true)
+        controller.run()
+        return controller.computer.pointer
     }
     
 }
@@ -36,12 +38,93 @@ extension Day17 {
     
     final class RobotController {
         
-        let initialProgram: [Int]
-        var image = [Coordinate: Pixel]()
-        var imageSize = Coordinate.zero
+        let computer: Intcode
+        var initialProgram: [Int]
+        private var imageDrawingCursor = Coordinate.zero {
+            didSet {
+                imageSize.x = max(imageSize.x, imageDrawingCursor.x)
+                imageSize.y = max(imageSize.y, imageDrawingCursor.y)
+            }
+        }
+        private var image = [Coordinate: Pixel]()
+        private var imageSize = Coordinate.zero
         
-        init(program: [Int]) {
+        /// where we buffer unknown outputs for better errors
+        private var unknownBuffer = [String]()
+        
+        init(program: [Int], enableRobot: Bool = false) {
             self.initialProgram = program
+            if enableRobot {
+                self.initialProgram[0] = 2
+            }
+            self.computer = Intcode(data: initialProgram, inputs: [])
+        }
+        
+        func run() {
+            let computer = Intcode(data: initialProgram, inputs: [])
+            computer.runLoop { (out, inputs) in
+                handle(output: out, inputs: &inputs)
+            }
+            print(unknownBuffer.joined())
+        }
+        
+        private func handle(output: Int, inputs: inout [Int]) {
+            if handleDrawing(output: output) { return }
+            if handleSupplyRoutines(output: output, in: &inputs) { return }
+            handleUnknown(output: output)
+        }
+        
+        private var isDrawing = false
+        
+        /// returns true if it was able to handle this output
+        private func handleDrawing(output: Int) -> Bool {
+            guard let scalar = UnicodeScalar(output) else { return false }
+            let character = Character(scalar)
+            if let object = Object(rawValue: character) {
+                image[imageDrawingCursor] = .object(object)
+                isDrawing = true
+            } else if let robot = Robot(rawValue: character) {
+                image[imageDrawingCursor] = .robot(robot)
+                isDrawing = true
+            } else if character == "\n" {
+                if isDrawing {
+                    isDrawing = false
+                    imageDrawingCursor.x = 0
+                    imageDrawingCursor.y += 1
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                // cannot handle
+                imageDrawingCursor.x += 1
+                return false
+            }
+            imageDrawingCursor.x += 1
+            return true
+        }
+        
+        private var routinesSupplied = 0
+        
+        /// returns `true` if it was able to handle the output
+        private func handleSupplyRoutines(output: Int, in buffer: inout [Int]) -> Bool {
+            guard let scalar = UnicodeScalar(output) else { return false }
+            // last char is colon to accept input
+            // e.g. "MainFunction A:"
+            guard Character(scalar) == ":" else { return false }
+            let cmd = Code.command(.routine("A"), .routine("B"), .routine("C"))
+            buffer = cmd
+            routinesSupplied += 1
+            return true
+        }
+        
+        private func handleUnknown(output: Int) {
+            if let scalar = UnicodeScalar(output) {
+                let chr = String(Character(scalar))
+                unknownBuffer.append(chr)
+            } else {
+                unknownBuffer.append(String(output))
+            }
         }
         
     }
@@ -105,6 +188,55 @@ extension Day17.RobotController {
         }
     }
     
+    enum Code {
+        case left
+        case right
+        case forward(Int)
+        /// routines may not call other routines!
+        case routine(Character)
+        
+        private enum Container {
+            case ascii(Character)
+            case raw(Int)
+            
+            var command: Int {
+                switch self {
+                case .ascii(let chr):
+                    return Int(chr.asciiValue!)
+                case .raw(let val):
+                    return val
+                }
+            }
+        }
+        
+        private static let TERM: Container = .ascii("\n")
+        private static let SEP: Container = .ascii(",")
+        
+        private var value: Container {
+            switch self {
+            case .left:
+                return .ascii("L")
+            case .right:
+                return .ascii("R")
+            case .forward(let amount):
+                return .raw(amount)
+            case .routine(let id):
+                return .ascii(id)
+            }
+        }
+        
+        /// create a correctly terminated command sequence
+        static func command(_ codes: Code...) -> [Int] {
+            var commands = [Container]()
+            for code in codes {
+                if !commands.isEmpty { commands.append(SEP) }
+                commands.append(code.value)
+            }
+            commands.append(TERM)
+            return commands.map(\.command)
+        }
+    }
+    
 }
 
 extension Day17.RobotController {
@@ -122,48 +254,14 @@ extension Day17.RobotController {
         }.joined(separator: "\n")
     }
     
-    func loadImage() {
-        let (image, size) = getImage()
-        self.image = image
-        self.imageSize = size
-    }
-    
-    private func getImage() -> ([Coordinate: Pixel], size: Coordinate) {
-        var image = [Coordinate: Pixel]()
-        var size = Coordinate.zero
-        var currentCoordinate = Coordinate.zero {
-            didSet {
-                size.x = max(size.x, currentCoordinate.x)
-                size.y = max(size.y, currentCoordinate.y)
-            }
-        }
-        let computer = Intcode(data: initialProgram, inputs: [])
-        computer.pauseExecutionOnException = true
-        computer.runLoop { (asciiCode, _) in
-            let scalar = UnicodeScalar(asciiCode)!
-            let character = Character(scalar)
-            if let object = Object(rawValue: character) {
-                image[currentCoordinate] = .object(object)
-            } else if let robot = Robot(rawValue: character) {
-                image[currentCoordinate] = .robot(robot)
-            } else if character == "\n" {
-                currentCoordinate.x = 0
-                currentCoordinate.y += 1
-                return
-            } else {
-                // undefined
-                image[currentCoordinate] = .object(.unknown)
-            }
-            currentCoordinate.x += 1
-        }
-        return (image, size)
-    }
-    
     func scaffoldIntersections() -> Set<Coordinate> {
         var coords = Set<Coordinate>()
         for (coord, item) in image where item == .object(.scaffold) {
-            let isIntersection = Direction.allCases
-                .allSatisfy { image[$0.moving(coord)] == .object(.scaffold) } // all neighbours scaffold
+            let isIntersection = Direction.allCases.allSatisfy {
+                direction in
+                // verify all neighbours scaffold
+                image[direction.moving(coord)] == .object(.scaffold)
+            }
             if isIntersection {
                 coords.insert(coord)
             }
