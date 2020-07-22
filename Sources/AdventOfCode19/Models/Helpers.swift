@@ -23,6 +23,14 @@ extension Sequence where Element: AdditiveArithmetic {
     
 }
 
+extension Sequence where Element == Int {
+    
+    func joinedToInteger() -> Int? {
+        Int(map(String.init).joined())
+    }
+    
+}
+
 /// https://sveinhal.github.io/2018/06/14/repeating-sequence/
 public struct RepeatingSequence<T: Collection>: Sequence {
     

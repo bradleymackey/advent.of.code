@@ -22,16 +22,16 @@ final class Day16: Day {
     }
     
     func solvePartOne() -> CustomStringConvertible {
-        fft(data, rounds: 100)[...7].map(String.init).joined()
+        fft(data, rounds: 100)[...7].joinedToInteger()!
     }
 
     func solvePartTwo() -> CustomStringConvertible {
-        let messageOffset = Int(data[...6].map(String.init).joined())!
+        let messageOffset = data[...6].joinedToInteger()!
         let repeatCount = 10_000
         assert(messageOffset > (data.count * repeatCount / 2), "fast algorithm requires that offset > n/2")
         let bigData = part2Vector(repeated: repeatCount, startOffset: messageOffset)
         let result = fftCyclicOpt(bigData, rounds: 100)
-        return result[...7].map(String.init).joined()
+        return result[...7].joinedToInteger()!
     }
     
 }
