@@ -88,11 +88,12 @@ extension Day17 {
                 isDrawing = true
             } else if character == "\n" {
                 if isDrawing {
-                    isDrawing = false
+                    isDrawing = false // 2 newline in a row = not drawing
                     imageDrawingCursor.x = 0
                     imageDrawingCursor.y += 1
                     return true
                 } else {
+                    imageDrawingCursor = .zero // reset cursor, we have terminated the drawing
                     return false
                 }
             } else {
