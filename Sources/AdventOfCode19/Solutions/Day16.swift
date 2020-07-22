@@ -16,48 +16,117 @@ final class Day16: Day {
     
     lazy var data = Parse.integerList(from: input)
     
-    let base = [0, 1, 0, -1]
-    
-    func fft(_ signal: [Int]) -> [Int] {
-        var new = signal
-        for outputIndex in 0..<signal.count {
-            var running = 0
-            let repeatFactor = outputIndex + 1
-            var positionalCounter = 1 // skip first
-            var digitIndex = 0
-//            var pat = [Int]()
-            for inputIndex in 0..<signal.count {
-                if positionalCounter >= repeatFactor {
-                    positionalCounter = 0
-                    digitIndex += 1
-                }
-//                pat.append(base[digitIndex % 4])
-                running += signal[inputIndex] * base[digitIndex % 4]
-                positionalCounter += 1
-            }
-//            print(pat)
-            new[outputIndex] = abs(running) % 10
-        }
-        return new
-    }
-    
-    func fftRounds(_ signal: [Int], rounds: Int) -> [Int] {
-        var current = signal
-        for round in 1...rounds {
-            current = fft(current)
-            if round.isMultiple(of: 10) {
-                print(" -> Round \(round)/\(rounds)")
-            }
-        }
-        return current
+    @inline(__always)
+    func truncateToDigit(_ input: Int) -> Int {
+        abs(input) % 10
     }
     
     func solvePartOne() -> CustomStringConvertible {
-        fftRounds(data, rounds: 100)[...7].map(String.init).joined()
+        fft(data, rounds: 100)[...7].map(String.init).joined()
+    }
+
+    func solvePartTwo() -> CustomStringConvertible {
+        let messageOffset = Int(data[...6].map(String.init).joined())!
+        let repeatCount = 10_000
+        assert(messageOffset > (data.count * repeatCount / 2), "fast algorithm requires that offset > n/2")
+        let bigData = part2Vector(repeated: repeatCount, startOffset: messageOffset)
+        let result = fftCyclicOpt(bigData, rounds: 100)
+        return result[...7].map(String.init).joined()
     }
     
-    func solvePartTwo() -> CustomStringConvertible {
-        "?"
+}
+
+// MARK: - Part 1
+
+extension Day16 {
+    
+    func fft(_ signal: [Int], rounds: Int = 1) -> [Int] {
+        
+        let signalLength = signal.count
+        
+        func _fft(_ signal: [Int]) -> [Int] {
+            let base = [0, 1, 0, -1]
+            var new = signal
+            for outputIndex in 0..<signalLength {
+                var running = 0
+                let repeatFactor = outputIndex + 1
+                var positionalCounter = 1 // skip first
+                var digitIndex = 0
+                for inputIndex in 0..<signalLength {
+                    if positionalCounter >= repeatFactor {
+                        positionalCounter = 0
+                        digitIndex += 1
+                    }
+                    let digit = base[digitIndex % 4]
+                    if digit != 0 {
+                        running += signal[inputIndex] * digit
+                    }
+                    positionalCounter += 1
+                }
+                new[outputIndex] = truncateToDigit(running)
+            }
+            return new
+        }
+        
+        var current = signal
+        for round in 0..<rounds {
+            if (round + 1).isMultiple(of: 25) {
+                print(" -> round \(round + 1)/\(rounds)")
+            }
+            current = _fft(current)
+        }
+        return current
+        
+    }
+    
+}
+
+// MARK: - Part 2
+
+extension Day16 {
+    
+    func fftCyclicOpt(_ signal: [Int], rounds: Int = 1) -> [Int] {
+        
+        // @bluepichu:
+        // sequence has length `n`;
+        // next round at index `i` (with `i` > `n/2`) = sum of all elements with index at least `i`
+        //
+        // this is because the phase numbers work out so the first half of the elements are all `*0`
+        // and the second half are all `*1`, meaning we can use the much faster sum method rather than
+        // computing phase for very many numbers
+        func _fftCyclicOptRound(_ signal: [Int]) -> [Int] {
+            var sum = 0
+            var out = [Int]()
+            out.reserveCapacity(signal.count)
+            // back-to-front, so we can keep a running total as we go
+            for sig in signal.reversed() {
+                sum += sig
+                out.append(truncateToDigit(sum))
+            }
+            // output is back-to-front, so flip it back
+            return out.reversed()
+        }
+        
+        var current = signal
+        for round in 0..<rounds {
+            if (round + 1).isMultiple(of: 25) {
+                print(" -> round \(round + 1)/\(rounds)")
+            }
+            current = _fftCyclicOptRound(current)
+        }
+        
+        return current
+    }
+    
+    /// vector that starts at our offset
+    func part2Vector(repeated: Int, startOffset offset: Int) -> [Int] {
+        let sequence = data.repeated().makeIterator()
+        // get to the message offset location in the iterator
+        let shorterOffset = offset % data.count // cyclic repeat, so only need to get to a matching phase
+        _ = Array(sequence.prefix(shorterOffset)) // pass to array or `prefix` won't sink the values
+        // use the current state of the iterator to fill the resultant vector
+        let totalLength = data.count * repeated
+        return Array(sequence.prefix(totalLength - offset))
     }
     
 }
