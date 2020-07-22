@@ -213,30 +213,26 @@ extension Array where Element == Day12.Moon {
     /// returns which axes have equal states to for all moons
     func equalStateAxes(to other: [Day12.Moon]) -> (x: Bool, y: Bool, z: Bool) {
         let length = self.count
-        guard length == other.count else { return (false, false, false) }
-        var result: SIMD3<UInt8> = [1, 1, 1]
+        let falseVector: SIMDMask<SIMD3<Int>> = [false, false, false]
+        guard length == other.count else { return falseVector.tuple }
+        var result: SIMDMask<SIMD3<Int>> = [true, true, true]
         for idx in 0..<length {
-            if result == .zero { break } // all false, no chance of becoming true
+            if result == falseVector { break } // all false, no chance of becoming true
             let ourMoon = self[idx]
             let theirMoon = other[idx]
-            let positionEqual = ourMoon.position .== theirMoon.position
-            result = result & SIMD3(positionEqual)
-            let velocityEqual = ourMoon.velocity .== theirMoon.velocity
-            result = result & SIMD3(velocityEqual)
+            result = result
+                .& (ourMoon.position .== theirMoon.position)
+                .& (ourMoon.velocity .== theirMoon.velocity)
         }
-        return result.asBoolean()
+        return result.tuple
     }
     
 }
 
-extension SIMD3 where Scalar == UInt8 {
+extension SIMDMask where Storage == SIMD3<Int> {
     
-    init(_ tuple: SIMDMask<SIMD3<Int>.MaskStorage>) {
-        self = .init(x: tuple[0] ? 1 : 0, y: tuple[1] ? 1 : 0, z: tuple[2] ? 1 : 0)
-    }
-    
-    func asBoolean() -> (x: Bool, y: Bool, z: Bool) {
-        (x > 0, y > 0, z > 0)
+    var tuple: (x: Bool, y: Bool, z: Bool) {
+        (self[0], self[1], self[2])
     }
     
 }

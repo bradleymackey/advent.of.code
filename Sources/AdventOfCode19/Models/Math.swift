@@ -9,9 +9,9 @@
 enum Math {
     
     /// the greatest common divisor of **n** integers
-    static func gcd(_ vals: Int...) -> Int {
+    static func gcd<T: BinaryInteger & SignedNumeric>(_ vals: T...) -> T {
         
-        func _gcd2(_ a: Int, _ b: Int) -> Int {
+        func _gcd2(_ a: T, _ b: T) -> T {
             var a = a, b = b
             while b != 0 {
                 (a, b) = (b, a % b)
@@ -25,9 +25,9 @@ enum Math {
     }
     
     /// the lowest common multiple of **n** integers
-    static func lcm(_ vals: Int...) -> Int {
+    static func lcm<T: BinaryInteger & SignedNumeric>(_ vals: T...) -> T {
         
-        func _lcm2(_ a: Int, _ b: Int) -> Int {
+        func _lcm2(_ a: T, _ b: T) -> T {
             a * b / gcd(a, b)
         }
         
