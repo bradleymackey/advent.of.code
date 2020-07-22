@@ -14,7 +14,7 @@ final class Day16: Day {
         self.input = input
     }
     
-    lazy var data = Parse.integerList(from: input)
+    lazy var data = Parse.unseparatedIntegerList(from: input)
     
     @inline(__always)
     func truncateToDigit(_ input: Int) -> Int {
@@ -44,7 +44,7 @@ extension Day16 {
         
         let signalLength = signal.count
         
-        func _fft(_ signal: [Int]) -> [Int] {
+        func _fftRound(_ signal: [Int]) -> [Int] {
             let base = [0, 1, 0, -1]
             var new = signal
             for outputIndex in 0..<signalLength {
@@ -73,7 +73,7 @@ extension Day16 {
             if (round + 1).isMultiple(of: 25) {
                 print(" -> round \(round + 1)/\(rounds)")
             }
-            current = _fft(current)
+            current = _fftRound(current)
         }
         return current
         

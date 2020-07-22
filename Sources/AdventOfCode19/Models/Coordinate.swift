@@ -82,4 +82,9 @@ extension Coordinate {
         return h + v
     }
     
+    /// multiply all members of the coordinate to produce a single value
+    public func product() -> Int {
+        x * y
+    }
+    
 }

@@ -20,7 +20,7 @@ final class Day08: Day {
     
     /// maps layer number: rows-by-columns
     lazy var data: [Int: [[Pixel]]] = {
-        let values = Parse.integerList(from: input)
+        let values = Parse.unseparatedIntegerList(from: input)
         var result = [Int: [[Pixel]]]()
         let layers = values.count / (imageWidth*imageHeight)
         for l in 0..<layers {

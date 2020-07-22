@@ -8,17 +8,17 @@
 /// AdventOfCode fast parsers for common data formats
 enum Parse {
     
-    static func integerList(from input: String, separator: Character? = nil) -> [Int] {
-        if let sep = separator {
-            return trimmed(input)
-                .split(separator: sep)
-                .map(String.init)
-                .compactMap(Int.init)
-        } else {
-            return trimmed(input)
-                .map(String.init)
-                .compactMap(Int.init)
-        }
+    static func unseparatedIntegerList(from input: String) -> [Int] {
+        trimmed(input)
+            .map(String.init)
+            .compactMap(Int.init)
+    }
+    
+    static func integerList(from input: String, separator: Character) -> [Int] {
+        trimmed(input)
+            .split(separator: separator)
+            .map(String.init)
+            .compactMap(Int.init)
     }
     
     static func list(from input: String, separator: Character) -> [String] {

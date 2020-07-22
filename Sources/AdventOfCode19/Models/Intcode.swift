@@ -14,20 +14,35 @@ final class Intcode {
         case halt
     }
     
-    enum Error: Swift.Error {
-        case invalidOpcode(Int)
-        case invalidPointer
-    }
-    
     /// used to change the normal running procedure of the Intcode computer
     enum Interrupt: Swift.Error {
         case pauseExecution
+    }
+    
+    enum Exception: Swift.Error {
+        case inputRequired
+        case invalidOpcode(Int)
+        case invalidPointer
+        
+        var localizedDescription: String {
+            switch self {
+            case .inputRequired:
+                return "An input was required, but none are available."
+            case .invalidOpcode(let code):
+                return "The opcode '\(code)' is invalid."
+            case .invalidPointer:
+                return "The pointer is invalid."
+            }
+        }
     }
     
     var data: [Int: Int]
     var inputs: [Int]
     var pointer: Int
     var relativeBase: Int
+    /// configuration: if an exception is thrown, just ignore it and break out of the program, just as if you
+    /// had manually sent an `Interrupt.pauseExecution`
+    var pauseExecutionOnException: Bool = false
     
     /// get raw input data, `[Int]` into the format required for sparse `Intcode` computing
     static func sparseInput(from data: [Int]) -> [Int: Int] {
@@ -73,7 +88,7 @@ final class Intcode {
         while true {
             do {
                 let instruction = try nextInstruction()
-                let result = execute(instruction)
+                let result = try execute(instruction)
                 switch result {
                 case .continue:
                     continue
@@ -89,10 +104,17 @@ final class Intcode {
                 // thrown from user code to pause the state of the program
                 // can continue later from this state
                 return
+            } catch let err as Exception {
+                if pauseExecutionOnException { return }
+                print(">>>>>>> INTCODE EXCEPTION <<<<<<<")
+                print(">>> \(err.localizedDescription)")
+                print(state)
+                return
             } catch {
-                print("ERROR PARSING INTCODE INSTRUCTION")
-                print("computer state: \(state)")
+                if pauseExecutionOnException { return }
+                print("****** INTCODE UNKNOWN ERROR ********")
                 print(error)
+                print(state)
                 return
             }
         }
@@ -137,11 +159,11 @@ final class Intcode {
             pointer >= 0 && pointer < data.count,
             let fullCode = data[pointer]
         else {
-            throw Error.invalidPointer
+            throw Exception.invalidPointer
         }
         let rawCodeNumber = fullCode % 100
         guard let code = Instruction.Code(rawValue: rawCodeNumber) else {
-            throw Error.invalidOpcode(rawCodeNumber)
+            throw Exception.invalidOpcode(rawCodeNumber)
         }
         let rawParameterCodes = fullCode / 100
         let parameterModes = Instruction.Parameter.Mode.modesFrom(
@@ -159,7 +181,7 @@ final class Intcode {
         return Instruction(code: code, parameters: parameters, instructionStartPosition: pointer)
     }
     
-    func execute(_ i: Instruction) -> Action {
+    func execute(_ i: Instruction) throws -> Action {
         switch i.code {
         case .add:
             let total = load(i) + load(i)
@@ -168,6 +190,7 @@ final class Intcode {
             let total = load(i) * load(i)
             store(val: total, i)
         case .input:
+            guard !inputs.isEmpty else { throw Exception.inputRequired }
             let input = inputs.remove(at: 0)
             store(val: input, i)
         case .output:
