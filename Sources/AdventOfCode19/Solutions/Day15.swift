@@ -198,7 +198,9 @@ extension Day15 {
             for iter in 0..<upcomingBranches {
                 let index = exploreNext.index(exploreNext.startIndex, offsetBy: iter)
                 let target = exploreNext[index]
-                // @optimisation: so that we don't copy the whole computer memory for each explored cell,
+                // @optimisation: only clone the computer n-1 times for n possible branches
+                //
+                // so that we don't copy the whole computer memory for each explored cell,
                 // we only create a copy if there is more than one possible branch,
                 // otherwise we can pass a reference to the same computer down into the next recursive call
                 // this happens on the final by passing a copy of the computer to all but the last explored
