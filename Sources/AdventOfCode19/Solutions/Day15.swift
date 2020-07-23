@@ -149,22 +149,22 @@ extension Day15 {
             steps: Int = 0
         ) {
             
-            /// move the droid in a direction (if possible), report what it finds
-            func move(into direction: Direction, using local: Intcode) -> Item {
-                local.inputs = [direction.rawValue]
-                let output = local.nextOutput()!
+            /// move the droid in a direction (if possible), report what was found in that location
+            @discardableResult
+            func move(into direction: Direction, using instance: Intcode) -> Item {
+                instance.inputs = [direction.rawValue]
+                let output = instance.nextOutput()!
                 return Item(rawValue: output)!
             }
             
             /// check what is in a direction without moving there
-            func probe(_ direction: Direction, using local: Intcode) -> (Item, item: Coordinate) {
-                let foundItem = move(into: direction, using: local)
+            func probe(_ direction: Direction) -> Item {
+                let foundItem = move(into: direction, using: computer)
                 if foundItem.canMoveInto {
                     // moving into a free space modifies the state of the program, so revert this
-                    _ = move(into: direction.reverse, using: local)
+                    move(into: direction.reverse, using: computer)
                 }
-                let itemLocation = direction.moving(coordinate)
-                return (foundItem, itemLocation)
+                return foundItem
             }
             
             struct CandidatePosition: Hashable {
@@ -175,18 +175,18 @@ extension Day15 {
             var exploreNext = Set<CandidatePosition>()
             
             for direction in Direction.allCases {
-                let (found, itemLocation) = probe(direction, using: computer)
+                let foundItem = probe(direction)
+                let itemLocation = direction.moving(coordinate)
                 guard explored[itemLocation] == nil else { continue }
-//                print(direction, "found new", found, "at", itemLocation)
-                if found == .oxygen {
-                    let oxygen = Found(coordinate: itemLocation, steps: steps + 1)
-                    self.oxygen = oxygen
-                }
-                explored[itemLocation] = found
-                if found.canMoveInto {
+                explored[itemLocation] = foundItem
+                if foundItem.canMoveInto {
                     let candidate = CandidatePosition(location: itemLocation,
                                                       direction: direction)
                     exploreNext.insert(candidate)
+                }
+                if foundItem == .oxygen {
+                    let oxygen = Found(coordinate: itemLocation, steps: steps + 1)
+                    self.oxygen = oxygen
                 }
             }
             
@@ -196,8 +196,9 @@ extension Day15 {
             let upcomingBranches = exploreNext.count
 
             for iter in 0..<upcomingBranches {
-                let index = exploreNext.index(exploreNext.startIndex, offsetBy: iter)
-                let target = exploreNext[index]
+                let currentIndex = exploreNext.index(exploreNext.startIndex, offsetBy: iter)
+                let nextIndex = exploreNext.index(currentIndex, offsetBy: 1)
+                let target = exploreNext[currentIndex]
                 // @optimisation: only clone the computer n-1 times for n possible branches
                 //
                 // so that we don't copy the whole computer memory for each explored cell,
@@ -205,9 +206,9 @@ extension Day15 {
                 // otherwise we can pass a reference to the same computer down into the next recursive call
                 // this happens on the final by passing a copy of the computer to all but the last explored
                 // direction
-                let isFinalIteration = exploreNext.index(index, offsetBy: 1) == exploreNext.endIndex
+                let isFinalIteration = nextIndex == exploreNext.endIndex
                 let uniqueComputerForBranch = !isFinalIteration ? computer.copy() : computer
-                _ = move(into: target.direction, using: uniqueComputerForBranch)
+                move(into: target.direction, using: uniqueComputerForBranch)
                 _dfsExplore(from: target.location, computer: uniqueComputerForBranch, steps: steps + 1)
             }
             
