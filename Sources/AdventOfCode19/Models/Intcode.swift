@@ -20,13 +20,13 @@ final class Intcode {
     }
     
     enum Exception: Swift.Error {
-        case inputRequired
+        case noInputs
         case invalidOpcode(Int)
         case invalidPointer
         
         var localizedDescription: String {
             switch self {
-            case .inputRequired:
+            case .noInputs:
                 return "An input was required, but none are available."
             case .invalidOpcode(let code):
                 return "The opcode '\(code)' is invalid."
@@ -120,8 +120,10 @@ final class Intcode {
         }
     }
     
+    /// creates a new instance of the computer with seperate memory, cloned exactly in the current state
     func copy() -> Intcode {
         let computer = Intcode(data: data, inputs: inputs, pointer: pointer, relativeBase: relativeBase)
+        computer.pauseExecutionOnException = pauseExecutionOnException
         return computer
     }
     
@@ -190,7 +192,7 @@ final class Intcode {
             let total = load(i) * load(i)
             store(val: total, i)
         case .input:
-            guard !inputs.isEmpty else { throw Exception.inputRequired }
+            guard !inputs.isEmpty else { throw Exception.noInputs }
             let input = inputs.remove(at: 0)
             store(val: input, i)
         case .output:

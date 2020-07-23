@@ -48,7 +48,6 @@ extension Day17 {
         }
         private var image = [Coordinate: Pixel]()
         private var imageSize = Coordinate.zero
-        
         /// where we buffer unknown outputs for better errors
         private var unknownBuffer = [String]()
         
