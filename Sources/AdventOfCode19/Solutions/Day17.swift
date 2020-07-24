@@ -55,10 +55,8 @@ extension Day17 {
     final class RobotController {
         
         var initialProgram: [Int]
-        private var programOverride: [Int] = []
-        private var programSupplied = false
+        private let computer: Intcode
         private var isDrawing = false
-        private var drawingOptionHandled = false
         private var imageDrawingCursor = Coordinate.zero {
             didSet {
                 imageSize.x = max(imageSize.x, imageDrawingCursor.x)
@@ -71,24 +69,20 @@ extension Day17 {
         
         init(program: [Int], programOverride: [Input] = []) {
             self.initialProgram = program
-            self.programOverride = programOverride.flatMap(\.intcodeCommand)
             if !programOverride.isEmpty {
                 // enable command override
                 self.initialProgram[0] = 2
             }
+            let programOverrideIntcode = programOverride.flatMap(\.intcodeCommand)
+            self.computer = Intcode(data: initialProgram, inputs: programOverrideIntcode)
         }
         
         @discardableResult
         func run() -> String {
             var dustResult: Int = 0
             var printBuffer = [Character]() // collect other ascii outputs for debugging
-            let computer = Intcode(data: initialProgram, inputs: [])
             computer.runLoop { (out, inputs) in
                 if handleDrawing(output: out) { return }
-                if inputs.isEmpty, !programOverride.isEmpty {
-                    inputs = programOverride
-                    programOverride = []
-                }
                 if let scalar = UnicodeScalar(out), scalar.isASCII {
                     printBuffer.append(Character(scalar))
                 } else {
