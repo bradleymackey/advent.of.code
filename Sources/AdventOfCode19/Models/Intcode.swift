@@ -53,7 +53,7 @@ final class Intcode {
     
     /// data is input as a dictionary of index to value. this allows for sparse, unbouded memory
     /// use this method to automatically convert to sparse memory
-    init(data: [Int], inputs: [Int], pointer: Int = 0, relativeBase: Int = 0) {
+    init(data: [Int], inputs: [Int] = [], pointer: Int = 0, relativeBase: Int = 0) {
         self.data = Self.sparseInput(from: data)
         self.inputs = inputs
         self.pointer = pointer
@@ -62,7 +62,7 @@ final class Intcode {
     
     /// data is input as a dictionary of index to value. this allows for sparse, unbouded memory
     /// use this method to initalise directly from this sparse format
-    init(data: [Int: Int], inputs: [Int], pointer: Int = 0, relativeBase: Int = 0) {
+    init(data: [Int: Int], inputs: [Int] = [], pointer: Int = 0, relativeBase: Int = 0) {
         self.data = data
         self.inputs = inputs
         self.pointer = pointer

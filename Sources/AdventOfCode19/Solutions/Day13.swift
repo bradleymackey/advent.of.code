@@ -75,7 +75,7 @@ extension Day13 {
             objects = [:]
             var paddleX = 0, ballX = 0, score = 0
             
-            let computer = Intcode(data: program, inputs: [])
+            let computer = Intcode(data: program)
             computer.runLoop(outputLength: 3) { out, inputs in
                 let coor = Coordinate(x: out[0], y: out[1])
                 guard coor != Coordinate(x: -1, y: 0) else {

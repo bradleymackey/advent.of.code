@@ -118,7 +118,7 @@ extension Day15 {
         
         private func buildMap() {
             print(" -> Building map...")
-            let computer = Intcode(data: initialProgram, inputs: [])
+            let computer = Intcode(data: initialProgram)
             explored[.zero] = .empty
             _dfsExplore(from: .zero, computer: computer)
             print(" -> Map built!")
