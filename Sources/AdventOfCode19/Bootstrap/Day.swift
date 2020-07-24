@@ -22,13 +22,10 @@ extension Day {
     }
     
     func solveAll(day: Int) {
+        defer { print() }
         let dayFormatted = String(format: "%02d", day)
         print("********* DAY \(dayFormatted) ***********")
         print()
-        defer {
-            print()
-            print("****************************")
-        }
         let testResult = runTests()
         if let result = testResult as? String, result == "-" {
             // ignore

@@ -12,6 +12,14 @@ struct App {
     
     static func parseConfigurations() throws -> [Configuration] {
         
+        func fetchConfig(day: Int, filePath path: String, fileContents contents: String) -> Configuration? {
+            let config = Configuration(day: day, filePath: path, fileContents: contents)
+            if config == nil {
+                print("  × No implementation for day \(day)")
+            }
+            return config
+        }
+        
         let arguments = CommandLine.arguments
         if arguments.count < 3 { throw Error.tooFewArguments }
         if arguments.count > 3 { throw Error.tooManyArguments(arguments.count) }
@@ -27,26 +35,35 @@ struct App {
         
         // should run all challenges if 0!
         guard dayNumber != 0 else {
-            print("Day = 0 => Solve All!")
+            print("✓ Solving all available days")
+            defer { print() }
             return (1...25)
-            .compactMap { day in
-                let file = challengeFilename(for: day)
-                guard
-                    let (path, contents) = try? self.read(file, in: directoryPath)
-                else {
-                    print("Error reading day \(day)")
-                    return nil
+                .compactMap { day in
+                    let file = challengeFilename(for: day)
+                    guard
+                        let (path, contents) = try? self.read(file, in: directoryPath)
+                    else {
+                        print("  × No input for day \(day) -> \(file)")
+                        return nil
+                    }
+                    guard
+                        let config = fetchConfig(day: day, filePath: path, fileContents: contents)
+                    else {
+                        return nil
+                    }
+                    return config
                 }
-                return Configuration(day: day, filePath: path, fileContents: contents)
-            }
             
         }
         
         do {
             let file = challengeFilename(for: dayNumber)
             let (path, contents) = try read(file, in: directoryPath)
-            let config = Configuration(day: dayNumber, filePath: path, fileContents: contents)
-            return [config]
+            if let config = fetchConfig(day: dayNumber, filePath: path, fileContents: contents) {
+                return [config]
+            } else {
+                return []
+            }
         } catch {
             throw Error.badChallengeFile(
                 internal: error,

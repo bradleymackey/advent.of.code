@@ -38,10 +38,8 @@ func main() -> Int32 {
         print(intro)
         print(spacer)
         let configs = try App.parseConfigurations()
-        for config in configs {
-            let resolver = Resolver(day: config.day)
-            let day = try resolver.day(with: config.fileContents)
-            day.solveAll(day: config.day)
+        configs.forEach {
+            $0.performSolve()
             print()
         }
         print("Completed! Have a great day! 👨‍💻")

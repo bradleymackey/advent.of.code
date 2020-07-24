@@ -62,6 +62,9 @@ final class Intcode {
     
     /// data is input as a dictionary of index to value. this allows for sparse, unbouded memory
     /// use this method to initalise directly from this sparse format
+    ///
+    /// - note: using this sparse format will not incur translation overhead during initialisation, unlike the
+    /// more convenient array initalisation
     init(data: [Int: Int], inputs: [Int] = [], pointer: Int = 0, relativeBase: Int = 0) {
         self.data = data
         self.inputs = inputs
@@ -73,7 +76,7 @@ final class Intcode {
     var state: String {
         """
         ptr       -> \(pointer)
-        data[ptr] -> \(data[pointer] ?? 0)
+        data[ptr] -> \(data[pointer, default: 0])
         relBase   -> \(relativeBase)
         inputs    -> \(inputs)
         """
