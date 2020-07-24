@@ -1,8 +1,8 @@
 //
 //  Vector3.swift
-//  
+//  AdventOfCode
 //
-//  Created by Bradley Mackey on 20/07/2020.
+//  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
 public typealias Vector3 = SIMD3<Int>

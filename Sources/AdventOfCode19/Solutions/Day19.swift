@@ -26,7 +26,7 @@ final class Day19: Day {
             }
         }
         let pulled = actions[.pulled, default: 0]
-        return "\(pulled) PULLED"
+        return pulled
     }
     
     func solvePartTwo() -> CustomStringConvertible {

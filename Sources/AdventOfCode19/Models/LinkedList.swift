@@ -1,8 +1,8 @@
 //
 //  LinkedList.swift
-//  
+//  AdventOfCode
 //
-//  Created by Bradley Mackey on 21/07/2020.
+//  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
 // inspiration/timesaver:

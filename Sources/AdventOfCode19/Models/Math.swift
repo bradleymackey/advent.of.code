@@ -1,8 +1,8 @@
 //
 //  Math.swift
-//  
+//  AdventOfCode
 //
-//  Created by Bradley Mackey on 19/07/2020.
+//  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
 /// namespace for Math related operation

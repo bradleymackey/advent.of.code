@@ -46,11 +46,11 @@ func main() -> Int32 {
         print("Completed! Have a great day! 👨‍💻")
         return 0
     } catch App.Error.tooFewArguments {
-        print(help)
-        return 1
+        print(help, "\n")
+        return 2
     } catch {
         print("* ERROR *")
-        print(error.localizedDescription)
+        print(error.localizedDescription, "\n")
         return 1
     }
 }

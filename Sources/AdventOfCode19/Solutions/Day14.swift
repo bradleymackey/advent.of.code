@@ -1,8 +1,8 @@
 //
 //  Day14.swift
-//  
+//  AdventOfCode
 //
-//  Created by Bradley Mackey on 20/07/2020.
+//  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
 /// --- Day 14: Space Stoichiometry ---
