@@ -38,13 +38,13 @@ extension Day {
             print()
         }
         print("-- Part 1")
-        let partOne = measure(title: "-- runtime") {
+        let partOne = measure(title: "-- Part 1 Runtime") {
             solvePartOne()
         }
         print(partOne)
         print()
         print("-- Part 2")
-        let partTwo = measure(title: "-- runtime") {
+        let partTwo = measure(title: "-- Part 2 Runtime") {
             solvePartTwo()
         }
         print(partTwo)

@@ -31,13 +31,19 @@ final class Day17: Day {
     func solvePartTwo() -> CustomStringConvertible {
         /* calculate path from the map (not controlling robot yet, just want first image) */
         let initialMapController = RobotController(program: data)
+        print("  -> Create maze")
         initialMapController.run()
-        guard let pathTrace = initialMapController.simplePath() else {
+        print("  -> Calculate path")
+        guard let path = initialMapController.simplePath() else {
             return "ERROR, could not get path"
         }
-//        print("  Complete path:", pathTrace.map(\.description).joined(separator: ","))
+        print("  -> Full path has", path.count, "steps")
+        let optimalPathInput = path.optimalMovesRoutines().map(RobotController.Input.init)
+        let showVideoInput = RobotController.Input("n")
+        let fullProgram = optimalPathInput + [showVideoInput]
         /* use movement commands to control the robot */
-        let runnerController = RobotController(program: data, pathTrace: pathTrace)
+        print("  -> Run movement program")
+        let runnerController = RobotController(program: data, programOverride: fullProgram)
         let result = runnerController.run()
         return "💨 Dust: \(result)"
     }
@@ -48,8 +54,9 @@ extension Day17 {
     
     final class RobotController {
         
-        let computer: Intcode
         var initialProgram: [Int]
+        private var programOverride: [Int] = []
+        private var programSupplied = false
         private var isDrawing = false
         private var drawingOptionHandled = false
         private var imageDrawingCursor = Coordinate.zero {
@@ -61,30 +68,32 @@ extension Day17 {
         private var currentRobot: (Coordinate, Robot)?
         private var image = [Coordinate: Pixel]()
         private var imageSize = Coordinate.zero
-        private var routinesSupplied = 0
-        private var inputCommands: [[Int]]?
         
-        init(program: [Int], pathTrace: [Code]? = nil) {
+        init(program: [Int], programOverride: [Input] = []) {
             self.initialProgram = program
-            if let pathTrace = pathTrace {
+            self.programOverride = programOverride.flatMap(\.intcodeCommand)
+            if !programOverride.isEmpty {
+                // enable command override
                 self.initialProgram[0] = 2
-                self.inputCommands = Code.program(pathTrace, showVideo: false)
             }
-            self.computer = Intcode(data: initialProgram, inputs: [])
         }
         
         @discardableResult
         func run() -> String {
             var dustResult: Int = 0
-            var printBuffer = [String]()
+            var printBuffer = [Character]() // collect other ascii outputs for debugging
             let computer = Intcode(data: initialProgram, inputs: [])
             computer.runLoop { (out, inputs) in
                 if handleDrawing(output: out) { return }
-                let printable = handlePrintable(from: out)
-                printBuffer.append(printable)
-                handleSupplyRoutines(output: out, in: &inputs, printBuffer: &printBuffer)
-                if UnicodeScalar(out)?.isASCII == false {
+                if inputs.isEmpty, !programOverride.isEmpty {
+                    inputs = programOverride
+                    programOverride = []
+                }
+                if let scalar = UnicodeScalar(out), scalar.isASCII {
+                    printBuffer.append(Character(scalar))
+                } else {
                     dustResult = out
+                    throw Intcode.Interrupt.pauseExecution
                 }
             }
             return "\(dustResult)"
@@ -101,7 +110,7 @@ extension Day17.RobotController {
     /// returns true if it was able to handle this output
     private func handleDrawing(output: Int) -> Bool {
         // in the progress of supplying inputs, ignore outputs
-        if routinesSupplied > 0 && routinesSupplied != inputCommands?.count { return false }
+//        guard inputPayloads.isEmpty || firstInputProvided == false else { return false }
         guard let scalar = UnicodeScalar(output) else { return false }
         let character = Character(scalar)
         if let object = Object(rawValue: character) {
@@ -128,33 +137,6 @@ extension Day17.RobotController {
         }
         imageDrawingCursor.x += 1
         return true
-    }
-    
-    /// returns `true` if it was able to handle the output
-    private func handleSupplyRoutines(output: Int, in buffer: inout [Int], printBuffer: inout [String]) {
-        guard let scalar = UnicodeScalar(output) else { return }
-        guard let program = self.inputCommands else { return }
-        // last char is colon or question to accept input
-        // e.g. "Main:", Function A:", "Continuous video feed?"
-        let chr = Character(scalar)
-        guard chr == ":" || chr == "?" else { return }
-        guard routinesSupplied < program.count else { return }
-        defer { routinesSupplied += 1 }
-        let asciiInput = program[routinesSupplied].compactMap(UnicodeScalar.init).map(Character.init)
-        let request = printBuffer.joined().trimmingCharacters(in: .whitespacesAndNewlines)
-        printBuffer = []
-        print("  - REQ: \"\(request)\"")
-        print("  - RES: \"\(String(asciiInput).trimmingCharacters(in: .whitespacesAndNewlines))\"")
-        buffer = program[routinesSupplied]
-    }
-    
-    private func handlePrintable(from output: Int) -> String {
-        if let scalar = UnicodeScalar(output) {
-            let chr = String(Character(scalar))
-            return chr
-        } else {
-            return String(output)
-        }
     }
     
 }
@@ -203,13 +185,13 @@ extension Day17.RobotController {
         case right = ">"
         case tumbling = "X"
         
-        func applying(code: Code) -> Robot {
-            switch code {
+        func applying(_ move: Move) -> Robot {
+            switch move {
             case .left:
                 return turnLeft()
             case .right:
                 return turnRight()
-            default:
+            case .forward:
                 return self
             }
         }
@@ -258,7 +240,7 @@ extension Day17.RobotController {
             }
         }
         
-        func optimalTurn(for direction: Direction) -> [Code]? {
+        func optimalTurn(for direction: Direction) -> [Move]? {
             if self.direction == direction { return nil }
             if self.turnLeft().direction == direction { return [.left] }
             if self.turnRight().direction == direction { return [.right] }
@@ -326,11 +308,28 @@ extension Day17.RobotController {
 
 extension Day17.RobotController {
     
+    enum Move: CustomStringConvertible {
+        case left
+        case right
+        case forward(Int)
+        
+        var description: String {
+            switch self {
+            case .left:
+                return "L"
+            case .right:
+                return "R"
+            case .forward(let dist):
+                return "\(dist)"
+            }
+        }
+    }
+    
     private func nextMove(
         from coordinate: inout Coordinate,
         hasTraced: inout Set<Coordinate>,
         robot: Robot
-    ) -> [Code]? {
+    ) -> [Move]? {
         
         struct ViableMove: Hashable {
             var co: Coordinate
@@ -365,14 +364,14 @@ extension Day17.RobotController {
     }
     
     /// a path from start to end, **this will need to simplified into routines before passing to robot**
-    func simplePath() -> [Code]? {
+    func simplePath() -> [Move]? {
         guard var (currentPosition, robotState) = currentRobot else { return nil }
-        var path = [Code]()
+        var path = [Move]()
         var hasTraced = Set<Coordinate>()
         while let next = nextMove(from: &currentPosition, hasTraced: &hasTraced, robot: robotState) {
             for move in next {
                 // update robot state so it's up to date
-                robotState = robotState.applying(code: move)
+                robotState = robotState.applying(move)
             }
             path.append(contentsOf: next)
         }
@@ -385,115 +384,28 @@ extension Day17.RobotController {
 
 extension Day17.RobotController {
     
-    enum Code: CustomStringConvertible {
-        case left
-        case right
-        case forward(Int)
-        /// routines may not call other routines!
-        case routine(Character)
-        case yes
-        case no
+    /// a robot input command, which should be an ASCII string
+    struct Input {
         
-        private enum Container {
-            case ascii(Character)
-            case raw(String)
-            
-            var command: [Int] {
-                switch self {
-                case .ascii(let chr):
-                    return [Int(chr.asciiValue!)]
-                case .raw(let val):
-                    return val.compactMap(\.asciiValue).map { Int($0) }
-                }
-            }
+        let command: String
+        
+        init(_ command: String) {
+            self.command = command.trimmingCharacters(in: .whitespacesAndNewlines) + "\n"
         }
         
-        init?(string: String) {
-            switch string {
-            case "L":
-                self = .left
-            case "R":
-                self = .right
-            case "y":
-                self = .yes
-            case "n":
-                self = .no
-            default:
-                if let int = Int(string) {
-                    self = .forward(int)
-                } else if ["A", "B", "C"].contains(string) {
-                    self = .routine(Character(string))
-                } else {
-                    return nil
-                }
-            }
-        }
-        
-        private static let TERM: Container = .ascii("\n")
-        private static let SEP: Container = .ascii(",")
-        
-        private var value: Container {
-            switch self {
-            case .left:
-                return .ascii("L")
-            case .right:
-                return .ascii("R")
-            case .yes:
-                return .ascii("y")
-            case .no:
-                return .ascii("n")
-            case .forward(let amount):
-                return .raw(String(amount))
-            case .routine(let id):
-                return .ascii(id)
-            }
-        }
-        
-        var intcodeAsciiInput: [Int] {
-            value.command
-        }
-        
-        var description: String {
-            switch value {
-            case .ascii(let chr):
-                return String(chr)
-            case .raw(let int):
-                return String(int)
-            }
-        }
-        
-        /// create a correctly terminated command sequence
-        static func command(_ codes: [Code]) -> [Int] {
-            var commands = [Container]()
-            for code in codes {
-                if !commands.isEmpty { commands.append(SEP) }
-                commands.append(code.value)
-            }
-            commands.append(TERM)
-            return commands.flatMap(\.command)
-        }
-        
-        static func program(_ codes: [Code], showVideo: Bool) -> [[Int]] {
-            // break the full route into optimal sub-groups
-            var program = codes.optimalProgram()
-            // video
-            if showVideo {
-                program.append([.yes])
-            } else {
-                program.append([.no])
-            }
-            // commandify
-            let commandified = program.map(command(_:))
-            return commandified
+        /// fully terminated Intcode command
+        var intcodeCommand: [Int] {
+            command.compactMap(\.asciiValue).map { Int($0) }
         }
         
     }
     
 }
 
-private extension Array where Element == Day17.RobotController.Code {
+private extension Sequence where Element == Day17.RobotController.Move {
     
-    func optimalProgram() -> [[Element]] {
+    /// get an optimal program, broken into routines, from this sequence of moves
+    func optimalMovesRoutines() -> [String] {
         
         let string = map(\.description).joined(separator: ",") + "," // (extra comma needed on end)
         
@@ -514,10 +426,8 @@ private extension Array where Element == Day17.RobotController.Code {
             return result
         }
         
-        func convertToRoutine(_ str: String) -> [Element] {
-            str.split(separator: ",")
-                .map(String.init)
-                .compactMap(Day17.RobotController.Code.init(string:))
+        func formattedForInput(_ str: String) -> String {
+            str.split(separator: ",").joined(separator: ",")
         }
         
         var mainString = string
@@ -528,8 +438,8 @@ private extension Array where Element == Day17.RobotController.Code {
             identifier = identifier.nextAscii()!
         }
         
-        let main = convertToRoutine(mainString)
-        let routines = matches.map(convertToRoutine)
+        let main = formattedForInput(mainString)
+        let routines = matches.map(formattedForInput)
         
         return [main] + routines
     }
