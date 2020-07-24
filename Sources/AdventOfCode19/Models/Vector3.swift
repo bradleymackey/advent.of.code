@@ -28,4 +28,14 @@ extension Vector3 {
         return h + v + d
     }
     
+    /// multiply all members of the vector to produce a single value
+    public func product() -> Int {
+        (x * y) * z
+    }
+    
+    /// components as a list, order: `x`, `y`, `z`
+    public func list() -> [Int] {
+        [x, y, z]
+    }
+    
 }

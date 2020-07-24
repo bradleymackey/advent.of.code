@@ -32,7 +32,7 @@ extension Coordinate {
         let rangeX = self.x < other.x ? self.x...other.x : other.x...self.x
         let rangeY = self.y < other.y ? self.y...other.y : other.y...self.y
         repeat {
-            current += Coordinate(x: dx, y: dy)
+            current &+= Coordinate(x: dx, y: dy)
             if let min = min, current.x < min.x || current.y < min.y { break }
             if let max = max, current.x > max.x || current.y > max.y { break }
             if dx != 0, current.x >= rangeX.upperBound || current.x <= rangeX.lowerBound { break }
@@ -46,26 +46,10 @@ extension Coordinate {
 
 // MARK: - Arithmetic
 
-extension Coordinate: AdditiveArithmetic {
+extension Coordinate {
     
     public static var one: Coordinate {
         .init(x: 1, y: 1)
-    }
-    
-    static public func += (lhs: inout Coordinate, rhs: Coordinate) {
-        lhs &+= rhs
-    }
-    
-    public static func + (lhs: Coordinate, rhs: Coordinate) -> Coordinate {
-        lhs &+ rhs
-    }
-    
-    static public func -= (lhs: inout Coordinate, rhs: Coordinate) {
-        lhs &-= rhs
-    }
-    
-    public static func - (lhs: Coordinate, rhs: Coordinate) -> Coordinate {
-        lhs &- rhs
     }
     
 }
@@ -85,6 +69,11 @@ extension Coordinate {
     /// multiply all members of the coordinate to produce a single value
     public func product() -> Int {
         x * y
+    }
+    
+    /// components as a list, order: `x`, `y`
+    public func list() -> [Int] {
+        [x, y]
     }
     
 }

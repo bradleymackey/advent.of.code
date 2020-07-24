@@ -126,7 +126,7 @@ extension Day10.AsteroidField {
         var initiallySeen = initiallySeen
         initiallySeen.insert(origin)
         
-        let upperBound = max + Coordinate(x: 10_000, y: 10_000)
+        let upperBound = max &+ Coordinate(x: 10_000, y: 10_000)
         var closestPoints = [Coordinate: Coordinate]()
         
         for asteroid in asteroids {
