@@ -17,7 +17,7 @@ final class Day20: Day {
     func solvePartOne() -> CustomStringConvertible {
         let builder = MazeBuilder(map: input)
         print("  -> Building Maze")
-        let maze = builder.maze()
+        let maze = builder.buildMaze()
         print("  -> Dijkstra from start to end")
         return maze.startToEndDistance()
     }
@@ -43,7 +43,7 @@ extension Day20 {
         let map: String
         private lazy var lines = map.split(separator: "\n")
         
-        /// indexes correspond to coordinates, for accessing randomly
+        /// indexes correspond to coordinates, for fast random access
         private lazy var charsArray = lines.lazy.compactMap {
             line -> [Character] in
             line.unicodeScalars.map(Character.init) + "\n"
@@ -59,7 +59,7 @@ extension Day20 {
             self.map = map
         }
         
-        func maze() -> Maze {
+        func buildMaze() -> Maze {
             let (features, start, end) = pullFeatures()
             return Maze(start: start, end: end, features: features)
         }
@@ -85,21 +85,21 @@ extension Day20 {
                 case .wall:
                     features[coor] = .wall
                 case .path:
-                    if let (id, endpoint) = portalEndpoint(for: coor) {
-                        if let unconnected = portalEndpoints[id] {
-                            let portal = Object.Portal.complete(id: id, entry: unconnected, exit: endpoint)
-                            features[unconnected.adjacentPath] = .path(portal: portal)
-                            features[endpoint.adjacentPath] = .path(portal: portal.flipped())
-                            portalEndpoints[id] = nil
-                        } else {
-                            features[endpoint.adjacentPath] = .path(portal: .incomplete(id: id, endpoint))
-                            portalEndpoints[id] = endpoint
-                        }
+                    guard let (id, endpoint) = portalEndpoint(for: coor) else {
+                        features[coor] = .path(portal: nil); break
+                    }
+                    if let unconnected = portalEndpoints[id] {
+                        let portal = Object.Portal.complete(id: id, entry: unconnected, exit: endpoint)
+                        features[unconnected.adjacentPath] = .path(portal: portal)
+                        features[endpoint.adjacentPath] = .path(portal: portal.flipped())
+                        portalEndpoints[id] = nil
                     } else {
-                        features[coor] = .path(portal: nil)
+                        features[endpoint.adjacentPath] = .path(portal: .incomplete(id: id, endpoint))
+                        portalEndpoints[id] = endpoint
                     }
                 case .letter, .empty:
-                    // letters for portals are dealt with in the path code
+                    // letters for portals are dealt with in the `.path` code, because we need to find
+                    // the paths that portals are attached to for them to make sense
                     break
                 }
                 
@@ -241,6 +241,7 @@ extension Day20.Maze {
 
 extension Day20.Maze {
     
+    /// move from one place in the maze to another, passing through a portal if possible
     func move(coordinate: Vector2, by direction: Direction) -> Vector2 {
         
         func moveToRegularPositionIfPossible() -> Vector2 {
@@ -260,11 +261,9 @@ extension Day20.Maze {
         case .path(let portal):
             switch portal {
             case let .complete(id: _, entry: entry, exit: exit):
-                if direction == entry.directionToEnter {
-                    return exit.adjacentPath
-                }
-                fallthrough
-            case nil, .incomplete:
+                guard direction == entry.directionToEnter else { fallthrough }
+                return exit.adjacentPath
+            case .incomplete, nil:
                 return moveToRegularPositionIfPossible()
             }
         case .wall, nil:
