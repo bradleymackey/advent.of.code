@@ -46,14 +46,14 @@ final class Day03: Day {
 
 extension Day03 {
     
-    private func points(from wire: [Direction]) -> [Coordinate: Int] {
+    private func points(from wire: [Direction]) -> [Vector2: Int] {
         var currentSteps = 0
-        var points = [Coordinate: Int]()
+        var points = [Vector2: Int]()
         let entries = wire
             .map { $0.length }
             .sum()
         points.reserveCapacity(entries)
-        var currentCoordinate = Coordinate(x: 0, y: 0)
+        var currentCoordinate = Vector2(x: 0, y: 0)
         for point in wire {
             let (visited, final) = point.coordinatesVisited(
                 startingFrom: currentCoordinate,
@@ -74,13 +74,13 @@ extension Day03 {
     private func sharedPoints(
         _ wire1: [Direction],
         _ wire2: [Direction]
-    ) -> [Coordinate: Int] {
+    ) -> [Vector2: Int] {
         let points1 = points(from: wire1)
         let points2 = points(from: wire2)
         let both = Set(points1.keys)
             .intersection(Set(points2.keys))
             .subtracting([.zero])
-        var intersectingPoints = [Coordinate: Int]()
+        var intersectingPoints = [Vector2: Int]()
         intersectingPoints.reserveCapacity(both.count)
         for key in both {
             intersectingPoints[key] = points1[key]! + points2[key]!
@@ -118,10 +118,10 @@ extension Day03 {
         }
         
         func coordinatesVisited(
-            startingFrom point: Coordinate,
+            startingFrom point: Vector2,
             currentSteps: inout Int
-        ) -> (points: [Coordinate: Int], final: Coordinate) {
-            var result = [Coordinate: Int]()
+        ) -> (points: [Vector2: Int], final: Vector2) {
+            var result = [Vector2: Int]()
             result.reserveCapacity(length)
             var current = point
             for _ in 0..<length {

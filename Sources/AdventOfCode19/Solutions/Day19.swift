@@ -30,7 +30,7 @@ final class Day19: Day {
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        var pos = Coordinate.zero
+        var pos: Vector2 = .zero
         /* beam is contiguous in both the `x` and `y` directions, so keep moving until the TOP RIGHT and
             BOTTOM LEFT are in beam range, then we have done it */
         while action(for: pos &+ [99, 0]) == .stationary {
@@ -50,7 +50,7 @@ extension Day19 {
         case stationary, pulled
     }
     
-    func action(for co: Coordinate) -> Action {
+    func action(for co: Vector2) -> Action {
         let computer = Intcode(data: optimisedInput, inputs: co.list())
         let out = computer.nextOutput()!
         let action = Action(rawValue: out)!

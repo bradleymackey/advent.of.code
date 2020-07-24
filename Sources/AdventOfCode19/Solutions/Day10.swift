@@ -75,11 +75,11 @@ extension Day10 {
 
     /// a field of asteroids
     struct AsteroidField {
-        let min: Coordinate = .zero // by convention, no negatives
-        let max: Coordinate
-        let asteroids: Set<Coordinate>
+        let min: Vector2 = .zero // by convention, no negatives
+        let max: Vector2
+        let asteroids: Set<Vector2>
         
-        init(max: Coordinate, asteroids: Set<Coordinate>) {
+        init(max: Vector2, asteroids: Set<Vector2>) {
             if !asteroids.isEmpty {
                 assert(asteroids.map(\.x).max()! <= max.x)
                 assert(asteroids.map(\.y).max()! <= max.y)
@@ -96,17 +96,17 @@ extension Day10 {
             }
             
             var maxX = 0, maxY = 0
-            var asteroids = Set<Coordinate>()
+            var asteroids = Set<Vector2>()
             for (y, row) in asciiMap.split(separator: "\n").enumerated() {
                 if y > maxY { maxY = y }
                 for (x, char) in row.enumerated() {
                     if x > maxX { maxX = x }
                     guard case .asteroid = Tile(rawValue: char) else { continue }
-                    let coordinate = Coordinate(x: x, y: y)
+                    let coordinate = Vector2(x: x, y: y)
                     asteroids.insert(coordinate)
                 }
             }
-            self.max = Coordinate(x: maxX, y: maxY)
+            self.max = Vector2(x: maxX, y: maxY)
             self.asteroids = asteroids
 //            print(" 🚀 -> [\(max.x+1)x\(max.y+1)] with \(field.count) asteroids")
         }
@@ -119,21 +119,21 @@ extension Day10.AsteroidField {
     
     /// - complexity: O(n)
     func visibleAsteroids(
-        from origin: Coordinate,
-        initiallySeen: Set<Coordinate> = .init()
-    ) -> [Coordinate] {
+        from origin: Vector2,
+        initiallySeen: Set<Vector2> = .init()
+    ) -> [Vector2] {
         
         var initiallySeen = initiallySeen
         initiallySeen.insert(origin)
         
-        let upperBound = max &+ Coordinate(x: 10_000, y: 10_000)
-        var closestPoints = [Coordinate: Coordinate]()
+        let upperBound = max &+ Vector2(x: 10_000, y: 10_000)
+        var closestPoints = [Vector2: Vector2]()
         
         for asteroid in asteroids {
             if initiallySeen.contains(asteroid) { continue }
             // for this gradient, store the closest asteroid on each rotation of the gun
             let (dx, dy) = origin.gradient(to: asteroid)
-            let deltaCoord = Coordinate(x: dx, y: dy)
+            let deltaCoord = Vector2(x: dx, y: dy)
             let closest = closestPoints[deltaCoord, default: upperBound]
             if origin.distance(to: asteroid) < closest.distance(to: asteroid) {
                 closestPoints[deltaCoord] = asteroid
@@ -148,8 +148,8 @@ extension Day10.AsteroidField {
     }
     
     /// - complexity: O(n^2)
-    func bestMonitoringStation() -> (asteroid: Coordinate, othersVisible: Int)? {
-        var scores = [Coordinate: Int]()
+    func bestMonitoringStation() -> (asteroid: Vector2, othersVisible: Int)? {
+        var scores = [Vector2: Int]()
         let lock = NSLock()
         let _asteroids = Array(asteroids) // ordered so we can access concurrently
         DispatchQueue.concurrentPerform(iterations: _asteroids.count) { (ind) in
@@ -169,9 +169,9 @@ extension Day10.AsteroidField {
         return (asteroid, highScore)
     }
     
-    func vaporise(from station: Coordinate) -> [Coordinate] {
+    func vaporise(from station: Vector2) -> [Vector2] {
         // ordered list of destroyed asteroids
-        var destroyed = [Coordinate]()
+        var destroyed = [Vector2]()
         destroyed.reserveCapacity(asteroids.count)
         destroyed.append(station)
         

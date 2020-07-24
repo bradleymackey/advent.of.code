@@ -51,7 +51,7 @@ extension Day15 {
         enum Direction: Int, CaseIterable, Hashable {
             case north = 1, south, west, east
             
-            var vector: Coordinate {
+            var vector: Vector2 {
                 switch self {
                 case .north: return [0, 1]
                 case .south: return [0, -1]
@@ -69,7 +69,7 @@ extension Day15 {
                 }
             }
             
-            func moving(_ coordinate: Coordinate) -> Coordinate {
+            func moving(_ coordinate: Vector2) -> Vector2 {
                 coordinate &+ vector
             }
             
@@ -102,12 +102,12 @@ extension Day15 {
         }
         
         struct Found {
-            let coordinate: Coordinate
+            let coordinate: Vector2
             let steps: Int
         }
         
         let initialProgram: [Int: Int]
-        private(set) var explored = [Coordinate: Item]()
+        private(set) var explored = [Vector2: Item]()
         private(set) var oxygen: Found!
         
         /// create a repair droid and build the map
@@ -144,7 +144,7 @@ extension Day15 {
         }
         
         private func _dfsExplore(
-            from coordinate: Coordinate,
+            from coordinate: Vector2,
             computer: Intcode,
             steps: Int = 0
         ) {
@@ -168,7 +168,7 @@ extension Day15 {
             }
             
             struct CandidatePosition: Hashable {
-                let location: Coordinate
+                let location: Vector2
                 let direction: Direction
             }
             
@@ -217,8 +217,8 @@ extension Day15 {
         /// the time it takes for the whole maze to fill with oxygen
         func fillWithOxygen() -> Int {
             
-            var seen: Set<Coordinate> = [oxygen.coordinate]
-            let explore: Queue<(Coordinate, Int)> = [(oxygen.coordinate, 0)]
+            var seen: Set<Vector2> = [oxygen.coordinate]
+            let explore: Queue<(Vector2, Int)> = [(oxygen.coordinate, 0)]
             var time = 0
             
             while let (current, dist) = explore.dequeue() {

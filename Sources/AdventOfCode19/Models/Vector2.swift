@@ -1,18 +1,18 @@
 //
-//  Coordinate.swift
+//  Vector2.swift
 //  
 //
 //  Created by Bradley Mackey on 19/07/2020.
 //
 
-public typealias Coordinate = SIMD2<Int>
+public typealias Vector2 = SIMD2<Int>
 
 // MARK: - Points
 
-extension Coordinate {
+extension Vector2 {
     
     /// gets the gradient to the other point in the simplist possible form
-    public func gradient(to other: Coordinate) -> (dx: Int, dy: Int) {
+    public func gradient(to other: Vector2) -> (dx: Int, dy: Int) {
         let dx = other.x - self.x
         let dy = other.y - self.y
         let _gcd = Math.gcd(dy, dx)
@@ -22,17 +22,17 @@ extension Coordinate {
     
     /// - complexity: O(n), where n in the number of points between
     public func exactIntegerPointsBetween(
-        _ other: Coordinate,
-        min: Coordinate? = nil,
-        max: Coordinate? = nil
-    ) -> [Coordinate] {
+        _ other: Vector2,
+        min: Vector2? = nil,
+        max: Vector2? = nil
+    ) -> [Vector2] {
         let (dx, dy) = gradient(to: other)
-        var results = ContiguousArray<Coordinate>()
+        var results = ContiguousArray<Vector2>()
         var current = self
         let rangeX = self.x < other.x ? self.x...other.x : other.x...self.x
         let rangeY = self.y < other.y ? self.y...other.y : other.y...self.y
         repeat {
-            current &+= Coordinate(x: dx, y: dy)
+            current &+= Vector2(x: dx, y: dy)
             if let min = min, current.x < min.x || current.y < min.y { break }
             if let max = max, current.x > max.x || current.y > max.y { break }
             if dx != 0, current.x >= rangeX.upperBound || current.x <= rangeX.lowerBound { break }
@@ -44,23 +44,21 @@ extension Coordinate {
     
 }
 
-// MARK: - Arithmetic
-
-extension Coordinate {
+extension Vector2 {
     
-    public static var one: Coordinate {
+    public static var one: Vector2 {
         .init(x: 1, y: 1)
     }
     
 }
 
-extension Coordinate {
+extension Vector2 {
     
     public var distanceToOrigin: Int {
         abs(x) + abs(y)
     }
     
-    public func distance(to other: Coordinate) -> Int {
+    public func distance(to other: Vector2) -> Int {
         let h = abs(self.x - other.x)
         let v = abs(self.y - other.y)
         return h + v

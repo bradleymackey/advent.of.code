@@ -57,15 +57,15 @@ extension Day17 {
         var initialProgram: [Int]
         private let computer: Intcode
         private var isDrawing = false
-        private var imageDrawingCursor = Coordinate.zero {
+        private var imageDrawingCursor = Vector2.zero {
             didSet {
                 imageSize.x = max(imageSize.x, imageDrawingCursor.x)
                 imageSize.y = max(imageSize.y, imageDrawingCursor.y)
             }
         }
-        private var currentRobot: (Coordinate, Robot)?
-        private var image = [Coordinate: Pixel]()
-        private var imageSize = Coordinate.zero
+        private var currentRobot: (Vector2, Robot)?
+        private var image = [Vector2: Pixel]()
+        private var imageSize = Vector2.zero
         
         init(program: [Int], programOverride: [Input] = []) {
             self.initialProgram = program
@@ -142,7 +142,7 @@ extension Day17.RobotController {
     enum Direction: Int, CaseIterable, Hashable {
         case north, south, west, east
         
-        var vector: Coordinate {
+        var vector: Vector2 {
             switch self {
             case .north: return [0, 1]
             case .south: return [0, -1]
@@ -160,7 +160,7 @@ extension Day17.RobotController {
             }
         }
         
-        func moving(_ coordinate: Coordinate) -> Coordinate {
+        func moving(_ coordinate: Vector2) -> Vector2 {
             coordinate &+ vector
         }
         
@@ -281,8 +281,8 @@ extension Day17.RobotController {
 
 extension Day17.RobotController {
     
-    func scaffoldIntersections() -> Set<Coordinate> {
-        var coords = Set<Coordinate>()
+    func scaffoldIntersections() -> Set<Vector2> {
+        var coords = Set<Vector2>()
         for (coord, item) in image where item == .object(.scaffold) {
             let isIntersection = Direction.allCases.allSatisfy {
                 direction in
@@ -320,13 +320,13 @@ extension Day17.RobotController {
     }
     
     private func nextMove(
-        from coordinate: inout Coordinate,
-        hasTraced: inout Set<Coordinate>,
+        from coordinate: inout Vector2,
+        hasTraced: inout Set<Vector2>,
         robot: Robot
     ) -> [Move]? {
         
         struct ViableMove: Hashable {
-            var co: Coordinate
+            var co: Vector2
             var di: Direction
         }
         
@@ -361,7 +361,7 @@ extension Day17.RobotController {
     func simplePath() -> [Move]? {
         guard var (currentPosition, robotState) = currentRobot else { return nil }
         var path = [Move]()
-        var hasTraced = Set<Coordinate>()
+        var hasTraced = Set<Vector2>()
         while let next = nextMove(from: &currentPosition, hasTraced: &hasTraced, robot: robotState) {
             for move in next {
                 // update robot state so it's up to date

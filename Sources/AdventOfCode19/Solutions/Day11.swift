@@ -66,7 +66,7 @@ extension Day11 {
                 }
             }
             
-            func moveForward(_ coordinate: inout Coordinate) {
+            func moveForward(_ coordinate: inout Vector2) {
                 switch self {
                 case .up:
                     coordinate.y += 1
@@ -112,8 +112,8 @@ extension Day11 {
         
         // painter state
         var facing: Direction = .up
-        var coordinate: Coordinate = Coordinate(x: 0, y: 0)
-        var visited = [Coordinate: Color]()
+        var coordinate: Vector2 = Vector2(x: 0, y: 0)
+        var visited = [Vector2: Color]()
         
         init(program: [Int], startColor: Color) {
             self.initialProgram = program
@@ -150,7 +150,7 @@ extension Day11 {
         }
         
         func paint() {
-            coordinate = Coordinate(x: 0, y: 0)
+            coordinate = Vector2(x: 0, y: 0)
             facing = .up
             visited = [:]
             let computer = Intcode(data: initialProgram, inputs: [startColor.rawValue])

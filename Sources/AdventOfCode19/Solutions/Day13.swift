@@ -60,7 +60,7 @@ extension Day13 {
         }
         
         let program: [Int]
-        var objects = [Coordinate: Tile]()
+        var objects = [Vector2: Tile]()
         
         init(program: [Int], quarters: Int? = nil) {
             var gameProgram = program
@@ -77,8 +77,8 @@ extension Day13 {
             
             let computer = Intcode(data: program)
             computer.runLoop(outputLength: 3) { out, inputs in
-                let coor = Coordinate(x: out[0], y: out[1])
-                guard coor != Coordinate(x: -1, y: 0) else {
+                let coor = Vector2(x: out[0], y: out[1])
+                guard coor != Vector2(x: -1, y: 0) else {
                     // not a tile, this is the new score
                     score = out[2]
                     return
