@@ -43,7 +43,7 @@ struct App {
                     guard
                         let (path, contents) = try? self.read(file, in: directoryPath)
                     else {
-                        print("  × No input for day \(day) -> \(file)")
+                        print("  × No input for day \(day) -> require \(file)")
                         return nil
                     }
                     guard

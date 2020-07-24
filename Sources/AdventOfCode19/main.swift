@@ -42,6 +42,7 @@ func main() -> Int32 {
             $0.performSolve()
             print()
         }
+        print()
         print("Completed! Have a great day! 👨‍💻")
         return 0
     } catch App.Error.tooFewArguments {
