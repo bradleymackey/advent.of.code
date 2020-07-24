@@ -139,33 +139,6 @@ extension Day17.RobotController {
 
 extension Day17.RobotController {
     
-    enum Direction: Int, CaseIterable, Hashable {
-        case north, south, west, east
-        
-        var vector: Vector2 {
-            switch self {
-            case .north: return [0, 1]
-            case .south: return [0, -1]
-            case .east:  return [1, 0]
-            case .west:  return [-1, 0]
-            }
-        }
-        
-        var reverse: Direction {
-            switch self {
-            case .north: return .south
-            case .south: return .north
-            case .east:  return .west
-            case .west:  return .east
-            }
-        }
-        
-        func moving(_ coordinate: Vector2) -> Vector2 {
-            coordinate &+ vector
-        }
-        
-    }
-    
     enum Object: Character, Equatable {
         case scaffold = "#"
         case openSpace = "."
@@ -224,13 +197,13 @@ extension Day17.RobotController {
             // coordinates are inverted, so north is actually down, south is up
             switch self {
             case .up, .tumbling:
-                return .south
+                return .down
             case .down:
-                return .north
+                return .up
             case .left:
-                return .west
+                return .left
             case .right:
-                return .east
+                return .right
             }
         }
         

@@ -23,3 +23,27 @@ final class Day20: Day {
     }
     
 }
+
+extension Day20 {
+    
+    struct Maze {
+        
+        let map: String
+        
+        init(map: String) {
+            self.map = map
+        }
+        
+    }
+    
+}
+
+extension Day20.Maze {
+    
+    enum Object {
+        case open
+        case wall
+        case portal
+    }
+    
+}

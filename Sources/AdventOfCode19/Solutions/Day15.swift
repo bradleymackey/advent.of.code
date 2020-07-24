@@ -36,6 +36,38 @@ final class Day15: Day {
     
 }
 
+private extension Direction {
+    
+    init?(day15Raw: Int) {
+        switch day15Raw {
+        case 1:
+            self = .up
+        case 2:
+            self = .down
+        case 3:
+            self = .left
+        case 4:
+            self = .right
+        default:
+            return nil
+        }
+    }
+    
+    var rawValue: Int {
+        switch self {
+        case .up:
+            return 1
+        case .down:
+            return 2
+        case .left:
+            return 3
+        case .right:
+            return 4
+        }
+    }
+    
+}
+
 extension Day15 {
     
     final class RepairDroid {
@@ -47,33 +79,6 @@ extension Day15 {
          - Wait for the repair droid to finish the movement operation.
          - Report on the status of the repair droid via an output instruction.
          */
-        
-        enum Direction: Int, CaseIterable, Hashable {
-            case north = 1, south, west, east
-            
-            var vector: Vector2 {
-                switch self {
-                case .north: return [0, 1]
-                case .south: return [0, -1]
-                case .east:  return [1, 0]
-                case .west:  return [-1, 0]
-                }
-            }
-            
-            var reverse: Direction {
-                switch self {
-                case .north: return .south
-                case .south: return .north
-                case .east:  return .west
-                case .west:  return .east
-                }
-            }
-            
-            func moving(_ coordinate: Vector2) -> Vector2 {
-                coordinate &+ vector
-            }
-            
-        }
         
         enum Item: Int {
             case wall = 0
@@ -162,7 +167,7 @@ extension Day15 {
                 let foundItem = move(into: direction, using: computer)
                 if foundItem.canMoveInto {
                     // moving into a free space modifies the state of the program, so revert this
-                    move(into: direction.reverse, using: computer)
+                    move(into: direction.reversed, using: computer)
                 }
                 return foundItem
             }

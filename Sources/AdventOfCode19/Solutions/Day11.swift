@@ -30,6 +30,19 @@ final class Day11: Day {
     
 }
 
+private extension Direction {
+    
+    func turn(_ direction: Day11.Painter.Turn) -> Direction {
+        switch direction {
+        case .left:
+            return self.turnedLeft
+        case .right:
+            return self.turnedRight
+        }
+    }
+    
+}
+
 extension Day11 {
     
     final class Painter {
@@ -51,59 +64,6 @@ extension Day11 {
         enum Turn: Int {
             case left  = 0
             case right = 1
-        }
-        
-        enum Direction {
-            
-            case up, down, left, right
-        
-            func turn(_ direction: Turn) -> Direction {
-                switch direction {
-                case .left:
-                    return turnLeft()
-                case .right:
-                    return turnRight()
-                }
-            }
-            
-            func moveForward(_ coordinate: inout Vector2) {
-                switch self {
-                case .up:
-                    coordinate.y += 1
-                case .left:
-                    coordinate.x -= 1
-                case .down:
-                    coordinate.y -= 1
-                case .right:
-                    coordinate.x += 1
-                }
-            }
-            
-            private func turnLeft() -> Direction {
-                switch self {
-                case .up:
-                    return .left
-                case .left:
-                    return .down
-                case .down:
-                    return .right
-                case .right:
-                    return .up
-                }
-            }
-            
-            private func turnRight() -> Direction {
-                switch self {
-                case .up:
-                    return .right
-                case .right:
-                    return .down
-                case .down:
-                    return .left
-                case .left:
-                    return .up
-                }
-            }
         }
         
         // initial conditions
