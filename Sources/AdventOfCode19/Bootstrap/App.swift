@@ -83,7 +83,6 @@ struct App {
         let directoryURL = URL(fileURLWithPath: directory, isDirectory: true)
         let fileURL = directoryURL.appendingPathComponent(file)
         let contents = try String(contentsOf: fileURL, encoding: .utf8)
-            .trimmingCharacters(in: .whitespacesAndNewlines)
         return (fileURL.absoluteString, contents)
     }
     
