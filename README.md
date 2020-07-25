@@ -26,4 +26,5 @@ Bad:
 - Why is there no `Character` literal (`'A'`) yet?!
 - Pattern matching expressions directly are not supported, which is really annoying when trying to match on `enum`s with associated values:
 > Expectation: `people.filter { case .man(age: 30) }`
+>
 > Reality: `people.filter { if case .man(age: 30) = $0 { return true } else { return false } }`
