@@ -37,12 +37,19 @@ public struct Queue<Element> {
     fileprivate var array = [Element?]()
     fileprivate var head = 0
     
+    /// - note: this is only 'rolling' capacity, so after this many elements have been queued/dequeued the
+    /// reserved capacity will need to be re-allocated
+    public mutating func reserveCapacity(_ minimumCapacity: Int) {
+        purgeTombstones()
+        array.reserveCapacity(minimumCapacity)
+    }
+    
     public var isEmpty: Bool {
-        return count == 0
+        count == 0
     }
     
     public var count: Int {
-        return array.count - head
+        array.count - head
     }
     
     public mutating func enqueue(_ element: Element) {
@@ -60,10 +67,8 @@ public struct Queue<Element> {
         head += 1
         
         // remove tombstones as they become a large enough overhead
-        let percentage = Double(head)/Double(array.count)
-        if array.count > 50 && percentage > 0.25 {
-            array.removeFirst(head)
-            head = 0
+        if array.count > 100 && tombstoneRatio > 0.25 {
+            purgeTombstones()
         }
         
         return element
@@ -75,6 +80,16 @@ public struct Queue<Element> {
         } else {
             return array[head]
         }
+    }
+    
+    var tombstoneRatio: Double {
+         Double(head)/Double(array.count)
+    }
+    
+    /// - complexity: O(n), where *n* is the number of tombstones, which will never exceed `tombstoneRatio`
+    mutating func purgeTombstones() {
+        array.removeFirst(head)
+        head = 0
     }
     
 }
