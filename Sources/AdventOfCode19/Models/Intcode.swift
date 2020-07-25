@@ -44,6 +44,11 @@ final class Intcode {
     /// had manually sent an `Interrupt.pauseExecution`
     var pauseExecutionOnException: Bool = false
     
+    /// if no inputs are available, backup to this input
+    var defaultInput: Int?
+    
+    var supressExceptionOutput: Bool = false
+    
     /// get raw input data, `[Int]` into the format required for sparse `Intcode` computing
     static func sparseInput(from data: [Int]) -> [Int: Int] {
         data.enumerated().reduce(into: [:]) { dict, elem in
@@ -109,12 +114,14 @@ final class Intcode {
                 return
             } catch let err as Exception {
                 if pauseExecutionOnException { return }
+                if supressExceptionOutput { return }
                 print(">>>>>>> INTCODE EXCEPTION <<<<<<<")
                 print(">>> \(err.localizedDescription)")
                 print(state)
                 return
             } catch {
                 if pauseExecutionOnException { return }
+                if supressExceptionOutput { return }
                 print("****** INTCODE UNKNOWN ERROR ********")
                 print(error)
                 print(state)
@@ -195,9 +202,13 @@ final class Intcode {
             let total = load(i) * load(i)
             store(val: total, i)
         case .input:
-            guard !inputs.isEmpty else { throw Exception.noInputs }
-            let input = inputs.remove(at: 0)
-            store(val: input, i)
+            if inputs.isEmpty {
+                guard let defaultInput = defaultInput else { throw Exception.noInputs }
+                store(val: defaultInput, i)
+            } else {
+                let input = inputs.remove(at: 0)
+                store(val: input, i)
+            }
         case .output:
             let output = load(i)
             pointer += 1
