@@ -14,16 +14,20 @@ final class Day20: Day {
         self.input = input
     }
     
+    private lazy var maze = MazeBuilder(map: input).buildMaze()
+    
     func solvePartOne() -> CustomStringConvertible {
-        let builder = MazeBuilder(map: input)
         print("  -> Building Maze")
-        let maze = builder.buildMaze()
+        let maze = self.maze
         print("  -> Dijkstra from start to end")
         return maze.startToEndDistance()
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        "?"
+        print("  -> Reusing maze")
+        let maze = self.maze
+        print("  -> Recursive disance from start to end")
+        return maze.startToEndDistanceRecursive()
     }
     
 }
@@ -132,7 +136,23 @@ extension Day20 {
                     chars = [ltr1, ltr2]
                 }
                 let identifier = String(chars)
-                let endpoint = Object.Portal.Endpoint(adjacentPath: coor, directionToEnter: direction)
+                let position: Object.Portal.Position
+                if nextLetterCoor.min() == 0 {
+                    position = .outer
+                } else if direction == .right, nextLetterCoor.x == charsArray.first!.count - 2 {
+                    position = .outer
+                    // up and down flipped becuase of coordinates
+                } else if direction == .up, nextLetterCoor.y == charsArray.count - 1 {
+                    position = .outer
+                } else {
+                    position = .inner
+                }
+                let endpoint = Object.Portal.Endpoint(
+                    adjacentPath: coor,
+                    directionToEnter: direction,
+                    position: position
+                )
+                print(identifier, testCoor, position)
                 return (identifier, endpoint)
             }
             return nil
@@ -213,6 +233,12 @@ extension Day20.Maze {
                 let adjacentPath: Vector2
                 /// the direction travelled from the path in order to enter the portal
                 let directionToEnter: Direction
+                /// is this an inner or an outer portal?
+                let position: Position
+            }
+            
+            enum Position {
+                case inner, outer
             }
             
             var id: String {
@@ -321,6 +347,42 @@ extension Day20.Maze {
         
     }
     
+    func startToEndDistanceRecursive() -> Int {
+//        var visited = Set<Vector2>()
+//        var distance: [Vector2: Int] = [start: 0]
+//        var current: (vec: Vector2, dist: Int, depth: Int) = (start, 0, 0)
+//
+//        while visited.count < features.count {
+//
+//            for direction in Direction.allCases {
+//                let neighbour = move(coordinate: current.vec, by: direction)
+//                guard features[neighbour]?.isPath == true else { continue }
+//                guard !visited.contains(neighbour) else { continue }
+//                let tentativeDistance = current.dist + 1
+//                let currentDistance = distance[neighbour, default: Int.max]
+//                distance[neighbour] = min(tentativeDistance, currentDistance)
+//            }
+//            visited.insert(current.vec)
+//
+//            if visited.contains(end) {
+//                break
+//            }
+//
+//            let nextSmallest = distance
+//                .filter { !visited.contains($0.key) }
+//                .sorted(by: { $0.value < $1.value })
+//                .first
+//            if let (vec, dist) = nextSmallest {
+//                current = (vec, dist)
+//            } else {
+//                break
+//            }
+//
+//        }
+//
+        return 0//distance[end, default: Int.max]
+    }
+    
 }
 
 extension Day20 {
@@ -346,6 +408,48 @@ extension Day20 {
           ###########.#####
                      Z
                      Z
+        """
+    }
+    
+    static var recursiveTestInput: String {
+        """
+                     Z L X W       C
+                     Z P Q B       K
+          ###########.#.#.#.#######.###############
+          #...#.......#.#.......#.#.......#.#.#...#
+          ###.#.#.#.#.#.#.#.###.#.#.#######.#.#.###
+          #.#...#.#.#...#.#.#...#...#...#.#.......#
+          #.###.#######.###.###.#.###.###.#.#######
+          #...#.......#.#...#...#.............#...#
+          #.#########.#######.#.#######.#######.###
+          #...#.#    F       R I       Z    #.#.#.#
+          #.###.#    D       E C       H    #.#.#.#
+          #.#...#                           #...#.#
+          #.###.#                           #.###.#
+          #.#....OA                       WB..#.#..ZH
+          #.###.#                           #.#.#.#
+        CJ......#                           #.....#
+          #######                           #######
+          #.#....CK                         #......IC
+          #.###.#                           #.###.#
+          #.....#                           #...#.#
+          ###.###                           #.#.#.#
+        XF....#.#                         RF..#.#.#
+          #####.#                           #######
+          #......CJ                       NM..#...#
+          ###.#.#                           #.###.#
+        RE....#.#                           #......RF
+          ###.###        X   X       L      #.#.#.#
+          #.....#        F   Q       P      #.#.#.#
+          ###.###########.###.#######.#########.###
+          #.....#...#.....#.......#...#.....#.#...#
+          #####.#.###.#######.#######.###.###.#.#.#
+          #.......#.......#.#.#.#.#...#...#...#.#.#
+          #####.###.#####.#.#.#.#.###.###.#.###.###
+          #.......#.....#.#...#...............#...#
+          #############.#.#.###.###################
+                       A O F   N
+                       A A D   M
         """
     }
     
