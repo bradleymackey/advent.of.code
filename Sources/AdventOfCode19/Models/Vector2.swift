@@ -64,6 +64,11 @@ extension Vector2 {
         return h + v
     }
     
+    public func absDistance(to other: Vector2) -> Double {
+        let dist = distance(to: other)
+        return Double(dist).squareRoot()
+    }
+    
     /// multiply all members of the coordinate to produce a single value
     public func product() -> Int {
         x * y

@@ -22,6 +22,15 @@ extension Direction {
         }
     }
     
+    var vector3: Vector3 {
+        switch self {
+            case .up: return [0, 1, 0]
+            case .down: return [0, -1, 0]
+            case .right:  return [1, 0, 0]
+            case .left:  return [-1, 0, 0]
+        }
+    }
+    
     var turnedLeft: Direction {
         switch self {
         case .up: return .left
@@ -68,8 +77,24 @@ extension Direction {
 
 extension Direction {
     
+    @inline(__always)
     func moving(_ coordinate: Vector2) -> Vector2 {
         coordinate &+ vector
+    }
+    
+    @inline(__always)
+    func move(_ coordinate: inout Vector2) {
+        coordinate &+= vector
+    }
+    
+    @inline(__always)
+    func moving(_ vec: Vector3) -> Vector3 {
+        vec &+ vector3
+    }
+    
+    @inline(__always)
+    func move(_ vec: inout Vector3) {
+        vec &+= vector3
     }
     
 }

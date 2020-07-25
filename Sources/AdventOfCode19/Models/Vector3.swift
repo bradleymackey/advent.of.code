@@ -38,4 +38,12 @@ extension Vector3 {
         [x, y, z]
     }
     
+    public init(xy: Vector2, z: Int) {
+        self.init(x: xy.x, y: xy.y, z: z)
+    }
+    
+    public var xy: Vector2 {
+        Vector2(x: x, y: y)
+    }
+    
 }

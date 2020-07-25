@@ -21,6 +21,12 @@ struct Queue<Element> {
         _list.append(element)
     }
     
+    func enqueue(multiple elements: [Element]) {
+        for element in elements {
+            _list.append(element)
+        }
+    }
+    
     func dequeue() -> Element? {
         _list.popFirst()
     }
