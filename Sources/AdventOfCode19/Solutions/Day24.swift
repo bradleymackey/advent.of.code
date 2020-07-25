@@ -15,15 +15,6 @@ final class Day24: Day {
     }
     
     func solvePartOne() -> CustomStringConvertible {
-        
-        enum Person {
-            case man(age: Int)
-        }
-        
-        let etr = Person.man(age: 30)
-        let thing = [etr]
-        thing.filter { $0 in if case .man(age: 30) = $0 { return true } else { return false } }
-        
         let eris = Eris(input: input)
         eris.gameOfLifeUntilRepeat()
         return eris.biodiversity

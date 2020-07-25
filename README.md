@@ -17,6 +17,7 @@ Good:
 
 - `enum`s are expressive, powerful and efficient. They can be used instead of `struct` in more places than you might think when modelling.
 - The ability to easily choose between value semantics (`enum`, `struct`) and reference semantics (`class`) still is one of my favourite features of Swift. The fact that the system manages the additional levels of abstraction for you (for the most part, see Reference Cycles) means that in many cases `struct` and `class` keywords can just be swapped out instantly for a change in the semantics of the model type (no need for additional boxing, wrapping or heap memory management). This language feature shows it's worth time and time again, and I absolutely do not take it for granted!
+- I'm absolutely an advocate of protocol oriented programming. In many cases it makes more sense than a class hierarchy, as model objects typically adopt multiple, _distinct_ behaviours.
 
 Bad:
 
@@ -28,3 +29,5 @@ Bad:
 > Expectation: `people.filter { case .man(age: 30) }`
 >
 > Reality: `people.filter { if case .man(age: 30) = $0 { return true } else { return false } }`
+
+- Xcode doesn't work as well with Swift packages as it does with Xcode projects.
