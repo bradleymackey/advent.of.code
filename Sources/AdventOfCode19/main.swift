@@ -33,6 +33,9 @@ let spacer = """
 
 """
 
+/// loads, runs and reports success for all requested challenges
+///
+/// - returns: program exit code
 func main() -> Int32 {
     do {
         print(intro)

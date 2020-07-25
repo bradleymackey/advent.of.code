@@ -7,6 +7,7 @@
 //
 
 struct Configuration {
+    // many configs may be loaded at once, so don't initialise day until we are ready
     private let day: () -> Day
     let dayNumber: Int
     let filePath: String

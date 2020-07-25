@@ -36,6 +36,7 @@ extension Day20 {
         let features: [Vector2: Object]
     }
     
+    /// a maze is a complex thing, you'll need a builder!
     final class MazeBuilder {
         
         typealias Object = Maze.Object
@@ -59,6 +60,7 @@ extension Day20 {
             self.map = map
         }
         
+        /// construct the maze using the originally supplied input
         func buildMaze() -> Maze {
             let (features, start, end) = pullFeatures()
             return Maze(start: start, end: end, features: features)
@@ -200,11 +202,16 @@ extension Day20.Maze {
         }
         
         enum Portal: Equatable, Hashable {
+            /// a portal endpoint that is unconnected to another -- you can't use this portal
             case incomplete(id: String, Endpoint)
+            /// a portal, you may enter through the `entry` and exit through the `exit`, or in reverse!
             case complete(id: String, entry: Endpoint, exit: Endpoint)
             
             struct Endpoint: Equatable, Hashable {
+                /// the path that is next to the portal -- it's a great place to relax after the terrifying
+                /// journey through the unknown
                 let adjacentPath: Vector2
+                /// the direction travelled from the path in order to enter the portal
                 let directionToEnter: Direction
             }
             
@@ -273,7 +280,9 @@ extension Day20.Maze {
         
     }
     
-    /// https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
+    /// computes the smallest distance from the start "AA" to the end "ZZ", using both portals and paths
+    ///
+    /// - note: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm
     func startToEndDistance() -> Int {
         
         var visited = Set<Vector2>()
