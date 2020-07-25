@@ -17,7 +17,7 @@ final class Day04: Day {
         self.input = input
     }
     
-    lazy var nums = input
+    lazy var nums = Parse.trimmed(input)
         .split(separator: "-")
         .map(String.init)
         .compactMap(Int.init)
