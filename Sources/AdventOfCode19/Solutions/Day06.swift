@@ -16,7 +16,7 @@ final class Day06: Day {
         self.input = input
     }
     
-    lazy var graph = input
+    lazy var graph = Parse.trimmed(input)
         .split(separator: "\n")
         .reduce(into: Graph<String>()) { (graph, edge) in
             let nodes = edge.split(separator: ")").map(String.init)

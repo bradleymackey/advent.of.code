@@ -17,7 +17,7 @@ final class Day03: Day {
         self.input = input
     }
     
-    lazy var wires = input
+    lazy var wires = Parse.trimmed(input)
         .split(separator: "\n")
     
     lazy var wire1 = wires[0]
