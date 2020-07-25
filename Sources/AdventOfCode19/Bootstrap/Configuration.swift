@@ -51,7 +51,7 @@ extension Configuration {
 //          18: Day18.self,
             19: Day19.self,
             20: Day20.self,
-//          21: Day21.self,
+            21: Day21.self,
 //          22: Day22.self,
 //          23: Day23.self,
 //          24: Day24.self,
