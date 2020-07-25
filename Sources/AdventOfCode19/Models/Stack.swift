@@ -31,7 +31,12 @@
  Push and pop are O(1) operations.
  */
 public struct Stack<Element> {
+    
     fileprivate var array = [Element]()
+    
+    public mutating func reserveCapacity(_ minimumCapacity: Int) {
+        array.reserveCapacity(minimumCapacity)
+    }
     
     public var isEmpty: Bool {
         array.isEmpty
