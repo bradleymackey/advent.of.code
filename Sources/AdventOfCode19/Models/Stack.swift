@@ -1,5 +1,5 @@
 //
-//  Queue.swift
+//  Stack.swift
 //  AdventOfCode by Bradley Mackey
 //
 
@@ -27,75 +27,59 @@
 //  THE SOFTWARE.
 
 /**
- First-in first-out queue (FIFO)
- New elements are added to the end of the queue. Dequeuing pulls elements from
- the front of the queue.
- Enqueuing and dequeuing are O(1) operations.
+ Last-in first-out stack (LIFO)
+ Push and pop are O(1) operations.
  */
-public struct Queue<Element> {
-    
-    fileprivate var array = [Element?]()
-    fileprivate var head = 0
+public struct Stack<Element> {
+    fileprivate var array = [Element]()
     
     public var isEmpty: Bool {
-        return count == 0
+        array.isEmpty
     }
     
     public var count: Int {
-        return array.count - head
+        array.count
     }
     
-    public mutating func enqueue(_ element: Element) {
+    public mutating func push(_ element: Element) {
         array.append(element)
     }
     
-    public mutating func enqueue<S: Sequence>(contentsOf sequence: S) where S.Element == Element {
-        array.append(contentsOf: sequence.map(Optional.init))
+    public mutating func push<S: Sequence>(contentsOf sequence: S) where S.Element == Element {
+        array.append(contentsOf: sequence)
     }
     
-    public mutating func dequeue() -> Element? {
-        guard let element = array[guarded: head] else { return nil }
-        
-        array[head] = nil
-        head += 1
-        
-        // remove tombstones as they become a large enough overhead
-        let percentage = Double(head)/Double(array.count)
-        if array.count > 50 && percentage > 0.25 {
-            array.removeFirst(head)
-            head = 0
-        }
-        
-        return element
+    public mutating func pop() -> Element? {
+        array.popLast()
     }
     
-    public var front: Element? {
-        if isEmpty {
-            return nil
-        } else {
-            return array[head]
-        }
+    public var top: Element? {
+        array.last
+    }
+    
+    public var bottom: Element? {
+        array.first
     }
     
 }
 
-extension Queue: ExpressibleByArrayLiteral {
+extension Stack: ExpressibleByArrayLiteral {
     
     public typealias ArrayLiteralElement = Element
     
     public init(arrayLiteral elements: Element...) {
-        self.init(array: elements.map(Optional.init), head: 0)
+        self.init(array: elements)
     }
     
 }
 
-private extension Array {
+extension Stack: Sequence {
     
-    subscript(guarded idx: Int) -> Element? {
-        guard (startIndex..<endIndex).contains(idx) else {
-            return nil
+    public func makeIterator() -> AnyIterator<Element> {
+        var curr = self
+        return AnyIterator {
+            return curr.pop()
         }
-        return self[idx]
     }
     
 }

@@ -223,7 +223,7 @@ extension Day15 {
         func fillWithOxygen() -> Int {
             
             var seen: Set<Vector2> = [oxygen.coordinate]
-            let explore: Queue<(Vector2, Int)> = [(oxygen.coordinate, 0)]
+            var explore: Queue<(Vector2, Int)> = [(oxygen.coordinate, 0)]
             var time = 0
             
             while let (current, dist) = explore.dequeue() {

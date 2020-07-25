@@ -321,7 +321,7 @@ extension Day20.Maze {
         let start = Vector3(xy: self.start, z: 0)
         let end = Vector3(xy: self.end, z: 0)
         var seen: Set<Vector3> = []
-        let explore: Queue<(Vector3, Int)> = [(start, 0)]
+        var explore: Queue<(Vector3, Int)> = [(start, 0)]
         var targetDistance = Int.max
         
         while let (current, dist) = explore.dequeue() {

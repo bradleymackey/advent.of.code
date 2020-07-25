@@ -29,7 +29,7 @@ final class Day14: Day {
         
         var oreDemand = 0
         var supply = [String: Int]()
-        let required: Queue<Ingredient> = [target]
+        var required: Queue<Ingredient> = [target]
         
         while let nextIngredient = required.dequeue() {
             if nextIngredient.name == "ORE" {
