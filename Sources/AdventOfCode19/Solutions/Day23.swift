@@ -45,7 +45,7 @@ extension Day23 {
         init(number: Int, intcodeProgram: [Int]) {
             self.number = number
             var computers = [Intcode]()
-            for addr in 0..<50 {
+            for addr in 0..<number {
                 let intcode = Intcode(data: intcodeProgram, inputs: [addr])
                 // computers may request a lot of inputs, even more than we supply, so just supress the
                 // warnings

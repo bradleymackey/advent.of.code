@@ -1,8 +1,8 @@
 //
-//  File.swift
-//  
+//  Direction.swift
+//  AdventOfCode
 //
-//  Created by Bradley Mackey on 24/07/2020.
+//  Copyright © 2019 Bradley Mackey. MIT Licenced.
 //
 
 enum Direction: CaseIterable, Hashable, Equatable {
