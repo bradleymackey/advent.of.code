@@ -84,10 +84,10 @@ extension Day21 {
             let asciiValues = asciiText
                 .compactMap(\.asciiValue)
                 .map(Int.init)
-            self.computer.inputs = asciiValues
+            computer.inputs = asciiValues
             var charOutputs = [Character]()
             var intOutput = 0
-            self.computer.runLoop { (out, ins) in
+            computer.runLoop { (out, ins) in
                 guard let scal = UnicodeScalar(out) else {
                     return intOutput = out
                 }

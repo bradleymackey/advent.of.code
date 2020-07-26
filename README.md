@@ -22,12 +22,20 @@ Good:
 Bad:
 
 - Needs more general-purpose algorithms and data structures available by default (think `collections` module from Python).
-- `-Onone` is seriously slow in some cases, especially when using custom operators (no amount of `@inline(__always)` seems to help).
+- `-Onone` is _suprisingly_ slow in some cases, especially when using custom operators (no amount of `@inline(__always)` seems to help).
+Run the project with and without optimisations enabled to see what I mean.
 - `KeyPaths` property accesses are (in general) ~10x slower than direct property accesses. 
-- Why is there no `Character` literal (`'A'`) yet?!
+- Why is there no `Character` literal (`'A'`) yet?
 - Pattern matching expressions directly are not supported, which is really annoying when trying to match on `enum`s with associated values:
+
 > Expectation: `people.filter { case .man(age: 30) }`
 >
 > Reality: `people.filter { if case .man(age: 30) = $0 { return true } else { return false } }`
 
-- Xcode doesn't work as well with Swift packages as it does with Xcode projects.
+### Xcode
+
+Bad:
+
+- It doesn't work as well with Swift packages as it does with Xcode projects.
+Losing the state of opened folders when opening the project, for example.
+- I'd like an easier way to change program arguments and Swift compilation flags than having to dig into the scheme settings all the time.

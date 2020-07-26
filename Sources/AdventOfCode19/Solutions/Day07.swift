@@ -100,4 +100,31 @@ extension Collection {
         return result
     }
     
+    /// https://stackoverflow.com/a/51474264/3261161
+    func combinations(takenBy: Int) -> [[Element]] {
+        if count == takenBy {
+            return [Array(self)]
+        }
+        
+        if isEmpty {
+            return []
+        }
+        
+        if takenBy == 0 {
+            return []
+        }
+        
+        if takenBy == 1 {
+            return map { [$0] }
+        }
+        
+        var result : [[Element]] = []
+        
+        let rest = self[index(after: startIndex)...]
+        let subCombos = rest.combinations(takenBy: takenBy - 1)
+        result += subCombos.map { [self[startIndex]] + $0 }
+        result += rest.combinations(takenBy: takenBy)
+        return result
+    }
+    
 }

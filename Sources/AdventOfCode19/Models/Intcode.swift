@@ -43,11 +43,20 @@ final class Intcode {
     /// configuration: if an exception is thrown, just ignore it and break out of the program, just as if you
     /// had manually sent an `Interrupt.pauseExecution`
     var pauseExecutionOnException: Bool = false
+    var supressExceptionOutput: Bool = false
     
     /// if no inputs are available, backup to this input
     var defaultInput: Int?
     
-    var supressExceptionOutput: Bool = false
+    /// computer inputs formatted for ASCII, omitting incompatible values
+    var asciiInput: String {
+        get {
+            String(inputs.compactMap(UnicodeScalar.init).map(Character.init))
+        }
+        set {
+            inputs = Array(newValue).compactMap(\.asciiValue).map(Int.init)
+        }
+    }
     
     /// get raw input data, `[Int]` into the format required for sparse `Intcode` computing
     static func sparseInput(from data: [Int]) -> [Int: Int] {
@@ -87,6 +96,8 @@ final class Intcode {
         """
     }
     
+    private(set) var hasHalted = false
+    
     /// runloop to handle outputs of arbitrary length, and handle all of these at once
     func runLoop(
         outputLength: Int,
@@ -106,6 +117,7 @@ final class Intcode {
                     try handler(outBuffer, &inputs)
                     outBuffer = []
                 case .halt:
+                    hasHalted = true
                     return
                 }
             } catch Interrupt.pauseExecution {
@@ -142,28 +154,6 @@ final class Intcode {
         runLoop(outputLength: 1) { (out, input) in
             try handler(out[0], &input)
         }
-    }
-    
-    /// run the computer until a single output is produced
-    /// - returns: `nil` if no outputs are produced
-    func nextOutput() -> Int? {
-        var output: Int?
-        runLoop { (out, _) in
-            output = out
-            throw Interrupt.pauseExecution
-        }
-        return output
-    }
-    
-    /// run the computer until an output of the length specified is produced
-    /// - returns: `nil` if no outputs are produced
-    func nextOutput(length: Int) -> [Int]? {
-        var output: [Int]?
-        runLoop(outputLength: length) { (out, _) in
-            output = out
-            throw Interrupt.pauseExecution
-        }
-        return output
     }
     
     func nextInstruction() throws -> Instruction {
@@ -352,6 +342,51 @@ extension Intcode {
     }
     
 }
+
+// MARK: - Output
+
+// MARK: Simple Helpers
+
+extension Intcode {
+    
+    /// run the computer until a single output is produced
+    /// - returns: `nil` if no outputs are produced
+    func nextOutput() -> Int? {
+        var output: Int?
+        runLoop { (out, _) in
+            output = out
+            throw Interrupt.pauseExecution
+        }
+        return output
+    }
+    
+    /// interpret outputs from the computer as ASCII text, and wait for the next line to be built.
+    /// line will be broken when the computer outputs a newline
+    func nextAsciiLine() -> String? {
+        var str = ""
+        runLoop { (out, _) in
+            guard let sclr = UnicodeScalar(out) else { return }
+            let char = Character(sclr)
+            str.append(char)
+            if char == "\n" { throw Interrupt.pauseExecution }
+        }
+        return str.isEmpty ? nil : str
+    }
+    
+    /// run the computer until an output of the length specified is produced
+    /// - returns: `nil` if no outputs are produced
+    func nextOutput(length: Int) -> [Int]? {
+        var output: [Int]?
+        runLoop(outputLength: length) { (out, _) in
+            output = out
+            throw Interrupt.pauseExecution
+        }
+        return output
+    }
+    
+}
+
+// MARK: Sequence
 
 extension Intcode {
     

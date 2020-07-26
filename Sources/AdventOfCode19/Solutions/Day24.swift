@@ -188,19 +188,19 @@ extension Day24 {
             var seen = Set<Int>()
             seen.insert(activeBugs.hashValue)
             var uniqueState = true
-            repeat {
+            while uniqueState {
                 round()
                 let (hasInsertedUnique, _) = seen.insert(activeBugs.hashValue)
                 uniqueState = hasInsertedUnique
-            } while uniqueState
+            }
         }
         
         func gameOfLife(rounds: Int) {
             initalise()
-            print("  --> Require \(rounds) iterations...")
+            print("  -> Require \(rounds) iterations...")
             for i in 1...rounds {
                 if i.isMultiple(of: 25) {
-                    print("  -- Iteration", i)
+                    print("  - Iteration", i)
                 }
                 round()
             }

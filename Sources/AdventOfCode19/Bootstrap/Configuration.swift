@@ -55,7 +55,7 @@ extension Configuration {
 //          22: Day22.self,
             23: Day23.self,
             24: Day24.self,
-//          25: Day25.self,
+            25: Day25.self,
         ]
     }
     
