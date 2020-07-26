@@ -46,4 +46,12 @@ extension Vector3 {
         Vector2(x: x, y: y)
     }
     
+    public func incrementingDepth() -> Vector3 {
+        self &+ [0, 0, 1]
+    }
+    
+    public func decrementingDepth() -> Vector3 {
+        self &+ [0, 0, 1]
+    }
+    
 }
