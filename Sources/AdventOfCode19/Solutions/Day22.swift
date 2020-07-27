@@ -30,11 +30,11 @@ final class Day22: Day {
         // thanks to /u/mcpower_ on reddit
         let cards: BigInt = 119315717514047
         let repeats: BigInt = 101741582076661
-        var state = Shuffle.State(cards: cards)
+        var deck = Deck(cards: cards)
         for shuffle in shuffles {
-            state.apply(shuffle: shuffle)
+            deck.apply(shuffle: shuffle)
         }
-        return state.repeated(times: repeats).card(at: 2020)
+        return deck.repeatedShuffleState(times: repeats).card(at: 2020)
     }
     
 }
@@ -116,13 +116,16 @@ extension Day22.Shuffle {
 
 // MARK: - Serious Business
 
-extension Day22.Shuffle {
+extension Day22 {
     
     /// represents the state of an arbitrary number of cards
-    struct State {
+    struct Deck {
         
+        /// the number of cards in the deck
         let cards: BigInt
+        /// current cut position, modulo card number
         @Modulo var offset: BigInt = 0
+        /// distance between adjacent cards, modulo card number
         @Modulo var difference: BigInt = 1
         
         init(cards: BigInt) {
@@ -135,37 +138,44 @@ extension Day22.Shuffle {
     
 }
 
-extension Day22.Shuffle.State  {
+extension Day22.Deck  {
     
     func card(at position: BigInt) -> BigInt {
         let crd = (offset + difference * position) % cards
         return crd < 0 ? cards + crd : crd
     }
     
-    func repeated(times repeats: BigInt) -> Day22.Shuffle.State {
+    /// once shuffled into a given arrangement, it's very efficient to replay this suffling dance
+    func repeatedShuffleState(times repeats: BigInt) -> Day22.Deck {
         let increment = difference.power(repeats, modulus: cards)
         let offset = self.offset * (1 - increment) * (1 - difference).inverse(cards)!
-        var newState = Day22.Shuffle.State(cards: cards)
+        var newState = Day22.Deck(cards: cards)
         newState.offset = offset
         newState.difference = increment
         return newState
     }
     
-    func applying(shuffle: Day22.Shuffle) -> Day22.Shuffle.State {
-        var current = self
+    func applying(shuffle: Day22.Shuffle) -> Day22.Deck {
+        var new = self
         switch shuffle {
         case .dealNewStack:
-            current.difference *= -1
-            current.offset += current.difference
-        case .cut(let num):
-            let bigNum = BigInt(num)
-            // move nth card to the front (nth card gotten from offset + difference * position)
-            current.offset += current.difference * bigNum
-        case .dealWithIncrement(let num):
-            let bigNum = BigInt(num)
-            current.difference *= bigNum.inverse(current.cards)!
+            // deck reverses, offset position needs to wrap around
+            new.difference *= -1
+            new.offset += new.difference
+        case .cut(let idx):
+            // just a list shift, so the offset changes but difference stays the same
+            // achieved by moving nth card to the front, and the nth card is got via `offset + difference * n`
+            new.offset += new.difference * BigInt(idx)
+        case .dealWithIncrement(let idx):
+            // offset doesn't change because it is dealt to the same position
+            // in general, `i`th card goes to position `n*i mod N`
+            // when does `i*n == 1` -> `i == n^(-1)`
+            // therefore, position the position `i` in the new list is just the modular inverse of `n`
+            // `offset + difference * n^(-1) - offset = difference * n^(-1)`
+            // therefore, we should multiply `difference` by `n^(-1)`
+            new.difference *= BigInt(idx).inverse(new.cards)!
         }
-        return current
+        return new
     }
     
     mutating func apply(shuffle: Day22.Shuffle) {
