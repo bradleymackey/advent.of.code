@@ -360,6 +360,17 @@ extension Intcode {
         return output
     }
     
+    /// run the computer until an output of the length specified is produced
+    /// - returns: `nil` if no outputs are produced
+    func nextOutput(length: Int) -> [Int]? {
+        var output: [Int]?
+        runLoop(outputLength: length) { (out, _) in
+            output = out
+            throw Interrupt.pauseExecution
+        }
+        return output
+    }
+    
     /// interpret outputs from the computer as ASCII text, and wait for the next line to be built.
     /// line will be broken when the computer outputs a newline
     func nextAsciiLine() -> String? {
@@ -371,17 +382,6 @@ extension Intcode {
             if char == "\n" { throw Interrupt.pauseExecution }
         }
         return str.isEmpty ? nil : str
-    }
-    
-    /// run the computer until an output of the length specified is produced
-    /// - returns: `nil` if no outputs are produced
-    func nextOutput(length: Int) -> [Int]? {
-        var output: [Int]?
-        runLoop(outputLength: length) { (out, _) in
-            output = out
-            throw Interrupt.pauseExecution
-        }
-        return output
     }
     
 }
