@@ -41,11 +41,11 @@ func main() -> Int32 {
         print(intro)
         print(spacer)
         let configs = try App.parseConfigurations()
+        if configs.isEmpty { print() }
         configs.forEach {
             $0.performSolve()
             print()
         }
-        print()
         print("Completed! Have a great day! 👨‍💻")
         return 0
     } catch App.Error.tooFewArguments {
