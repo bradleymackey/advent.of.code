@@ -92,7 +92,7 @@ extension Day15 {
                 case .empty:
                     return "."
                 case .oxygen:
-                    return "Ω"
+                    return "●"
                 }
             }
             
