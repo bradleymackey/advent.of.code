@@ -118,7 +118,7 @@ extension Collection {
             return map { [$0] }
         }
         
-        var result : [[Element]] = []
+        var result: [[Element]] = []
         
         let rest = self[index(after: startIndex)...]
         let subCombos = rest.combinations(takenBy: takenBy - 1)

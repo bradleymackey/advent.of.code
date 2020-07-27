@@ -17,8 +17,10 @@ final class Day25: Day {
     private lazy var data = Parse.integerList(from: input, separator: ",")
     
     func solvePartOne() -> CustomStringConvertible {
+        // my items: festive hat, space heater, hypercube, semiconductor
         let droid = Droid(input: data)
-        return droid.performSearch()
+        droid.searchMaze()
+        return droid.attemptAccess()
     }
     
     func solvePartTwo() -> CustomStringConvertible {
@@ -31,23 +33,22 @@ extension Day25 {
     
     final class Droid {
         
+        private let initialProgram: [Int]
+        
+        private(set) var hasExploredMaze = false
         private var blacklist: Set<String> = ["infinite loop"]
         private var explored = Set<Location>()
-        
         private var securityCheckpoint: Location!
         private var securityEntrance: Direction!
         
-        private let initialProgram: [Int]
-        private var computer: Intcode {
-            didSet {
-                consumeCommand()
-            }
-        }
-
         init(input: [Int]) {
             self.initialProgram = input
-            self.computer = Intcode(data: input)
-            self.computer.supressExceptionOutput = true
+        }
+        
+        func searchMaze() {
+            explore()
+            updateBlacklistItems()
+            hasExploredMaze = true
         }
         
     }
@@ -109,133 +110,102 @@ extension Day25.Droid {
         
     }
     
-    private func move(along path: [Direction]) {
-        for step in path {
-            computer.set(command: .walk(step))
-            _ = nextMove()
-        }
-    }
-    
-    private func backtrack(along path: [Direction]) {
-        move(along: path.reversed().map(\.reversed))
-    }
-    
-    /// parse output into a location
-    private func nextMove() -> (name: String, items: Set<String>, doors: Set<Direction>, explored: Bool)? {
-        
-        enum Tracking {
-            case doors, items
-        }
-        
-        var tmpName: String?
-        var doors = Set<Direction>()
-        var items = Set<String>()
-        var tracking: Tracking = .doors
-        
-        var notMoved = false
-        while let line = computer.nextAsciiLine()?.trimmingCharacters(in: .whitespacesAndNewlines) {
-            if line.starts(with: "==") { tmpName = line }
-            if line.starts(with: "Doors") { tracking = .doors }
-            if line.starts(with: "Items") { tracking = .items }
-            if line.starts(with: "-") {
-                let next = line.index(line.startIndex, offsetBy: 2)
-                let item = String(line[next...])
-                switch tracking {
-                case .doors:
-                    let direction = Direction(compass: item)!
-                    doors.insert(direction)
-                case .items:
-                    items.insert(item)
-                }
-            }
-            if line.starts(with: "Command?") { break }
-            if line.starts(with: "A loud, robotic voice") { notMoved = true; break }
-        }
-        
-        if let name = tmpName, !doors.isEmpty {
-            return (name, items, doors, !notMoved)
-        } else {
-            return nil
-        }
-        
-    }
-    
+    /// use an iterative depth-first search to find all locations on the map
     private func explore() {
         
+        let computer = Intcode(day25DroidProgram: initialProgram, ignoreFirstOutput: false)
+        var result = computer.pullOutput()
         var unexploredDirections = [Location: Set<Direction>]()
         
         var currentPath = Stack<Direction>()
-        var initialLocation: Location?
+        var initialLocation: Location!
+        var currentLocation: Location!
+        var nextMove: Direction = .up
         
-        while let (name, items, doors, explored) = nextMove() {
-            
-            let location = Location(
-                name: name,
-                initialItems: items,
-                doors: doors,
-                // reverse because path is a stack
-                path: Array(currentPath.reversed())
-            )
-            
-            if initialLocation == nil {
-                initialLocation = location
-            }
-            
-            if securityCheckpoint == nil, location.name.contains("Security Checkpoint") {
-                var possibleEntrances = doors
-                possibleEntrances.remove(currentPath.top!.reversed)
-                securityEntrance = possibleEntrances.first! // should only be one entrance
-                securityCheckpoint = location
-            }
-
-            if unexploredDirections[location] == nil {
-                unexploredDirections[location] = location.doors
-            }
-            
-            // just come from this direction, so don't need to explore it
-            if let ignoreDirection = currentPath.top {
-                unexploredDirections[location]!.remove(ignoreDirection.reversed)
-            }
-            
-            if unexploredDirections[location]!.isEmpty {
-                // nowhere else to explore
-                if let backtrack = currentPath.pop() {
-                    computer.set(command: .walk(backtrack.reversed))
-                } else {
-                    break
-                }
-            } else if let nextPath = unexploredDirections[location]!.popFirst() {
-                if explored {
-                    // if not explored, we never moved there
-                    currentPath.push(nextPath)
-                }
-                computer.set(command: .walk(nextPath))
-            }
-
+        defer {
+            explored = unexploredDirections.map(\.key).reducedToSet()
+            print("  -> Found", explored.count, "locations")
         }
         
-        explored = unexploredDirections.map(\.key).reducedToSet()
-        print("  -> Found", explored.count, "locations")
+        // will force return when all locations are explored
+        while true {
+            
+            defer {
+                result = computer.run(command: .walk(nextMove))
+            }
+            
+            switch result {
+            case let .location(name, items, doors):
+                
+                let location = Location(
+                    name: name,
+                    initialItems: items,
+                    doors: doors,
+                    // reverse because path is a stack
+                    path: Array(currentPath.reversed())
+                )
+                
+                currentLocation = location
+                
+                if initialLocation == nil {
+                    initialLocation = location
+                }
+                
+                if unexploredDirections[location] == nil {
+                    unexploredDirections[location] = location.doors
+                }
+                
+                // just come from this direction, so don't need to explore it
+                if let ignoreDirection = currentPath.top {
+                    unexploredDirections[location]!.remove(ignoreDirection.reversed)
+                }
+                
+                let isSecurity = securityCheckpoint == nil && location.name.contains("Security")
+                if isSecurity {
+                    // should only be one possible 'key direction'
+                    securityEntrance = unexploredDirections[location]!.first!
+                    securityCheckpoint = location
+                }
+                
+            case .unmoved:
+                break
+            case .fatal, .success:
+                // should not happen, we're just moving
+                return
+            }
+            
+            // there is another direction to explore
+            if let nextPath = unexploredDirections[currentLocation]!.popFirst() {
+                if !result.isUnexpected {
+                    currentPath.push(nextPath)
+                }
+                nextMove = nextPath
+            } else {
+                if let backtrack = currentPath.pop() {
+                    nextMove = backtrack.reversed
+                } else {
+                    // nowhere left to explore! we are done
+                    return
+                }
+            }
+            
+        }
+        
     }
     
     private func updateBlacklistItems() {
-        mainLoop: for location in explored where !location.initialItems.isEmpty {
-            for item in location.initialItems {
-                computer = Intcode(data: initialProgram)
-                move(along: location.path)
-                if blacklist.contains(item) { continue }
-                computer.set(command: .take(item))
-                if nextMove() == nil, computer.hasHalted {
+        for location in explored where !location.initialItems.isEmpty {
+            // run each item in new computer so bad states don't affect the active session
+            for item in location.initialItems where !blacklist.contains(item) {
+                let computer = Intcode(day25DroidProgram: initialProgram)
+                computer.move(along: location.path)
+
+                // -- in order for an item to be fine, we should be able to pick it up and walk with it --
+                computer.run(command: .take(item))
+                let randomTestWalkDirection = location.doors.randomElement()!
+                let check2 = computer.run(command: .walk(randomTestWalkDirection))
+                if check2.isUnexpected {
                     blacklist.insert(item)
-                    continue
-                }
-                // try to move with the item...
-                // (some items only show problems after moving)
-                let move = location.doors.first!
-                computer.set(command: .walk(move))
-                if nextMove() == nil {
-                    blacklist.insert(item)
-                    continue
                 }
             }
         }
@@ -243,66 +213,48 @@ extension Day25.Droid {
         print("  🛑 Blacklisted items:", blacklist.joined(separator: ", "))
     }
     
-    private func attemptAccess() -> String {
-        computer = Intcode(data: initialProgram)
-        var gotItems = Set<String>()
-        // get all items
-        for location in explored {
-            let validItems = location.initialItems.filter { !blacklist.contains($0) }
-            if validItems.isEmpty { continue }
-            move(along: location.path)
-            for item in validItems {
-                gotItems.insert(item)
-                computer.set(command: .take(item))
-                consumeCommand()
-            }
-            // move back to start
-            backtrack(along: location.path)
-        }
+    func attemptAccess() -> String {
         
-        func winningQuote() -> String? {
-            while let line = computer.nextAsciiLine()?.trimmingCharacters(in: .whitespacesAndNewlines) {
-                if line.starts(with: "\"") { return line }
-                if line.starts(with: "Command?") { return nil }
-            }
-            return nil
+        assert(hasExploredMaze, "you must searchMaze before you attemptAccess!")
+        
+        var computer = Intcode(day25DroidProgram: initialProgram)
+        
+        /* get the items we need */
+        let gotItems = collectAllItems(at: explored, using: &computer)
+        if gotItems.isEmpty {
+            return "Error: no usable items, cannot continue"
         }
+        print("  -> Collected all \(gotItems.count) usable items")
         
         // go to the security
-        move(along: securityCheckpoint.path)
+        computer.move(along: securityCheckpoint.path)
+        print("  -> Reached security checkpoint.")
         // drop all items
         for item in gotItems {
-            computer.set(command: .drop(item))
-            consumeCommand()
+            computer.run(command: .drop(item))
         }
         // try item combinations
-        comboLoop: for combo in 1...gotItems.count {
+        for combo in 1...gotItems.count {
             let combos = gotItems.combinations(takenBy: combo)
+            print("  -# Trying \(combo) item groupings (\(combos.count))")
             for list in combos {
+                // 1. equip required items
                 for item in list {
-                    computer.set(command: .take(item))
-                    consumeCommand()
+                    computer.run(command: .take(item))
                 }
-                computer.set(command: .walk(securityEntrance))
-                if let quote = winningQuote() {
+                // 2. see if we got through
+                if case .success(let quote) = computer.run(command: .walk(securityEntrance)) {
                     print("  🌟 Winning Items:", list.joined(separator: ", "))
-                    return quote
+                    return "🎅 \(quote)"
                 }
-                // drop all items, try again
+                // 3. drop all items, try again
                 for item in list {
-                    computer.set(command: .drop(item))
-                    consumeCommand()
+                    computer.run(command: .drop(item))
                 }
             }
         }
         
-        return "?"
-    }
-    
-    func performSearch() -> String {
-        explore()
-        updateBlacklistItems()
-        return attemptAccess()
+        return "😔 Unable to gain access."
     }
 
 }
@@ -345,9 +297,63 @@ extension Direction {
 
 extension Day25.Droid {
     
-    private func consumeCommand(printOutput: Bool = false) {
+    func interactive() -> String {
+        print("💻 Interactive droid.")
+        let exitCommands: Set<String> = ["QUIT", "EXIT", "STOP"]
+        let computer = Intcode(day25DroidProgram: initialProgram, ignoreFirstOutput: false)
+        computer.consumeCommand(printOutput: true)
+        while !computer.hasHalted, let input = readLine(), !exitCommands.contains(input.uppercased()) {
+            print()
+            computer.asciiInput = input.lowercased() + "\n"
+            computer.consumeCommand(printOutput: true)
+        }
+        return "💻 Interactive session ended."
+    }
+    
+}
+
+// MARK: - Auto Helpers
+
+private extension Day25.Droid {
+    
+    func collectAllItems(at locations: Set<Location>, using computer: inout Intcode) -> Set<String> {
+        var gotItems = Set<String>()
+        // get all items
+        for location in locations {
+            let validItems = location.initialItems.filter { !blacklist.contains($0) }
+            if validItems.isEmpty { continue }
+            computer.move(along: location.path)
+            for item in validItems {
+                gotItems.insert(item)
+                computer.run(command: .take(item))
+            }
+            // move back to start
+            computer.backtrack(along: location.path)
+        }
+        return gotItems
+    }
+
+}
+
+// MARK: - Intcode
+
+private extension Intcode {
+    
+    convenience init(day25DroidProgram: [Int], ignoreFirstOutput: Bool = true) {
+        self.init(data: day25DroidProgram)
+        if ignoreFirstOutput {
+            // if we ignore the first output, we want to be able to input a prompt right away
+            // (without having to handle the initial output)
+            // this is only really needed when we need to examine all outputs from the computer
+            // (i.e. parsing locations or in interactive mode)
+            self.consumeCommand()
+        }
+    }
+    
+    /// pull ASCII lines until we hit "Command?", so the computer is immediately ready for input
+    func consumeCommand(printOutput: Bool = false) {
         var lastOutput = ""
-        while let output = computer.nextAsciiLine() {
+        while let output = nextAsciiLine() {
             if output == lastOutput, output == "\n" { continue }
             lastOutput = output
             if printOutput {
@@ -357,21 +363,92 @@ extension Day25.Droid {
         }
     }
     
-    func interactiveShell() {
-        consumeCommand(printOutput: true)
-        while let input = readLine() {
-            print()
-            computer.asciiInput = input + "\n"
-            consumeCommand(printOutput: true)
+    func move(along path: [Direction]) {
+        for step in path {
+            run(command: .walk(step))
         }
     }
     
-}
-
-private extension Intcode {
+    func backtrack(along path: [Direction]) {
+        move(along: path.reversed().map(\.reversed))
+    }
     
-    func set(command: Day25.Droid.Command) {
+    enum Output {
+        /// successfully moved to location
+        case location(name: String, items: Set<String>, doors: Set<Direction>)
+        /// cannot move, with provided reason
+        case unmoved(String)
+        case success(String)
+        case fatal(String)
+        
+        var isTerminal: Bool {
+            switch self {
+            case .success, .fatal:
+                return true
+            default:
+                return false
+            }
+        }
+        
+        var isUnexpected: Bool {
+            switch self {
+            case .fatal, .unmoved:
+                return true
+            default:
+                return false
+            }
+        }
+    }
+    
+    @discardableResult
+    func run(command: Day25.Droid.Command) -> Output {
         asciiInput = command.description + "\n"
+        return pullOutput()
+    }
+    
+    func pullOutput() -> Output {
+        
+        enum Tracking {
+            case doors, items
+        }
+        
+        var locationName: String?
+        var doors = Set<Direction>()
+        var items = Set<String>()
+        var tracking: Tracking = .doors
+        var lastLine = ""
+        
+        while let line = nextAsciiLine()?.trimmingCharacters(in: .whitespacesAndNewlines) {
+            defer { lastLine = line }
+            if line.starts(with: "==") { locationName = line }
+            if line.starts(with: "Doors") { tracking = .doors }
+            if line.starts(with: "Items") { tracking = .items }
+            if line.starts(with: "-") {
+                let next = line.index(line.startIndex, offsetBy: 2)
+                let item = String(line[next...])
+                switch tracking {
+                case .doors:
+                    let direction = Direction(compass: item)!
+                    doors.insert(direction)
+                case .items:
+                    items.insert(item)
+                }
+            }
+            if line.starts(with: "Command?") { break }
+            // success is a quote with the key
+            if line.starts(with: "\"") { return .success(line) }
+        }
+        
+        if let name = locationName, !doors.isEmpty {
+            return .location(name: name, items: items, doors: doors)
+        } else {
+            if hasHalted {
+                return .fatal(lastLine)
+            } else {
+                return .unmoved(lastLine)
+            }
+        }
+        
     }
     
 }
