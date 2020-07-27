@@ -23,7 +23,7 @@ final class Day22: Day {
         for shuffle in shuffles {
             shuffle.perform(on: &cards)
         }
-        return cards.firstIndex(of: 2019) ?? -1
+        return cards.firstIndex(of: 2019)!
     }
     
     func solvePartTwo() -> CustomStringConvertible {
@@ -58,11 +58,11 @@ extension Day22.Shuffle: RawRepresentable {
     init?(rawValue: String) {
         if rawValue == "deal into new stack" {
             self = .dealNewStack
-        } else if rawValue.contains("increment") {
+        } else if rawValue.starts(with: "deal with increment") {
             let num = rawValue.split(separator: " ").map(String.init).compactMap(Int.init)
             guard let firstNum = num.first else { return nil }
             self = .dealWithIncrement(firstNum)
-        } else if rawValue.contains("cut") {
+        } else if rawValue.starts(with: "cut") {
             let num = rawValue.split(separator: " ").map(String.init).compactMap(Int.init)
             guard let firstNum = num.first else { return nil }
             self = .cut(firstNum)
