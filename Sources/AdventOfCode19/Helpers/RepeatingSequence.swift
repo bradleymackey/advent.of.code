@@ -1,5 +1,5 @@
 //
-//  LinkedList.swift
+//  RepeatingSequence.swift
 //  AdventOfCode
 //
 //  Copyright © 2019 Bradley Mackey. MIT Licenced.

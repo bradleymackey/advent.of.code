@@ -84,7 +84,7 @@ extension Direction {
     
     @inline(__always)
     func move(_ coordinate: inout Vector2) {
-        coordinate &+= vector
+        coordinate += vector
     }
     
     @inline(__always)
@@ -94,7 +94,7 @@ extension Direction {
     
     @inline(__always)
     func move(_ vec: inout Vector3) {
-        vec &+= vector3
+        vec += vector3
     }
     
 }

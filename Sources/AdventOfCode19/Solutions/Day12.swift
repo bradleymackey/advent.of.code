@@ -93,10 +93,7 @@ final class Day12: Day {
     }
     
     func solvePartTwo() -> CustomStringConvertible {
-        // this is very slow in Debug thanks to the custom addition operators used by Vector3
-        // (inlining/optimising of these operators only happens in Release so it seems)
-        // probably can speed this up by using SIMD3 directly
-        print("🌓 Calculating part 2 iterations (very slow in Debug)")
+        print("  🌓 Calculating Iterations")
 
         let initialMoons = moons
         // vector to hold the result values as we get them
@@ -162,7 +159,7 @@ extension Day12 {
         }
         
         mutating func applyCurrentVelocity() {
-            position &+= velocity
+            position += velocity
         }
         
         mutating func applyGravityField(from moonField: [Moon]) {
@@ -172,7 +169,7 @@ extension Day12 {
         }
         
         mutating func applyGravity(from other: Moon) {
-            velocity &+= velocityDelta(applyingGravityFrom: other)
+            velocity += velocityDelta(applyingGravityFrom: other)
         }
         
         func velocityDelta(applyingGravityFrom other: Moon) -> Vector3 {
@@ -213,26 +210,35 @@ extension Array where Element == Day12.Moon {
     /// returns which axes have equal states to for all moons
     func equalStateAxes(to other: [Day12.Moon]) -> (x: Bool, y: Bool, z: Bool) {
         let length = self.count
-        let falseVector: SIMDMask<SIMD3<Int>> = [false, false, false]
-        guard length == other.count else { return falseVector.tuple }
-        var result: SIMDMask<SIMD3<Int>> = [true, true, true]
+        let falseVector = [false, false, false]
+        guard length == other.count else { return falseVector.toThreeTuple() }
+        var result = [true, true, true]
         for idx in 0..<length {
-            if result == falseVector { break } // all false, no chance of becoming true
+            if result == falseVector { break } // all false, no chance of any becoming true
             let ourMoon = self[idx]
             let theirMoon = other[idx]
-            result = result
-                .& (ourMoon.position .== theirMoon.position)
-                .& (ourMoon.velocity .== theirMoon.velocity)
+            let positionEqual = [Bool](threeTuple: ourMoon.position .== theirMoon.position)
+            let velocityEqual = [Bool](threeTuple: ourMoon.velocity .== theirMoon.velocity)
+            result = result .& positionEqual .& velocityEqual
         }
-        return result.tuple
+        return result.toThreeTuple()
     }
     
 }
 
-extension SIMDMask where Storage == SIMD3<Int> {
+private extension Array where Element == Bool {
     
-    var tuple: (x: Bool, y: Bool, z: Bool) {
-        (self[0], self[1], self[2])
+    static func .& (lhs: Self, rhs: Self) -> Self {
+        zip(lhs, rhs).map { $0 && $1 }
+    }
+    
+    init(threeTuple: (Bool, Bool, Bool)) {
+        self = [threeTuple.0, threeTuple.1, threeTuple.2]
+    }
+    
+    func toThreeTuple() -> (Bool, Bool, Bool) {
+        assert(count == 3)
+        return (self[0], self[1], self[2])
     }
     
 }
@@ -250,7 +256,6 @@ extension Vector3 {
     }
     
 }
-
 
 extension Day12 {
     
