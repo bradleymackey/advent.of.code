@@ -52,7 +52,7 @@ extension Day18.Maze {
         var toExplore = Queue<([ItemLocation], dist: Int, actualKeys: UInt32, Stack<ItemLocation>)>()
         toExplore.enqueue((entranceLocations, 0, 0, []))
         
-        // z component of vector = keys fetched at each level
+        // z component of vector = current keys in possession when (x,y) is visited
         // all locations are at the start, so no distance away
         var distances = [Vector3: Int]()
         entrances.forEach {
@@ -72,11 +72,13 @@ extension Day18.Maze {
                     bestDist = dist
                     bestPath = path
                 }
+                // we got all the keys on this search path, so we don't need to keep searching
+                continue
             }
             
             // 'nodes' are all the locations that we currently have droids at
             for node in nodes {
-                
+
                 let neighbours = currentNeighbours[node]
                 for (nbr, weight) in neighbours {
                     
