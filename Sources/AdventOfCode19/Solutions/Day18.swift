@@ -24,65 +24,81 @@ final class Day18: Day {
     func solvePartTwo() -> CustomStringConvertible {
         print("  -> Loading maze...")
         let maze = MazeBuilder(input: input).buildMaze(patchToFourWay: true)
+        print("  -> Maze of size \(maze.size.x)x\(maze.size.y)")
         return maze.fastestUnlockPath()
     }
     
 }
 
-// MARK: - Solutions
+// MARK: - Solution
 
 extension Day18.Maze {
     
     func fastestUnlockPath() -> CustomStringConvertible {
         let (graph, allKeysMask) = keysGraph()
         
-        var toExplore: Queue<(entrance: Vector2, ItemLocation, dist: Int, actualKeys: UInt32, Stack<ItemLocation>)> = []
+        // queue holds:
+        //  - all locations that we currently have droids at
+        //  - cumulative distance
+        //  - current keys possessed
+        //  - path used to get here
+        var toExplore: Queue<([ItemLocation], dist: Int, actualKeys: UInt32, Stack<ItemLocation>)> = []
         // z component of vector = keys fetched at each level
         var distances = [Vector3: Int]()
+        var entranceLocations = [ItemLocation]()
         for entrance in entrances {
             distances[.init(xy: entrance, z: 0)] = 0
-            toExplore.enqueue((entrance, .init(object: .entrance, coordinate: entrance), 0, 0, []))
+            entranceLocations.append(.init(object: .entrance, coordinate: entrance))
         }
-        var bestDist = [Vector2: Int]() // best distance from each entrance
-        var bestPath = [Vector2: Stack<ItemLocation>]()
+        toExplore.enqueue((entranceLocations, 0, 0, []))
+        var bestDist = Int.max
+        var bestPath = Stack<ItemLocation>()
         
-        while let (entrance, node, dist, actualKeys, path) = toExplore.dequeue() {
+        // this cache can give a 2x speedup
+        var currentNeighbours = KeyValueCache(slowPath: graph.neighbours)
+        
+        while let (nodes, dist, actualKeys, path) = toExplore.dequeue() {
             
             if actualKeys == allKeysMask {
-                if dist < bestDist[entrance, default: Int.max] {
-                    bestDist[entrance] = dist
-                    bestPath[entrance] = path
+                if dist < bestDist {
+                    bestDist = dist
+                    bestPath = path
                 }
             }
             
-            let neighbours = graph.edges[node, default: []]
-            for nbr in neighbours {
+            for node in nodes {
                 
-                var actualKeys = actualKeys
-                let requiredKeys = nbr.value.keysRequired
-                // check if already have key
-                guard (actualKeys & nbr.value.keyMask) == 0 else { continue }
-                // check if have enough keys to reach this key
-                guard (actualKeys & requiredKeys) == requiredKeys else { continue }
-                let wgt = nbr.weight
-                if case let .key(ky) = nbr.value.object {
-                    actualKeys |= ky.mask
-                }
-                let nbrCoordinate = Vector3(xy: nbr.value.coordinate, z: Int(actualKeys))
-                let tentativeDistance = dist &+ wgt
-                let existingDistance = distances[nbrCoordinate, default: Int.max]
-                var newPath = path
-                newPath.push(nbr.value)
-                if tentativeDistance < existingDistance {
-                    distances[nbrCoordinate] = tentativeDistance
-                    toExplore.enqueue((entrance, nbr.value, tentativeDistance, actualKeys, newPath))
+                let neighbours = currentNeighbours[node]
+                for (nbr, weight) in neighbours {
+                    
+                    var actualKeys = actualKeys
+                    let requiredKeys = nbr.keysRequired
+                    // check if already have key
+                    guard (actualKeys & nbr.keyMask) == 0 else { continue }
+                    // check if have enough keys to reach this key
+                    guard (actualKeys & requiredKeys) == requiredKeys else { continue }
+                    if case let .key(ky) = nbr.object {
+                        actualKeys |= ky.mask
+                    }
+                    let nbrCoordinate = Vector3(xy: nbr.coordinate, z: Int(actualKeys))
+                    let tentativeDistance = dist &+ weight
+                    let existingDistance = distances[nbrCoordinate, default: Int.max]
+                    var newPath = path
+                    newPath.push(nbr)
+                    if tentativeDistance < existingDistance {
+                        distances[nbrCoordinate] = tentativeDistance
+                        var newNodes = nodes
+                        let currentIndex = nodes.firstIndex(of: node)!
+                        newNodes[currentIndex] = nbr
+                        toExplore.enqueue((newNodes, tentativeDistance, actualKeys, newPath))
+                    }
                 }
                 
             }
             
         }
         
-        return "\(bestDist.map { $0.value }.sum())"
+        return "\(bestDist) by \(bestPath.map { $0.description })"
     
     }
     
@@ -310,10 +326,11 @@ extension Day18.Maze {
     }
     
     /// a weighted graph of all keys
-    func keysGraph() -> (WeightedGraph<ItemLocation>, mask: UInt32) {
-        var graph = WeightedGraph<ItemLocation>()
+    func keysGraph() -> (Graph<ItemLocation>, mask: UInt32) {
+        var graph = Graph<ItemLocation>()
         var keyMask: UInt32 = 0
         
+        // how many other keys are required before we can reach this key?
         var keysRequired = [Day18.Object.Key: UInt32]()
         
         for entrance in entrances {
@@ -322,20 +339,21 @@ extension Day18.Maze {
                 coordinate: entrance
             )
             let foundFromEntrance = keyBfs(
-                from: startLocation
+                from: startLocation,
+                realStartLocation: true
             )
             for item in foundFromEntrance where item.item.coordinate != startLocation.coordinate {
                 if case .key(let ky) = item.item.object {
-                    // bump the mask
+                    // 1. bump the mask (so we know how many keys total we have)
                     if keyMask == 0 {
                         keyMask &+= 1
                     } else {
                         keyMask = keyMask << 1
                         keyMask &+= 1
                     }
-                    // add to keys dict
+                    // 2. add to keys dict
                     keysRequired[ky] = item.item.keysRequired
-                    // add to graph
+                    // 3. add start to key edge to graph
                     graph.add(from: startLocation, to: item.item, weight: item.distance)
                 }
             }
@@ -347,8 +365,10 @@ extension Day18.Maze {
                 coordinate: key.location
             )
             let found = keyBfs(
-                from: startingKey
+                from: startingKey,
+                realStartLocation: false
             )
+            // use the `keysRequired` value from the start location
             startingKey.keysRequired = keysRequired[key.key]!
             for otherObject in found where otherObject.item.coordinate != key.location {
                 var other = otherObject
@@ -362,7 +382,9 @@ extension Day18.Maze {
         return (graph, keyMask)
     }
     
-    private func keyBfs(from start: ItemLocation) -> Set<_FoundItemLocation> {
+    /// breadth-first search to find all keys from the starting location provided
+    /// - note: `keysRequired` value is only valid if starting from a real start location
+    private func keyBfs(from start: ItemLocation, realStartLocation: Bool) -> Set<_FoundItemLocation> {
         
         var seen: Set<Vector2> = []
         let start = _FoundItemLocation(item: start, distance: 0)
@@ -408,7 +430,8 @@ extension Day18.Maze {
                     item: ItemLocation(
                         object: object,
                         coordinate: coor,
-                        keysRequired: current.item.keysRequired
+                        // `keysRequired` value is only valid for a realStartLocation
+                        keysRequired: realStartLocation ? current.item.keysRequired : .max
                     ),
                     distance: newDistance
                 )
@@ -439,7 +462,7 @@ extension Day18.Maze {
 extension Day18.Object: CustomStringConvertible {
     
     var description: String {
-        "\(self.rawValue)"
+        String(rawValue)
     }
     
 }
@@ -447,7 +470,7 @@ extension Day18.Object: CustomStringConvertible {
 extension Day18.Maze.ItemLocation: CustomStringConvertible {
     
     var description: String {
-        "\"\(self.object)\",\(self.coordinate),keys:\(self.keysRequired)"
+        object.description
     }
     
 }
@@ -456,67 +479,35 @@ extension Day18.Maze.ItemLocation: CustomStringConvertible {
 
 extension Day18.Maze {
     
-    struct WeightedGraph<Node> where Node: Hashable {
+    struct Graph<Node> where Node: Hashable {
         
-        struct WeightedNode: Hashable {
-            var value: Node
-            var weight: Int
-            
-            init(_ value: Node, weight: Int = 1) {
-                self.value = value
-                self.weight = weight
-            }
-            
-            func hash(into hasher: inout Hasher) {
-                hasher.combine(value)
-            }
-            
-        }
-        
-        struct _Directed: Hashable {
+        /// could really use Swift 5.3 Tuple Hashable here...
+        private struct _Edge: Hashable {
             var from: Node
             var to: Node
         }
-        
-        private(set) var edges = [Node: Set<WeightedNode>]()
-        /// fast access to weights
-        private var weights = [_Directed: Int]()
-        
-        subscript(_ node: Node) -> Set<WeightedNode> {
-            edges[node] ?? []
-        }
+
+        private var edges = [Node: Set<Node>]()
+        private var weights = [_Edge: Int]()
         
         mutating func add(from: Node, to: Node, weight: Int = 1) {
-            let newNode = WeightedNode(to, weight: weight)
-            edges[from, default: []].insert(newNode)
-            let directed = _Directed(from: from, to: to)
-            weights[directed] = weight
+            edges[from, default: []].insert(to)
+            let edge = _Edge(from: from, to: to)
+            weights[edge] = weight
         }
         
-        func weight(from: Node, to: Node) -> Int? {
-            let directed = _Directed(from: from, to: to)
-            return weights[directed]
-        }
-        
-        var allNodes: Set<Node> {
-            var result = Set<Node>()
-            for (node, neighbours) in edges {
-                result.insert(node)
-                for neighbour in neighbours {
-                    result.insert(neighbour.value)
-                }
+        func neighbours(to node: Node) -> [(Node, weight: Int)] {
+            guard let nbrs = edges[node] else { return [] }
+            var result = [(Node, weight: Int)]()
+            result.reserveCapacity(nbrs.count)
+            for nbr in nbrs {
+                let edge = _Edge(from: node, to: nbr)
+                guard let weight = weights[edge] else { continue }
+                result.append((nbr, weight))
             }
             return result
         }
         
-    }
-    
-}
-
-extension Day18.Maze.WeightedGraph.WeightedNode: CustomStringConvertible {
-    
-    var description: String {
-        "(\(value),w:\(weight))"
     }
     
 }

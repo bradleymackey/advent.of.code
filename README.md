@@ -5,11 +5,21 @@ Feel free to look around.
 
 I've been fascinated with Swift's general-purpose languge features for a long time, and AOC is the perfect excuse to put that framework-independent, pure-language applicability to the test.
 
+## Usage Tips
+
+Run in `Release`, that is, `-O` optimisation level.
+This can cause at least an _order of magnitude_ of speed improvements on some challenges (i.e. Day 12, Day 18).
+All other challenges run many times faster as well.
+
+> Insert comment about how `-Onone` is suprisingly slow.
+
 ## Thoughts, Feelings and Observations
 
 ### Questions
 
 - Excellent ranging of levels of difficultly and novel questions make for an exciting time. Clearly very well thought out.
+- Part 2 always built very well on Part 1. Code could generally be reused, but needed to be though of in a different way.
+This often led to a refactoring and fundamental improvement of the original code for both parts of the question.
 
 ### Swift
 
