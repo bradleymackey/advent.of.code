@@ -32,30 +32,35 @@
  */
 public struct Stack<Element> {
     
-    fileprivate var array = [Element]()
+    fileprivate var storage = [Element]()
     
     public mutating func reserveCapacity(_ minimumCapacity: Int) {
-        array.reserveCapacity(minimumCapacity)
+        storage.reserveCapacity(minimumCapacity)
     }
     
     public var isEmpty: Bool {
-        array.isEmpty
+        storage.isEmpty
     }
     
     public var count: Int {
-        array.count
+        storage.count
+    }
+    
+    public var array: [Element] {
+        storage
     }
     
     public mutating func push(_ element: Element) {
-        array.append(element)
+        storage.append(element)
     }
     
     public mutating func push<S: Sequence>(contentsOf sequence: S) where S.Element == Element {
-        array.append(contentsOf: sequence)
+        storage.append(contentsOf: sequence)
     }
     
+    @discardableResult
     public mutating func pop() -> Element? {
-        array.popLast()
+        storage.popLast()
     }
     
     public var top: Element? {
@@ -68,12 +73,40 @@ public struct Stack<Element> {
     
 }
 
+extension Stack: CustomStringConvertible, CustomDebugStringConvertible {
+    
+    public var description: String {
+        array.description
+    }
+    
+    public var debugDescription: String {
+        "stack<\(array.debugDescription)|>" // top is last
+    }
+    
+}
+
 extension Stack: ExpressibleByArrayLiteral {
     
     public typealias ArrayLiteralElement = Element
     
     public init(arrayLiteral elements: Element...) {
-        self.init(array: elements)
+        self.init(storage: elements)
+    }
+    
+}
+
+extension Stack: Equatable where Element: Equatable {
+    
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.storage == rhs.storage
+    }
+    
+}
+
+extension Stack: Hashable where Element: Hashable {
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(storage)
     }
     
 }
