@@ -33,10 +33,16 @@ let spacer = """
 
 """
 
+enum Exit: Int32 {
+    case success
+    case error
+    case giveHelp
+}
+
 /// loads, runs and reports success for all requested challenges
 ///
 /// - returns: program exit code
-func main() -> Int32 {
+func main() -> Exit {
     do {
         print(intro)
         print(spacer)
@@ -47,20 +53,20 @@ func main() -> Int32 {
             print()
         }
         print("Completed! Have a great day! 👨‍💻")
-        return 0
+        return .success
     } catch App.Error.tooFewArguments {
         print(help, "\n")
-        return 2
+        return .giveHelp
     } catch {
         print("* ERROR *")
         print(error.localizedDescription, "\n")
-        return 1
+        return .error
     }
 }
 
-let exitCode = measure(title: "Total Runtime") {
+let exitStatus = measure(title: "Total Runtime") {
     main()
 }
 
 print(spacer)
-exit(exitCode)
+exit(exitStatus.rawValue)
