@@ -34,23 +34,31 @@ final class Day18: Day {
 
 extension Day18.Maze {
     
+    /// breadth-first search on a 3D maze, which considers (x,y,currentKeys) on a weighted graph of all
+    /// keys. all possible paths are considered based on which keys are in possession at any given time,
+    /// so running for long enough it is guaranteed to get the shortest path.
     func fastestUnlockPath() -> CustomStringConvertible {
         let (graph, allKeysMask) = keysGraph()
         
+        let entranceLocations = entrances.map {
+            ItemLocation(object: .entrance, coordinate: $0)
+        }
+        
         // queue holds:
         //  - all locations that we currently have droids at
-        //  - cumulative distance
+        //  - cumulative distance to the current state
         //  - current keys possessed
         //  - path used to get here
-        var toExplore: Queue<([ItemLocation], dist: Int, actualKeys: UInt32, Stack<ItemLocation>)> = []
-        // z component of vector = keys fetched at each level
-        var distances = [Vector3: Int]()
-        var entranceLocations = [ItemLocation]()
-        for entrance in entrances {
-            distances[.init(xy: entrance, z: 0)] = 0
-            entranceLocations.append(.init(object: .entrance, coordinate: entrance))
-        }
+        var toExplore = Queue<([ItemLocation], dist: Int, actualKeys: UInt32, Stack<ItemLocation>)>()
         toExplore.enqueue((entranceLocations, 0, 0, []))
+        
+        // z component of vector = keys fetched at each level
+        // all locations are at the start, so no distance away
+        var distances = [Vector3: Int]()
+        entrances.forEach {
+            distances[.init(xy: $0, z: 0)] = 0
+        }
+        
         var bestDist = Int.max
         var bestPath = Stack<ItemLocation>()
         
@@ -66,6 +74,7 @@ extension Day18.Maze {
                 }
             }
             
+            // 'nodes' are all the locations that we currently have droids at
             for node in nodes {
                 
                 let neighbours = currentNeighbours[node]
@@ -92,10 +101,9 @@ extension Day18.Maze {
                         newNodes[currentIndex] = nbr
                         toExplore.enqueue((newNodes, tentativeDistance, actualKeys, newPath))
                     }
+                    
                 }
-                
             }
-            
         }
         
         return "\(bestDist) by \(bestPath.map { $0.description })"
@@ -300,7 +308,7 @@ extension Day18 {
 
 extension Day18.Maze {
     
-    struct _FoundItemLocation: Hashable {
+    private struct _FoundItemLocation: Hashable {
         var item: ItemLocation
         var distance: Int
     }
@@ -368,11 +376,14 @@ extension Day18.Maze {
                 from: startingKey,
                 realStartLocation: false
             )
-            // use the `keysRequired` value from the start location
+            // use the `keysRequired` value from the start location,
+            // this value is invalid because it doesn't know how many doors it's behind when it starts
             startingKey.keysRequired = keysRequired[key.key]!
             for otherObject in found where otherObject.item.coordinate != key.location {
                 var other = otherObject
                 if case .key(let key) = other.item.object {
+                    // use the `keysRequired` value from the start location,
+                    // this value is invalid because it doesn't know how many doors it's behind when it starts
                     other.item.keysRequired = keysRequired[key]!
                     graph.add(from: startingKey, to: other.item, weight: otherObject.distance)
                 }
