@@ -355,12 +355,8 @@ extension Day18.Maze {
             for item in foundFromEntrance where item.item.coordinate != startLocation.coordinate {
                 if case .key(let ky) = item.item.object {
                     // 1. bump the mask (so we know how many keys total we have)
-                    if keyMask == 0 {
-                        keyMask &+= 1
-                    } else {
-                        keyMask = keyMask << 1
-                        keyMask &+= 1
-                    }
+                    keyMask &<<= 1
+                    keyMask |= 1
                     // 2. add to keys dict
                     keysRequired[ky] = item.item.keysRequired
                     // 3. add start to key edge to graph
