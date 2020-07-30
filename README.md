@@ -3,6 +3,9 @@
 At attempt at Advent of Code 2019 using only Swift, written as "Swiftly" as possible.
 Feel free to look around.
 
+This solution is **totally generic**, and will work on **any valid AOC inputs** (another goal of the challenge for me).
+Just replace my inputs with your own and get all the solutions!
+
 I've been fascinated with Swift's general-purpose languge features for a long time, and AOC is the perfect excuse to put that framework-independent, pure-language applicability to the test.
 
 ## Usage Tips
