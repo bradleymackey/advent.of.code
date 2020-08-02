@@ -63,9 +63,9 @@ extension Day18.Maze {
         var bestPath = Stack<ItemLocation>()
         
         // this cache can give a 2x speedup
-        var currentNeighbours = KeyValueCache(slowPath: graph.neighbours)
+        var neighbours = KeyValueCache(slowPath: graph.neighbours)
         
-        while let (nodes, dist, actualKeys, path) = toExplore.dequeue() {
+        while let (droidLocations, dist, actualKeys, path) = toExplore.dequeue() {
             
             if actualKeys == allKeysMask {
                 if dist < bestDist {
@@ -76,11 +76,9 @@ extension Day18.Maze {
                 continue
             }
             
-            // 'nodes' are all the locations that we currently have droids at
-            for node in nodes {
+            for (droidIndex, droid) in droidLocations.enumerated() {
 
-                let neighbours = currentNeighbours[node]
-                for (nbr, weight) in neighbours {
+                for (nbr, weight) in neighbours[droid] {
                     
                     var actualKeys = actualKeys
                     let requiredKeys = nbr.keysRequired
@@ -98,10 +96,10 @@ extension Day18.Maze {
                     newPath.push(nbr)
                     if tentativeDistance < existingDistance {
                         distances[nbrCoordinate] = tentativeDistance
-                        var newNodes = nodes
-                        let currentIndex = nodes.firstIndex(of: node)!
-                        newNodes[currentIndex] = nbr
-                        toExplore.enqueue((newNodes, tentativeDistance, actualKeys, newPath))
+                        var droidLocations = droidLocations
+                        // droid should move to new location, because it is a faster path
+                        droidLocations[droidIndex] = nbr
+                        toExplore.enqueue((droidLocations, tentativeDistance, actualKeys, newPath))
                     }
                     
                 }
