@@ -32,14 +32,14 @@ final class Day03: Day {
     
     func solvePartOne() -> CustomStringConvertible {
         intersectionPoints
-            .min(by: { $0.key.distanceToOrigin < $1.key.distanceToOrigin })!
-            .key.distanceToOrigin
+            .map(\.key.distanceToOrigin)
+            .min()!
     }
     
     func solvePartTwo() -> CustomStringConvertible {
         intersectionPoints
-            .min(by: { $0.value < $1.value })!
-            .value
+            .map(\.value)
+            .min()!
     }
     
 }
