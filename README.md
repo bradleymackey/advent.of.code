@@ -9,6 +9,22 @@ Just replace my inputs with your own and get all the solutions!
 
 I've been fascinated with Swift's general-purpose languge features for a long time, and AOC is the perfect excuse to put that framework-independent, pure-language applicability to the test.
 
+## Running
+
+Make sure you have Swift 5.2 or later installed, as well as the Swift Package Manager.
+Clone the repository and navigate to the directory:
+
+```sh
+git clone https://github.com/bradleymackey/advent-of-code-19
+cd advent-of-code-19
+```
+
+Run the executable (`0` runs all days, change this to a number to run that day):
+
+```sh
+swift run -c release AdventOfCode19 0 ./Inputs
+```
+
 ## Usage Tips
 
 Run in `Release`, that is, `-O` optimisation level.
