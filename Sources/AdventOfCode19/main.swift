@@ -36,7 +36,6 @@ let spacer = """
 enum Exit: Int32 {
     case success
     case error
-    case giveHelp
 }
 
 /// loads, runs and reports success for all requested challenges
@@ -56,7 +55,7 @@ func main() -> Exit {
         return .success
     } catch App.Error.tooFewArguments {
         print(help, "\n")
-        return .giveHelp
+        return .error
     } catch {
         print("* ERROR *")
         print(error.localizedDescription, "\n")
