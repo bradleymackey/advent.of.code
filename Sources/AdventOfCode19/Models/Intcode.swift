@@ -184,7 +184,8 @@ final class Intcode {
         return Instruction(code: code, parameters: parameters, instructionStartPosition: pointer)
     }
     
-    func execute(_ i: Instruction) throws -> Action {
+    @inline(__always)
+    private func execute(_ i: Instruction) throws -> Action {
         switch i.code {
         case .add:
             let total = load(i) + load(i)
@@ -233,12 +234,14 @@ final class Intcode {
         return .continue
     }
     
+    @inline(__always)
     private func load(_ i: Instruction) -> Int {
         defer { pointer += 1 }
         let paramIndex = pointer - i.instructionStartPosition
         return value(from: i.parameters[paramIndex])
     }
     
+    @inline(__always)
     private func store(val: Int, _ i: Instruction) {
         defer { pointer += 1 }
         let paramIndex = pointer - i.instructionStartPosition
@@ -246,7 +249,8 @@ final class Intcode {
         data[addr] = val
     }
     
-    func value(from param: Instruction.Parameter) -> Int {
+    @inline(__always)
+    private func value(from param: Instruction.Parameter) -> Int {
         switch param.mode {
         case .immediate:
             return param.value
@@ -255,7 +259,8 @@ final class Intcode {
         }
     }
     
-    func address(from param: Instruction.Parameter) -> Int {
+    @inline(__always)
+    private func address(from param: Instruction.Parameter) -> Int {
         switch param.mode {
         case .immediate, .position:
             return param.value
