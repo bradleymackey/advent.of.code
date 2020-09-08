@@ -2,6 +2,7 @@
 
 At attempt at Advent of Code 2019 using only Swift, written as "Swiftly" as possible.
 Feel free to look around.
+The project is structured as a [Swift Package](https://swift.org/package-manager/), so should be compatible on all platforms where Swift is supported.
 
 This solution is **totally generic**, and will work on **any valid AOC inputs** (another goal of the challenge for me).
 Just replace my inputs with your own and get all the solutions!
