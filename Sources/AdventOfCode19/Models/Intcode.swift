@@ -168,14 +168,15 @@ final class Intcode {
             throw Exception.invalidOpcode(rawCodeNumber)
         }
         let rawParameterCodes = fullCode / 100
+        let desiredParameters = code.desiredParameters
         let parameterModes = Instruction.Parameter.Mode.modesFrom(
             rawValue: rawParameterCodes,
-            totalDesired: code.desiredParameters
+            totalDesired: desiredParameters
         )
         let offset = pointer + 1
         var parameterValues = [Int]()
-        for i in offset..<(offset+code.desiredParameters) {
-            parameterValues.append(data[i]!)
+        for i in offset..<offset+desiredParameters {
+            parameterValues.append(data[i, default: 0])
         }
         let parameters = zip(parameterModes, parameterValues).map {
             Instruction.Parameter(mode: $0, value: $1)
