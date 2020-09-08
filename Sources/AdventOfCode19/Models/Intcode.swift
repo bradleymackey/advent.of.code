@@ -156,7 +156,7 @@ final class Intcode {
         }
     }
     
-    func nextInstruction() throws -> Instruction {
+    private func nextInstruction() throws -> Instruction {
         guard
             pointer >= 0 && pointer < data.count,
             let fullCode = data[pointer]
