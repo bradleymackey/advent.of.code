@@ -2,7 +2,7 @@ extern crate aoc_runner;
 #[macro_use]
 extern crate aoc_runner_derive;
 
-mod utils {
+mod common {
     pub mod direction;
     pub mod vector2;
 }
