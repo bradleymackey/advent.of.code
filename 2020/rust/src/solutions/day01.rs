@@ -12,21 +12,20 @@ fn parse_input(input: &str) -> Vec<u32> {
 }
 
 #[aoc(day1, part1)]
-fn part1(input: &Vec<u32>) -> u32 {
+fn part1(input: &Vec<u32>) -> Option<u32> {
     let target = 2020u32;
     for (i, num) in input.iter().enumerate() {
         let remaining_sum = target - num;
         let (_, right) = input.split_at(i + 1);
         if let Ok(_idx) = right.binary_search(&remaining_sum) {
-            return num * remaining_sum;
+            return Some(num * remaining_sum);
         }
     }
-    println!("no solution found for day 1 - part 1");
-    0
+    None
 }
 
 #[aoc(day1, part2)]
-fn part2(input: &Vec<u32>) -> u32 {
+fn part2(input: &Vec<u32>) -> Option<u32> {
     let target = 2020u32;
     for (i, num_i) in input.iter().enumerate() {
         let remaining_sum = target - num_i;
@@ -35,10 +34,9 @@ fn part2(input: &Vec<u32>) -> u32 {
             let remaining_sum = remaining_sum - num_j;
             let (_, right) = input.split_at(j + 1);
             if let Ok(_idx) = right.binary_search(&remaining_sum) {
-                return num_i * num_j * remaining_sum;
+                return Some(num_i * num_j * remaining_sum);
             }
         }
     }
-    println!("no solution found for day 1 - part 2");
-    0
+    None
 }
