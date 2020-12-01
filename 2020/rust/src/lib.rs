@@ -11,5 +11,4 @@ mod solutions {
     pub mod day01;
 }
 
-// define the the year that we are running aoc for
 aoc_lib! { year = 2020 }
