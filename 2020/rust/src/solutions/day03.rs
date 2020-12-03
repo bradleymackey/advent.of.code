@@ -37,10 +37,10 @@ fn parse_input(input: &str) -> Vec<Vec<Cell>> {
 
 fn trees_encountered(input: &Vec<Vec<Cell>>, slope: &Vector2) -> usize {
     let x_wide = input[0].len() as isize;
-    let y_bottom = input.len() as isize;
+    let height = input.len() as isize;
     let mut pos = Vector2::zero();
     let mut trees = 0;
-    while pos.y < y_bottom - 1 {
+    while pos.y < height - 1 {
         pos.x += slope.x;
         pos.x %= x_wide; // repeat, so wrap
         pos.y += slope.y;
