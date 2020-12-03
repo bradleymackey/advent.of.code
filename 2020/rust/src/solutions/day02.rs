@@ -4,40 +4,11 @@
 // I'm really a fan of the ability to write unit tests so easily! This definetly encourages safe
 // code.
 
+use crate::common::parse_error::ParseError;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::ops::RangeInclusive;
 use std::str::FromStr;
-use std::{
-    error::Error,
-    fmt::{self, Display, Formatter},
-    num::ParseIntError,
-};
-
-#[derive(Debug, Clone)]
-struct ParsePasswordError;
-
-impl Display for ParsePasswordError {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        write!(f, "Unable to parse to a Password.")
-    }
-}
-
-impl Error for ParsePasswordError {
-    fn description(&self) -> &str {
-        "Unable to parse to a Password."
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        None
-    }
-}
-
-impl From<ParseIntError> for ParsePasswordError {
-    fn from(_error: ParseIntError) -> Self {
-        ParsePasswordError
-    }
-}
 
 #[derive(Debug)]
 struct Condition {
@@ -98,7 +69,7 @@ impl Password {
 const PASSWORD_REGEX: &str = r"^(\d+)-(\d+) (\w): (\w+)$";
 
 impl FromStr for Password {
-    type Err = ParsePasswordError;
+    type Err = ParseError;
 
     fn from_str(password_str: &str) -> Result<Self, Self::Err> {
         lazy_static! {
@@ -107,12 +78,13 @@ impl FromStr for Password {
         }
 
         REG.captures(password_str)
-            .ok_or(ParsePasswordError)
+            .ok_or(ParseError)
             .and_then(|cap| {
                 Ok(Password::new(
                     &cap[4],
-                    // FIXME: rethrow our own error, rather than unwrapping
-                    cap[3].parse().unwrap(),
+                    // we implement From<> for Int error and char error to
+                    // our custom error type
+                    cap[3].parse()?,
                     cap[1].parse()?,
                     cap[2].parse()?,
                 ))
