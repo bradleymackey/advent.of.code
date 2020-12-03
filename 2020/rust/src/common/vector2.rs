@@ -1,3 +1,5 @@
+use std::ops::{Add, AddAssign, Sub, SubAssign};
+
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Vector2 {
     pub x: isize,
@@ -10,6 +12,7 @@ impl std::fmt::Display for Vector2 {
     }
 }
 
+#[allow(dead_code)]
 impl Vector2 {
     pub fn zero() -> Self {
         Vector2 { x: 0, y: 0 }
@@ -31,6 +34,11 @@ impl Vector2 {
         Vector2 { x: x, y: y }
     }
 
+    /// creates a new vector from a tuple (x,y)
+    pub fn from_tup(xy: (isize, isize)) -> Self {
+        Vector2 { x: xy.0, y: xy.1 }
+    }
+
     pub fn sum(&self) -> isize {
         self.x + self.y
     }
@@ -50,10 +58,9 @@ impl Vector2 {
     }
 }
 
-impl<'a, 'b> core::ops::Add<&'b Vector2> for &'a Vector2 {
+impl Add for Vector2 {
     type Output = Vector2;
-
-    fn add(self, other: &'b Vector2) -> Vector2 {
+    fn add(self, other: Vector2) -> Vector2 {
         Vector2 {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -61,13 +68,30 @@ impl<'a, 'b> core::ops::Add<&'b Vector2> for &'a Vector2 {
     }
 }
 
-impl<'a, 'b> core::ops::Sub<&'b Vector2> for &'a Vector2 {
-    type Output = Vector2;
+impl AddAssign for Vector2 {
+    fn add_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        };
+    }
+}
 
-    fn sub(self, other: &'b Vector2) -> Vector2 {
+impl Sub for Vector2 {
+    type Output = Vector2;
+    fn sub(self, other: Vector2) -> Vector2 {
         Vector2 {
             x: self.x - other.x,
             y: self.y - other.y,
         }
+    }
+}
+
+impl SubAssign for Vector2 {
+    fn sub_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        };
     }
 }

@@ -35,15 +35,15 @@ fn parse_input(input: &str) -> Vec<Vec<Cell>> {
         .collect()
 }
 
+#[inline]
 fn trees_encountered(input: &Vec<Vec<Cell>>, slope: &Vector2) -> usize {
     let x_wide = input[0].len() as isize;
     let height = input.len() as isize;
     let mut pos = Vector2::zero();
     let mut trees = 0;
     while pos.y < height - 1 {
-        pos.x += slope.x;
+        pos += *slope;
         pos.x %= x_wide; // repeat, so wrap
-        pos.y += slope.y;
         let item = &input[pos.y as usize][pos.x as usize];
         match item {
             Cell::Empty => {}
@@ -61,16 +61,10 @@ fn part1(input: &Vec<Vec<Cell>>) -> usize {
 
 #[aoc(day3, part2)]
 fn part2(input: &Vec<Vec<Cell>>) -> usize {
-    let slopes = [
-        Vector2::new(1, 1),
-        Vector2::new(3, 1),
-        Vector2::new(5, 1),
-        Vector2::new(7, 1),
-        Vector2::new(1, 2),
-    ];
+    let slopes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)];
     slopes
         .iter()
-        .map(|slope| trees_encountered(&input, slope))
+        .map(|slope| trees_encountered(&input, &Vector2::from_tup(*slope)))
         .product()
 }
 
