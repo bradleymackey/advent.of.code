@@ -53,13 +53,10 @@ impl BoardingPass {
         }
         seat
     }
-    fn seat_id_no(row: usize, col: usize) -> usize {
-        (row * 8) + col
-    }
     fn seat_id(&self) -> usize {
         let row = BoardingPass::seat_position(&self.rows);
         let col = BoardingPass::seat_position(&self.cols);
-        BoardingPass::seat_id_no(row, col)
+        (row * 8) + col
     }
 }
 
