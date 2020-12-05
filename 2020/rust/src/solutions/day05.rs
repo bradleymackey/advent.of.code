@@ -41,11 +41,9 @@ impl TryFrom<&str> for BoardingPass {
 
 impl BoardingPass {
     fn seat_position(positions: &Vec<Side>) -> usize {
-        let base: u32 = 2;
-        let len = positions.len() as u32;
         // only need to track the 'low end' of the binary search
         // if in the 'high end' a given round, just add the round size
-        let mut round_size = base.pow(len) as usize;
+        let mut round_size = 2u32.pow(positions.len() as u32) as usize;
         let mut seat = 0;
         for pos in positions {
             round_size /= 2;
