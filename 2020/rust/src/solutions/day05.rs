@@ -85,10 +85,10 @@ fn part2(input: &Vec<BoardingPass>) -> Option<usize> {
         .map(|p| p.seat_id())
         .collect::<HashSet<_>>();
     // rust iter note ->
-    // .iter() ALWAYS returns a reference
+    // .iter() ALWAYS returns a reference (&T)
     // eliding .iter() calls .into_iter()
     // .into_iter() returns either T, &T, &mut T depending on the context
-    // we don't want to move `seen` here, because we access it from the loop
+    // we don't want to "move" `seen` here, because we access it from the loop
     // therefore, just refer to it, so we call `.iter()`
     for id in seen.iter() {
         // we are looking for a gap in the consecutive ids -> not at the very start or end, just
