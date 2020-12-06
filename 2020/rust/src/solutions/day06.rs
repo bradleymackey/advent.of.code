@@ -29,14 +29,14 @@ fn part1(input: &Input) -> u32 {
 }
 
 #[aoc(day6, part2)]
-fn part2(input: &Input) -> usize {
+fn part2(input: &Input) -> u32 {
     let mut total = 0;
     let mut seen_round = HashMap::new();
     let mut members_round = 0;
     for chrs in input.iter() {
         // empty = end of group
         if chrs.is_empty() {
-            total += seen_round.values().filter(|c| **c == members_round).count();
+            total += seen_round.values().filter(|c| **c == members_round).count() as u32;
             members_round = 0;
             seen_round.clear();
         } else {
