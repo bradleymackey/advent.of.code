@@ -1,5 +1,6 @@
-use num::{Num, Signed, Unsigned};
-use std::fmt::Display;
+use num::Num;
+use std::cmp::{max, min};
+use std::fmt::{Display, Formatter};
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
@@ -20,6 +21,7 @@ where
         Vector2 { x, y }
     }
 
+    /// (x: 0, y: 0) - the origin
     pub fn zero() -> Self {
         Vector2 {
             x: N::zero(),
@@ -27,6 +29,7 @@ where
         }
     }
 
+    /// (x: 1, y: 1)
     pub fn one() -> Self {
         Vector2 {
             x: N::one(),
@@ -34,12 +37,14 @@ where
         }
     }
 
+    /// the minumum of the x and y values
     pub fn min(&self) -> N {
-        std::cmp::min(self.x, self.y)
+        min(self.x, self.y)
     }
 
+    /// the maximum of the x and y values
     pub fn max(&self) -> N {
-        std::cmp::max(self.x, self.y)
+        max(self.x, self.y)
     }
 
     /// creates a new vector from a tuple (x,y)
@@ -47,52 +52,26 @@ where
         Vector2 { x: xy.0, y: xy.1 }
     }
 
+    /// summation of the x and y components
     pub fn sum(&self) -> N {
         self.x + self.y
     }
 
+    /// product of the x and y components
     pub fn product(&self) -> N {
         self.x * self.y
     }
-}
 
-#[allow(dead_code)]
-impl<N> Vector2<N>
-where
-    N: Num + Ord + Copy + Signed,
-{
-    pub fn distance_to_origin(&self) -> N {
-        self.x.abs() + self.y.abs()
-    }
-
-    pub fn distance_to(&self, other: &Self) -> N {
-        let x_dist = (self.x - other.x).abs();
-        let y_dist = (self.y - other.y).abs();
+    /// the manhattan distance between these 2 points
+    pub fn man_distance_to(&self, other: &Self) -> N {
+        let x_dist = max(self.x, other.x) - min(self.x, other.x);
+        let y_dist = max(self.y, other.y) - min(self.y, other.y);
         x_dist + y_dist
     }
-}
 
-#[allow(dead_code)]
-impl<N> Vector2<N>
-where
-    N: Num + Ord + Copy + Unsigned,
-{
-    pub fn distance_unsigned_to_origin(&self) -> N {
-        self.x + self.y
-    }
-
-    pub fn distance_unsigned_to(&self, other: &Self) -> N {
-        let x_dist = if self.x > other.x {
-            self.x - other.x
-        } else {
-            other.x - self.x
-        };
-        let y_dist = if self.y > other.y {
-            self.y - other.y
-        } else {
-            other.y - self.y
-        };
-        x_dist + y_dist
+    /// the manhattan distance to the origin
+    pub fn man_distance_to_origin(&self) -> N {
+        self.man_distance_to(&Self::zero())
     }
 }
 
@@ -100,7 +79,7 @@ impl<N> Display for Vector2<N>
 where
     N: Num + Ord + Display + Copy,
 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "(x:{}, y:{})", self.x, self.y)
     }
 }
