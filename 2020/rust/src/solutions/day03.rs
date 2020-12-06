@@ -6,6 +6,8 @@ use crate::common::parse_error::ParseError;
 use crate::common::vector2::Vector2;
 use std::convert::TryFrom;
 
+type Input = Vec<Vec<Cell>>;
+
 #[derive(Debug)]
 enum Cell {
     Empty,
@@ -24,7 +26,7 @@ impl TryFrom<char> for Cell {
 }
 
 #[aoc_generator(day3)]
-fn parse_input(input: &str) -> Vec<Vec<Cell>> {
+fn parse_input(input: &str) -> Input {
     input
         .lines()
         .map(|line| {
@@ -36,15 +38,15 @@ fn parse_input(input: &str) -> Vec<Vec<Cell>> {
 }
 
 #[inline]
-fn trees_encountered(input: &Vec<Vec<Cell>>, slope: &Vector2) -> usize {
-    let x_wide = input[0].len() as isize;
-    let height = input.len() as isize;
+fn trees_encountered(input: &Input, slope: &Vector2<usize>) -> usize {
+    let x_wide = input[0].len();
+    let height = input.len();
     let mut pos = Vector2::zero();
     let mut trees = 0;
     while pos.y < height - 1 {
         pos += *slope;
         pos.x %= x_wide; // repeat, so wrap
-        let item = &input[pos.y as usize][pos.x as usize];
+        let item = &input[pos.y][pos.x];
         match item {
             Cell::Empty => {}
             Cell::Tree => trees += 1,
@@ -54,13 +56,13 @@ fn trees_encountered(input: &Vec<Vec<Cell>>, slope: &Vector2) -> usize {
 }
 
 #[aoc(day3, part1)]
-fn part1(input: &Vec<Vec<Cell>>) -> usize {
+fn part1(input: &Input) -> usize {
     let slope = Vector2::new(3, 1);
     trees_encountered(&input, &slope)
 }
 
 #[aoc(day3, part2)]
-fn part2(input: &Vec<Vec<Cell>>) -> usize {
+fn part2(input: &Input) -> usize {
     let slopes = [(1, 1), (3, 1), (5, 1), (7, 1), (1, 2)];
     slopes
         .iter()
