@@ -16,13 +16,13 @@ fn parse_input(input: &str) -> Input {
 fn part1(input: &Input) -> u32 {
     let mut total = 0;
     let mut seen_round = HashSet::<char>::new();
-    for chrs in input.iter() {
+    for chrs in input {
         // empty = end of group
         if chrs.is_empty() {
             total += seen_round.len() as u32;
             seen_round.clear();
         } else {
-            seen_round.extend(chrs.iter());
+            seen_round.extend(chrs);
         }
     }
     total
@@ -33,7 +33,7 @@ fn part2(input: &Input) -> u32 {
     let mut total = 0;
     let mut seen_round = HashMap::new();
     let mut members_round = 0;
-    for chrs in input.iter() {
+    for chrs in input {
         // empty = end of group
         if chrs.is_empty() {
             total += seen_round.values().filter(|c| **c == members_round).count() as u32;
