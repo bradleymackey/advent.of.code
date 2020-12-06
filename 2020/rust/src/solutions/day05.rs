@@ -32,8 +32,6 @@ fn part2(input: &Vec<u32>) -> Option<u32> {
     // .iter() ALWAYS returns a reference (&T)
     // eliding .iter() calls .into_iter() (see docs for more info)
     for &id in seen.iter() {
-        // we are looking for a gap in the consecutive ids -> not at the very start or end, just
-        // somewhere in the middle
         let (poss, next) = (id + 1, id + 2);
         if !seen.contains(&poss) && seen.contains(&next) {
             return Some(poss);
