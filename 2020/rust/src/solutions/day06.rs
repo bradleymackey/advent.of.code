@@ -13,20 +13,16 @@ fn parse_input(input: &str) -> Input {
 }
 
 #[aoc(day6, part1)]
-fn part1(input: &Input) -> usize {
+fn part1(input: &Input) -> u32 {
     let mut total = 0;
-    let mut seen_round = HashSet::new();
-    for ans in input.iter() {
-        match ans[..] {
-            [] => {
-                total += seen_round.len();
-                seen_round.clear();
-            }
-            _ => {
-                for ch in ans.iter() {
-                    seen_round.insert(ch);
-                }
-            }
+    let mut seen_round = HashSet::<char>::new();
+    for chrs in input.iter() {
+        // empty = end of group
+        if chrs.is_empty() {
+            total += seen_round.len() as u32;
+            seen_round.clear();
+        } else {
+            seen_round.extend(chrs.iter());
         }
     }
     total
@@ -37,24 +33,16 @@ fn part2(input: &Input) -> usize {
     let mut total = 0;
     let mut seen_round = HashMap::new();
     let mut members_round = 0;
-    for ans in input.iter() {
-        match ans[..] {
-            [] => {
-                // empty = end of round, add where all members have it
-                total += seen_round
-                    .values()
-                    .filter(|cnt| **cnt == members_round)
-                    .count();
-                members_round = 0;
-                seen_round.clear();
-            }
-            _ => {
-                // add 1 to the count for this character
-                for ch in ans.iter() {
-                    *seen_round.entry(ch).or_insert(0) += 1;
-                }
-                members_round += 1;
-            }
+    for chrs in input.iter() {
+        // empty = end of group
+        if chrs.is_empty() {
+            total += seen_round.values().filter(|c| **c == members_round).count();
+            members_round = 0;
+            seen_round.clear();
+        } else {
+            members_round += 1;
+            chrs.iter()
+                .for_each(|c| *seen_round.entry(c).or_insert(0) += 1);
         }
     }
     total
