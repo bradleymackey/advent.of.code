@@ -5,6 +5,12 @@ Rust on the server seems such a nice fit (business logic running as efficiently 
 
 ## Running
 
+Install the cargo aoc runner:
+
+```shell
+cargo install cargo-aoc
 ```
+
+```shell
 cargo aoc
 ```
