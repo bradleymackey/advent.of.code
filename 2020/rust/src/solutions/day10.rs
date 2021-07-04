@@ -5,7 +5,9 @@ use std::collections::HashMap;
 #[aoc_generator(day10)]
 fn parse_input(input: &str) -> Vec<i64> {
     let mut vec: Vec<i64> = input.lines().filter_map(|l| l.parse().ok()).collect();
+    // the 'ground plug'
     vec.push(0);
+    // the device
     vec.push(vec.iter().max().unwrap() + 3);
     vec.sort();
     vec
