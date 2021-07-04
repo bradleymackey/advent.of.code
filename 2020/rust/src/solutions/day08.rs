@@ -4,6 +4,7 @@ use crate::common::parse_error::ParseError;
 use lazy_static::lazy_static;
 use regex::Regex;
 use std::collections::HashSet;
+use std::convert::TryFrom;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy)]
@@ -47,9 +48,9 @@ enum ComputerFinished {
 #[derive(Debug)]
 struct Computer {
     acc: isize,
-    pc: isize,
+    pc: usize,
     program: Vec<Operation>,
-    seen: HashSet<isize>,
+    pc_seen: HashSet<usize>,
     loop_flag: bool,
 }
 
@@ -59,7 +60,7 @@ impl Computer {
             acc: 0,
             pc: 0,
             program,
-            seen: HashSet::default(),
+            pc_seen: HashSet::default(),
             loop_flag: false,
         }
     }
@@ -67,7 +68,7 @@ impl Computer {
         self.acc = 0;
         self.pc = 0;
         self.loop_flag = false;
-        self.seen.clear();
+        self.pc_seen.clear();
     }
     fn run_op(&mut self, op: &Operation) {
         use Operation::*;
@@ -77,23 +78,23 @@ impl Computer {
                 self.acc += dist;
             }
             Jmp(dist) => {
-                self.pc += dist;
+                // program counter < 0 is a program error, so nothing we can do
+                let pc = self.pc as isize + dist;
+                self.pc = usize::try_from(pc).unwrap();
             }
             Nop(_) => {
                 self.pc += 1;
             }
         }
-        if self.seen.contains(&self.pc) {
+        if self.pc_seen.contains(&self.pc) {
             self.loop_flag = true;
         }
-        self.seen.insert(self.pc);
+        self.pc_seen.insert(self.pc);
     }
     /// Get the op that the program counter is currently pointing to.
     fn current_op(&self) -> Option<Operation> {
         // program counter should only ever be positive, otherwise it's a program error
-        assert!(self.pc >= 0);
-        let pc_usize = self.pc.wrapping_abs() as usize;
-        let op = self.program.get(pc_usize)?.clone();
+        let op = self.program.get(self.pc)?.clone();
         Some(op)
     }
     /// For the index in the `program`, invert jmp => nop or nop => jmp accordingly
