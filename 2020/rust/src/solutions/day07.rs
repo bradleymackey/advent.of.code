@@ -50,7 +50,7 @@ fn parent_bag(bag: &str) -> Result<(BagID, HashMap<BagID, u32>), ParseError> {
             children.insert(name, count);
         }
     }
-    Ok((String::from(our_bag), children))
+    Ok((BagID::from(our_bag), children))
 }
 
 #[aoc_generator(day7)]
@@ -85,15 +85,13 @@ fn part1(input: &BagCarosel) -> usize {
 fn part2(input: &BagCarosel) -> u32 {
     // Computes the number of bags held within a given bag
     fn holds(input: &BagCarosel, target: &BagID) -> u32 {
-        let bag = input.get(target).unwrap();
-        let mut total = 0;
-        for (child_name, count) in bag {
-            // direct children
-            total += count;
-            // their children, repeat the count for each child
-            total += count * holds(input, &child_name);
-        }
-        total
+        input
+            .get(target)
+            .unwrap()
+            .iter()
+            // add direct children, then all indirect children
+            .map(|(child_name, count)| count + count * holds(input, child_name))
+            .sum()
     }
 
     let target = BagID::from("shiny gold");
