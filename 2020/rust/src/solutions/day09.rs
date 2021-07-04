@@ -6,13 +6,13 @@ fn parse_input(input: &str) -> Vec<i32> {
 }
 
 /// For part 1, the look-back size.
-const WINDOW_SIZE: usize = 25;
+const LOOKBACK_SIZE: usize = 25;
 
 fn invalid_number(input: &Vec<i32>) -> Option<i32> {
-    'i: for i in WINDOW_SIZE..input.len() {
+    'i: for i in LOOKBACK_SIZE..input.len() {
         let current = input[i];
-        for j in (i - WINDOW_SIZE)..=i {
-            for k in (i - WINDOW_SIZE)..=i {
+        for j in (i - LOOKBACK_SIZE)..=i {
+            for k in (i - LOOKBACK_SIZE)..=i {
                 if j == k {
                     continue;
                 }
