@@ -38,7 +38,7 @@ fn part2(input: &Vec<i64>) -> Option<i64> {
         // combination can bridge this gap
         let ways = [1, 2, 3]
             .iter()
-            .map(|dist| counts.get(&(adapter - dist)).unwrap_or(&0))
+            .filter_map(|dist| counts.get(&(adapter - dist)))
             .sum();
         counts.insert(*adapter, ways);
     }
