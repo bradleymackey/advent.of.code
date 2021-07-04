@@ -19,7 +19,7 @@ impl FromStr for Operation {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         lazy_static! {
-            static ref OP_REGEX: Regex = Regex::from_str(r"^([a-z]+)\s([-+]\d+)$").unwrap();
+            static ref OP_REGEX: Regex = Regex::from_str(r"^(\w+)\s+([-+]\d+)$").unwrap();
         }
         let captures = OP_REGEX.captures(s).ok_or(ParseError)?;
         let op_name = captures.get(1).ok_or(ParseError)?.as_str();
