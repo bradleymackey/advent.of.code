@@ -30,7 +30,7 @@ fn part1(input: &Vec<i64>) -> Option<i64> {
 
 #[aoc(day10, part2)]
 fn part2(input: &Vec<i64>) -> Option<i64> {
-    let mut counts = HashMap::<i64, i64>::default();
+    let mut counts = HashMap::new();
     counts.insert(0, 1); // 1 way to reach zero
     for adapter in &input.as_slice()[1..] {
         // add number of ways to 'bridge gap' to this connector
