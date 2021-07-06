@@ -1,3 +1,6 @@
+use crate::common::vector2::Vector2;
+use num::traits::Signed;
+use num::Num;
 use std::fmt;
 use std::hash::Hash;
 
@@ -38,6 +41,21 @@ impl Direction {
             'L' => Some(Left),
             'R' => Some(Right),
             _ => None,
+        }
+    }
+
+    pub fn vector<N>(&self) -> Vector2<N>
+    where
+        N: Copy,
+        N: Ord,
+        N: Num,
+        N: Signed,
+    {
+        match self {
+            Up => Vector2::new(N::zero(), N::one()),
+            Down => Vector2::new(N::zero(), -N::one()),
+            Left => Vector2::new(-N::one(), N::zero()),
+            Right => Vector2::new(N::one(), N::zero()),
         }
     }
 }

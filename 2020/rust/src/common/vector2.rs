@@ -1,3 +1,5 @@
+use crate::common::direction::Direction;
+use num::traits::Signed;
 use num::Num;
 use std::cmp::{max, min};
 use std::fmt::{Display, Formatter};
@@ -72,6 +74,13 @@ where
     /// the manhattan distance to the origin
     pub fn man_distance_to_origin(&self) -> N {
         self.man_distance_to(&Self::zero())
+    }
+
+    pub fn moved(&self, direction: Direction) -> Self
+    where
+        N: Signed,
+    {
+        *self + direction.vector()
     }
 }
 
