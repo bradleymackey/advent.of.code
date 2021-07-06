@@ -193,18 +193,13 @@ impl WaitingRoom {
         }
     }
 
-    /// how many sears are occupied?
-    fn occupied(&self) -> i32 {
-        let mut count = 0;
-        for i in 0..self.rows() {
-            for j in 0..self.cols() {
-                let vec = Vector2::new(i, j);
-                if self.position(vec).is_occupied() {
-                    count += 1;
-                }
-            }
-        }
-        count
+    /// how many seats are occupied?
+    fn occupied(&self) -> usize {
+        self.floor
+            .iter()
+            .flatten()
+            .filter(|pos| pos.is_occupied())
+            .count()
     }
 }
 
@@ -214,7 +209,7 @@ fn parse_input(input: &str) -> WaitingRoom {
 }
 
 #[aoc(day11, part1)]
-fn part1(input: &WaitingRoom) -> i32 {
+fn part1(input: &WaitingRoom) -> usize {
     let mut room = input.clone();
     loop {
         room.round(Part::One);
@@ -225,7 +220,7 @@ fn part1(input: &WaitingRoom) -> i32 {
 }
 
 #[aoc(day11, part2)]
-fn part2(input: &WaitingRoom) -> i32 {
+fn part2(input: &WaitingRoom) -> usize {
     let mut room = input.clone();
     loop {
         room.round(Part::Two);
