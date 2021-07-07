@@ -5,7 +5,7 @@ use std::fmt;
 use std::hash::Hash;
 
 /// a direction that can also represent a compass direction
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
 pub enum Direction {
     Up,
@@ -19,6 +19,33 @@ use Direction::*;
 impl fmt::Display for Direction {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.description())
+    }
+}
+
+impl Direction {
+    pub fn reversed(&self) -> Self {
+        match &self {
+            Up => Down,
+            Down => Up,
+            Left => Right,
+            Right => Left,
+        }
+    }
+    pub fn rotated_left(&self) -> Self {
+        match &self {
+            Up => Left,
+            Left => Down,
+            Down => Right,
+            Right => Up,
+        }
+    }
+    pub fn rotated_right(&self) -> Self {
+        match &self {
+            Up => Right,
+            Right => Down,
+            Down => Left,
+            Left => Up,
+        }
     }
 }
 

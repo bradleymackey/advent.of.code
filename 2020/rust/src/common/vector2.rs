@@ -1,9 +1,7 @@
-use crate::common::direction::Direction;
-use num::traits::Signed;
-use num::Num;
+use num::{Num, Signed};
 use std::cmp::{max, min};
 use std::fmt::{Display, Formatter};
-use std::ops::{Add, AddAssign, Sub, SubAssign};
+use std::ops::{Add, AddAssign, Neg, Sub, SubAssign};
 
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub struct Vector2<N: Num + Ord + Copy> {
@@ -36,6 +34,16 @@ where
         Vector2 {
             x: N::one(),
             y: N::one(),
+        }
+    }
+
+    /**
+     * Apply scalar to this vector
+     */
+    pub fn scaled(&self, amount: N) -> Self {
+        Self {
+            x: self.x * amount,
+            y: self.y * amount,
         }
     }
 
@@ -75,13 +83,6 @@ where
     pub fn man_distance_to_origin(&self) -> N {
         self.man_distance_to(&Self::zero())
     }
-
-    pub fn moved(&self, direction: Direction) -> Self
-    where
-        N: Signed,
-    {
-        *self + direction.vector()
-    }
 }
 
 impl<N> Display for Vector2<N>
@@ -90,6 +91,37 @@ where
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "(x:{}, y:{})", self.x, self.y)
+    }
+}
+
+impl<N> Vector2<N>
+where
+    N: Num + Ord + Copy + Neg + Signed,
+{
+    pub fn rotate_left_about_origin(&self) -> Self {
+        Self {
+            x: -self.y,
+            y: self.x,
+        }
+    }
+    pub fn rotate_right_about_origin(&self) -> Self {
+        Self {
+            x: self.y,
+            y: -self.x,
+        }
+    }
+}
+
+impl<N> Neg for Vector2<N>
+where
+    N: Num + Ord + Copy + Neg + Signed,
+{
+    type Output = Self;
+    fn neg(self) -> Self {
+        Self {
+            x: -self.x,
+            y: -self.y,
+        }
     }
 }
 
