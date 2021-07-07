@@ -9,15 +9,15 @@
 // And the 2d plane x-axis and y-axis.
 
 use crate::common::direction::Direction;
+use crate::common::parse_error::ParseError;
 use crate::common::vector2::Vector2;
-use std::convert::From;
+use std::convert::TryFrom;
 
 #[derive(Debug, Clone, Copy)]
 enum Rotation {
     Left,
     Right,
     Reverse,
-    Noop,
 }
 
 impl Direction {
@@ -26,7 +26,6 @@ impl Direction {
             Rotation::Left => self.rotated_left(),
             Rotation::Right => self.rotated_right(),
             Rotation::Reverse => self.reversed(),
-            Rotation::Noop => *self,
         }
     }
 }
@@ -38,38 +37,41 @@ enum Action {
     MoveForward(i32),
 }
 
-impl From<&str> for Action {
-    fn from(s: &str) -> Self {
+impl TryFrom<&str> for Action {
+    type Error = ParseError;
+    fn try_from(s: &str) -> Result<Self, Self::Error> {
         use Action::*;
         let chars: Vec<_> = s.chars().into_iter().collect();
         let first = chars[0];
         let amount = chars.iter().skip(1).collect::<String>().parse().unwrap();
         match first {
-            'F' => MoveForward(amount),
+            'F' => Ok(MoveForward(amount)),
             'L' => {
                 let degrees = amount % 360;
-                Rotate(match degrees {
-                    0 => Rotation::Noop,
+                let rotation = match degrees {
+                    0 => return Err(ParseError),
                     90 => Rotation::Left,
                     180 => Rotation::Reverse,
                     270 => Rotation::Right,
                     _ => panic!(),
-                })
+                };
+                Ok(Rotate(rotation))
             }
             'R' => {
                 let degrees = amount % 360;
-                Rotate(match degrees {
-                    0 => Rotation::Noop,
+                let rotation = match degrees {
+                    0 => return Err(ParseError),
                     90 => Rotation::Right,
                     180 => Rotation::Reverse,
                     270 => Rotation::Left,
                     _ => panic!(),
-                })
+                };
+                Ok(Rotate(rotation))
             }
-            'N' => Move(Vector2::new(0, amount)),
-            'S' => Move(Vector2::new(0, -amount)),
-            'E' => Move(Vector2::new(amount, 0)),
-            'W' => Move(Vector2::new(-amount, 0)),
+            'N' => Ok(Move(Vector2::new(0, amount))),
+            'S' => Ok(Move(Vector2::new(0, -amount))),
+            'E' => Ok(Move(Vector2::new(amount, 0))),
+            'W' => Ok(Move(Vector2::new(-amount, 0))),
             _ => panic!(),
         }
     }
@@ -77,7 +79,10 @@ impl From<&str> for Action {
 
 #[aoc_generator(day12)]
 fn parse_input(input: &str) -> Vec<Action> {
-    input.lines().map(|l| Action::from(l)).collect()
+    input
+        .lines()
+        .filter_map(|l| Action::try_from(l).ok())
+        .collect()
 }
 
 #[aoc(day12, part1)]
@@ -102,7 +107,6 @@ fn part2(input: &Vec<Action>) -> i32 {
         match action {
             Action::Move(vec) => waypoint += *vec,
             Action::Rotate(dir) => match dir {
-                Rotation::Noop => {}
                 Rotation::Reverse => waypoint = -waypoint,
                 Rotation::Left => waypoint = waypoint.rotate_left_about_origin(),
                 Rotation::Right => waypoint = waypoint.rotate_right_about_origin(),
