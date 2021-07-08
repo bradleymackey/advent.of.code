@@ -21,6 +21,7 @@ mod solutions {
     pub mod day10;
     pub mod day11;
     pub mod day12;
+    pub mod day13;
 }
 
 aoc_lib! { year = 2020 }
