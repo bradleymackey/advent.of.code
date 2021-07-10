@@ -43,11 +43,11 @@ impl Mask {
     }
     /// Part 2 addresses.
     fn addresses(&self, addr: u64) -> Vec<u64> {
-        let mut result = vec![];
         let addr = self.apply_ones(addr); // add 1 bits in, leaving zeros untouched
         let addr = addr & !self.floating; // zero-out floating bits in the input
         let bits_to_count = self.floating.count_ones();
         let count_upto = 2u32.pow(bits_to_count); // binary counter for the floating points
+        let mut result = Vec::with_capacity(count_upto as usize);
         for i in 0..count_upto as u64 {
             let mut candidate = addr;
             let mut bits_consumed = 0; // consume a bit 1-by-1 from the value to add
