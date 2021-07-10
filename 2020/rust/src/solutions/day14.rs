@@ -183,41 +183,6 @@ impl From<&str> for Action {
     }
 }
 
-#[derive(Debug, Clone)]
-struct Program {
-    mask: Mask,
-    mem: HashMap<u64, u64>,
-}
-
-impl Program {
-    fn new() -> Self {
-        Self {
-            mask: Mask::blank(),
-            mem: HashMap::new(),
-        }
-    }
-    fn run_part_1(&mut self, act: &Action) {
-        match act {
-            Action::SetMask(msk) => self.mask = msk.clone(),
-            Action::SetMemory(key, val) => {
-                let val = self.mask.apply_one_zero(*val);
-                self.mem.insert(*key, val);
-            }
-        }
-    }
-    fn run_part_2(&mut self, act: &Action) {
-        match act {
-            Action::SetMask(msk) => self.mask = msk.clone(),
-            Action::SetMemory(key, val) => {
-                let addrs = self.mask.addresses(*key);
-                for addr in addrs {
-                    self.mem.insert(addr, *val);
-                }
-            }
-        }
-    }
-}
-
 #[aoc_generator(day14)]
 fn parse_input(input: &str) -> Vec<Action> {
     input.lines().map(|l| Action::from(l)).collect()
@@ -225,18 +190,34 @@ fn parse_input(input: &str) -> Vec<Action> {
 
 #[aoc(day14, part1)]
 fn part1(input: &Vec<Action>) -> u64 {
-    let mut prog = Program::new();
+    let mut mask = &Mask::blank();
+    let mut mem = HashMap::with_capacity(input.len());
     for act in input {
-        prog.run_part_1(act);
+        match act {
+            Action::SetMask(msk) => mask = msk,
+            Action::SetMemory(key, val) => {
+                let val = mask.apply_one_zero(*val);
+                mem.insert(*key, val);
+            }
+        }
     }
-    prog.mem.values().sum()
+    mem.values().sum()
 }
 
 #[aoc(day14, part2)]
 fn part2(input: &Vec<Action>) -> u64 {
-    let mut prog = Program::new();
+    let mut mask = &Mask::blank();
+    let mut mem = HashMap::with_capacity(input.len());
     for act in input {
-        prog.run_part_2(act);
+        match act {
+            Action::SetMask(msk) => mask = msk,
+            Action::SetMemory(key, val) => {
+                let addrs = mask.addresses(*key);
+                for addr in addrs {
+                    mem.insert(addr, *val);
+                }
+            }
+        }
     }
-    prog.mem.values().sum()
+    mem.values().sum()
 }
