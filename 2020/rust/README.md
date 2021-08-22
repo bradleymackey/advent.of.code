@@ -18,3 +18,6 @@ cargo aoc
 ## Performance Target
 
 All 25 days, combined, execute in under 100 milliseconds.
+
+Exceptions: 
+- Day 15
