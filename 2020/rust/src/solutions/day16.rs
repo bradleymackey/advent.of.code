@@ -187,9 +187,9 @@ fn part2(input: &Manifest) -> u64 {
     }
 
     // the first 6 are the values that we want, get them out of our ticket
-    let my_ticket_values = indexes[0..6]
+    indexes[0..6]
         .iter()
         .map(|idx| idx.unwrap_or(1))
-        .map(|idx| input.my_ticket.values[idx] as u64);
-    my_ticket_values.product()
+        .map(|idx| input.my_ticket.values[idx] as u64)
+        .product()
 }
