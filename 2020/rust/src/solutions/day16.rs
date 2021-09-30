@@ -8,20 +8,20 @@ const FIELD_COUNT: usize = 20;
 #[derive(Debug, Clone)]
 struct Field {
     name: String,
-    rule1: RangeInclusive<u32>,
-    rule2: RangeInclusive<u32>,
+    rule1: RangeInclusive<u16>,
+    rule2: RangeInclusive<u16>,
 }
 
 impl Field {
-    fn matches_value(&self, value: &u32) -> bool {
+    fn matches_value(&self, value: &u16) -> bool {
         self.rule1.contains(&value) || self.rule2.contains(&value)
     }
 }
 
 impl Field {
     /// Parsing helper for getting range from string range like '123-456'
-    fn parse_range(s: &str) -> RangeInclusive<u32> {
-        let mut range = s.split("-").map(|n| n.parse::<u32>().unwrap()).into_iter();
+    fn parse_range(s: &str) -> RangeInclusive<u16> {
+        let mut range = s.split("-").map(|n| n.parse::<u16>().unwrap()).into_iter();
         RangeInclusive::new(range.next().unwrap(), range.next().unwrap())
     }
 }
@@ -48,12 +48,12 @@ impl From<&str> for Field {
 
 #[derive(Debug, Clone)]
 struct Ticket {
-    values: [u32; FIELD_COUNT],
+    values: [u16; FIELD_COUNT],
 }
 
 impl From<&str> for Ticket {
     fn from(s: &str) -> Self {
-        let nums: Vec<_> = s.split(",").map(|n| n.parse::<u32>().unwrap()).collect();
+        let nums: Vec<_> = s.split(",").map(|n| n.parse::<u16>().unwrap()).collect();
         let values: [_; FIELD_COUNT] = nums.as_slice().try_into().unwrap();
         Self { values }
     }
@@ -120,7 +120,7 @@ impl Manifest {
                 .collect::<Vec<_>>()
                 .contains(&true);
             if !is_valid {
-                total += v;
+                total += *v as u32;
             }
         }
         total
@@ -149,17 +149,20 @@ fn part2(input: &Manifest) -> u64 {
         possible.insert(i, all_candidates);
     }
 
-    let mut indexes = [0_usize; FIELD_COUNT];
+    // Maps key indexes to ticket value indexes -> this is where the result is stored.
+    let mut indexes = [None; FIELD_COUNT];
 
     let tickets: Vec<_> = input.other_tickets.iter().filter(|t| input.is_valid(t)).collect();
-    while possible.len() > 0 {
-        for ticket in tickets.iter() {
-            for i in 0..FIELD_COUNT {
+    while !possible.is_empty() {
+        for i in 0..FIELD_COUNT {
+            if indexes[i] != None {
+                continue;
+            }
+            for ticket in tickets.iter() {
                 let field = &input.fields[i];
                 for j in 0..FIELD_COUNT {
                     let value = ticket.values[j];
-                    let contains = field.rule1.contains(&value) || field.rule2.contains(&value);
-                    if !contains {
+                    if !field.matches_value(&value) {
                         if let Some(entry) = possible.get_mut(&i) {
                             entry.remove(&j);
                         }
@@ -168,26 +171,25 @@ fn part2(input: &Manifest) -> u64 {
             }
         }
 
-        let confirmed_candidates: Vec<(usize, usize)> = possible.iter().filter_map(|(k, v)| {
-            if v.len() == 1 {
-                Some((*k, *v.iter().next().unwrap()))
-            } else {
-                None
-            }
-        }).collect();
+        let confirmed_candidates: Vec<(usize, usize)> = possible.iter()
+            .filter(|(_, v)| v.len() == 1)
+            .flat_map(|(k, v)| Some((*k, *v.iter().next()?)))
+            .collect();
 
         for (key, value) in confirmed_candidates {
-            indexes[key] = value;
+            indexes[key] = Some(value);
             possible.remove(&key);
             // also remove from all other keys
             for k in possible.clone().keys() {
                 possible.get_mut(&k).unwrap().remove(&value);
             }
         }
-
     }
 
     // the first 6 are the values that we want, get them out of our ticket
-    let my_ticket_values = indexes[0..6].iter().map(|idx| input.my_ticket.values[*idx] as u64);
+    let my_ticket_values = indexes[0..6]
+        .iter()
+        .map(|idx| idx.unwrap_or(1))
+        .map(|idx| input.my_ticket.values[idx] as u64);
     my_ticket_values.product()
 }
