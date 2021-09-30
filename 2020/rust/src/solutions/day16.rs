@@ -171,10 +171,10 @@ fn part2(input: &Manifest) -> u64 {
             }
         }
 
-        let confirmed_candidates: Vec<(usize, usize)> = possible.iter()
+        let confirmed_candidates = possible.iter()
             .filter(|(_, v)| v.len() == 1)
             .flat_map(|(k, v)| Some((*k, *v.iter().next()?)))
-            .collect();
+            .collect::<Vec<_>>();
 
         for (key, value) in confirmed_candidates {
             indexes[key] = Some(value);
