@@ -1,5 +1,5 @@
 use std::convert::TryFrom;
-use std::collections::HashMap;
+use std::collections::HashSet;
 use std::convert::TryInto;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -21,18 +21,21 @@ impl TryFrom<char> for State {
 
 #[derive(Debug, Clone)]
 struct Cube<const N: usize> {
-    cells: HashMap<[i32; N], State>,
+    cells: HashSet<[i32; N]>,
 }
 
 impl<const N: usize> Cube<N> {
     fn from_first_layer(layer: Vec<Vec<State>>) -> Self {
         assert!(N >= 2, "Dimension must be at least 2");
         let cells = layer.iter().enumerate().flat_map(|(y, row)| {
-            row.iter().enumerate().map(move |(x, state)| {
+            row.iter().enumerate().flat_map(move |(x, state)| {
                 let mut arr = [0; N];
                 arr[0] = x as i32;
                 arr[1] = y as i32;
-                (arr, *state)
+                match state {
+                    State::Active => Some(arr),
+                    State::Inactive => None,
+                }
             })
         }).collect();
         Cube {
@@ -42,10 +45,10 @@ impl<const N: usize> Cube<N> {
 
     /// The total number of cells that are active
     fn active_count(&self) -> usize {
-        self.cells.values().filter(|&state| *state == State::Active).count()
+        self.cells.len()
     }
 
-    fn neighbors(&self, pos: &[i32; N]) -> Vec<[i32; N]> {
+    fn neighbors(&self, pos: &[i32; N], include_self: bool) -> Vec<[i32; N]> {
 
         fn _neighbours(pos: &Vec<i32>, include_self: bool) -> Vec<Vec<i32>> {
             let mut result = vec![];
@@ -72,19 +75,23 @@ impl<const N: usize> Cube<N> {
             result
         }
 
-        _neighbours(&pos.to_vec(), false).into_iter().map(|n| {
+        _neighbours(&pos.to_vec(), include_self).into_iter().map(|n| {
             n.try_into().unwrap()
         }).collect()
     }
 
     /// Get the state for this cell.
     fn state_at(&self, pos: &[i32; N]) -> State {
-        self.cells.get(pos).cloned().unwrap_or(State::Inactive)
+        if self.cells.contains(pos) {
+            State::Active
+        } else {
+            State::Inactive
+        }
     }
 
     /// Compute the next state for this position after a game of life round.
     fn next_state(&self, pos: &[i32; N]) -> State {
-        let neighbors = self.neighbors(&pos);
+        let neighbors = self.neighbors(&pos, false);
         let active_neighbors = neighbors
             .iter()
             .filter(|pos| self.state_at(pos) == State::Active)
@@ -96,30 +103,18 @@ impl<const N: usize> Cube<N> {
         }
     }
 
-    /// Boundry points that are not yet in our model storage.
-    fn boundry_points(&self) -> Vec<[i32; N]> {
-        let mut points = vec![];
-        for pos in self.cells.keys() {
-            let neighbours = self.neighbors(pos);
-            for n in neighbours {
-                if !self.cells.contains_key(&n) {
-                    points.push(n);
-                }
-            }
-        }
-        points
-    }
-
     fn game_of_life(&mut self) {
-        let mut new_cells = HashMap::new();
+        let mut new_cells = HashSet::new();
         // cells we already have in the model
-        for pos in self.cells.keys() {
-            let new_state = self.next_state(pos);
-            new_cells.insert(pos.clone(), new_state);
-        }
-        for pos in &self.boundry_points() {
-            let new_state = self.next_state(pos);
-            new_cells.insert(pos.clone(), new_state);
+        for pos in self.cells.iter() {
+            let ns = self.neighbors(pos, true);
+            for n in ns {
+                let new_state = self.next_state(&n);
+                match new_state {
+                    State::Active => new_cells.insert(n),
+                    State::Inactive => new_cells.remove(&n),
+                };
+            }
         }
         self.cells = new_cells;
     }
