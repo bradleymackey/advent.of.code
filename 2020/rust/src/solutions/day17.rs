@@ -104,11 +104,17 @@ impl<const N: usize> Cube<N> {
     }
 
     fn game_of_life(&mut self) {
-        let mut new_cells = HashSet::new();
+        let current_active = self.active_count();
+        let mut processed = HashSet::with_capacity(current_active);
+        let mut new_cells = HashSet::with_capacity(current_active);
         // cells we already have in the model
         for pos in self.cells.iter() {
             let ns = self.neighbors(pos, true);
             for n in ns {
+                if processed.contains(&n) {
+                    continue;
+                }
+                processed.insert(n);
                 let new_state = self.next_state(&n);
                 match new_state {
                     State::Active => new_cells.insert(n),
