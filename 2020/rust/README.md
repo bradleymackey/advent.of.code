@@ -19,5 +19,7 @@ cargo aoc
 
 All 25 days, combined, execute in under 100 milliseconds.
 
-Exceptions: 
+Exceptions:
+
 - Day 15
+- Day 17
