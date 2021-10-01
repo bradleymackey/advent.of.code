@@ -21,7 +21,7 @@ impl TryFrom<char> for State {
 
 #[derive(Debug, Clone)]
 struct Cube<const N: usize> {
-    cells: HashSet<[i32; N]>,
+    active: HashSet<[i32; N]>,
 }
 
 impl<const N: usize> Cube<N> {
@@ -39,13 +39,13 @@ impl<const N: usize> Cube<N> {
             })
         }).collect();
         Cube {
-            cells,
+            active: cells,
         }
     }
 
     /// The total number of cells that are active
     fn active_count(&self) -> usize {
-        self.cells.len()
+        self.active.len()
     }
 
     fn neighbors(&self, pos: &[i32; N], include_self: bool) -> Vec<[i32; N]> {
@@ -82,7 +82,7 @@ impl<const N: usize> Cube<N> {
 
     /// Get the state for this cell.
     fn state_at(&self, pos: &[i32; N]) -> State {
-        if self.cells.contains(pos) {
+        if self.active.contains(pos) {
             State::Active
         } else {
             State::Inactive
@@ -105,24 +105,20 @@ impl<const N: usize> Cube<N> {
 
     fn game_of_life(&mut self) {
         let current_active = self.active_count();
+        let mut new_active = HashSet::with_capacity(current_active);
         let mut processed = HashSet::with_capacity(current_active);
-        let mut new_cells = HashSet::with_capacity(current_active);
-        // cells we already have in the model
-        for pos in self.cells.iter() {
-            let ns = self.neighbors(pos, true);
+        for pos in self.active.iter() {
+            let ns = self.neighbors(pos, true)
+                .into_iter()
+                .filter(|nr| processed.insert(nr.clone()));
             for n in ns {
-                if processed.contains(&n) {
-                    continue;
-                }
-                processed.insert(n);
-                let new_state = self.next_state(&n);
-                match new_state {
-                    State::Active => new_cells.insert(n),
-                    State::Inactive => new_cells.remove(&n),
+                match self.next_state(&n) {
+                    State::Active => new_active.insert(n),
+                    State::Inactive => new_active.remove(&n),
                 };
             }
         }
-        self.cells = new_cells;
+        self.active = new_active;
     }
 }
 
