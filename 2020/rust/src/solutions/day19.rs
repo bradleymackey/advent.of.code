@@ -112,7 +112,7 @@ impl Manifest {
 
             match &rule.resolver {
                 Resolver::Literal(c) => {
-                    let is_match = chars.len() == 1 && *c == chars[0];
+                    let is_match = [*c] == chars;
                     memo.insert(key, is_match);
                     is_match
                 }
