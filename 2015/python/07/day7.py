@@ -1,6 +1,5 @@
 import fileinput
 from dataclasses import dataclass
-import operator
 from enum import Enum
 from typing import List
 
