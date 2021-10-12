@@ -58,8 +58,7 @@ for l in LINES:
                     LIGHTS_P2[key] += 1
                 case Action.OFF:
                     LIGHTS_P1[key] = 0
-                    cur = LIGHTS_P2[key]
-                    if cur > 0:
+                    if LIGHTS_P2[key] > 0:
                         LIGHTS_P2[key] -= 1
                 case Action.TOGGLE:
                     LIGHTS_P1[key] = 1 if LIGHTS_P1[key] == 0 else 0
