@@ -24,7 +24,7 @@ def light_count(input: List[List[str]]) -> int:
     tot = 0
     for row in input:
         for char in row:
-            if char == "#":
+            if char == ON:
                 tot += 1
     return tot
 
