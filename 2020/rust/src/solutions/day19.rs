@@ -1,7 +1,7 @@
-use std::collections::HashMap;
-use std::convert::TryFrom;
 use lazy_static::lazy_static;
 use regex::Regex;
+use std::collections::HashMap;
+use std::convert::TryFrom;
 
 type RuleID = u16;
 
@@ -20,13 +20,19 @@ impl TryFrom<&str> for Resolver {
             static ref CHARACTER: Regex = Regex::new("\"([a-z])\"").unwrap();
         }
         if let Some(cap) = CHARACTER.captures(s) {
-            let c = cap.get(1).ok_or("No Character matches")?.as_str().parse().unwrap();
+            let c = cap
+                .get(1)
+                .ok_or("No Character matches")?
+                .as_str()
+                .parse()
+                .unwrap();
             Ok(Resolver::Literal(c))
         } else {
             // dependency
-            let dep = s.split("|").map(|group| {
-                group.split(" ").flat_map(|num| num.parse().ok()).collect()
-            }).collect();
+            let dep = s
+                .split("|")
+                .map(|group| group.split(" ").flat_map(|num| num.parse().ok()).collect())
+                .collect();
             Ok(Resolver::Dep(dep))
         }
     }
@@ -68,18 +74,21 @@ impl Manifest {
     fn new(rules: HashMap<RuleID, Rule>, texts: Vec<String>) -> Manifest {
         Manifest { rules, texts }
     }
-    
+
     fn update_rule(&mut self, id: RuleID, resolver: Resolver) {
         let new_rule = Rule::new(id, resolver);
         self.rules.insert(id, new_rule);
     }
 
     fn does_match_rules(&self, text: &str) -> bool {
-
         type Key<'x> = (&'x [char], RuleID);
 
-        fn does_match_multiple<'a>(memo: &mut HashMap<Key<'a>, bool>, man: &Manifest, chars: &'a [char], rules: &[RuleID]) -> bool {
-
+        fn does_match_multiple<'a>(
+            memo: &mut HashMap<Key<'a>, bool>,
+            man: &Manifest,
+            chars: &'a [char],
+            rules: &[RuleID],
+        ) -> bool {
             let no_chars = chars.is_empty();
             let no_rules = rules.is_empty();
             if no_chars && no_rules {
@@ -95,7 +104,9 @@ impl Manifest {
             let other_rules = &rules[1..];
             for idx in 0..chars.len() {
                 let idx = idx + 1;
-                if does_match_single(memo, man, &chars[..idx], rules[0]) && does_match_multiple(memo, man, &chars[idx..], &other_rules) {
+                if does_match_single(memo, man, &chars[..idx], rules[0])
+                    && does_match_multiple(memo, man, &chars[idx..], &other_rules)
+                {
                     return true;
                 }
             }
@@ -103,7 +114,12 @@ impl Manifest {
             false
         }
 
-        fn does_match_single<'a>(memo: &mut HashMap<Key<'a>, bool>, man: &Manifest, chars: &'a [char], rule: RuleID) -> bool {
+        fn does_match_single<'a>(
+            memo: &mut HashMap<Key<'a>, bool>,
+            man: &Manifest,
+            chars: &'a [char],
+            rule: RuleID,
+        ) -> bool {
             let key = (chars, rule);
             if let Some(result) = memo.get(&key) {
                 return *result;
@@ -137,7 +153,10 @@ impl Manifest {
     }
 
     fn match_count(&self) -> usize {
-        self.texts.iter().filter(|t| self.does_match_rules(t)).count()
+        self.texts
+            .iter()
+            .filter(|t| self.does_match_rules(t))
+            .count()
     }
 }
 
@@ -152,10 +171,7 @@ impl TryFrom<&str> for Manifest {
             .map(|rule| (rule.id, rule))
             .collect();
         let texts = parts.next().unwrap();
-        let texts = texts
-            .lines()
-            .map(|line| line.to_string())
-            .collect();
+        let texts = texts.lines().map(|line| line.to_string()).collect();
         Ok(Manifest::new(rules, texts))
     }
 }

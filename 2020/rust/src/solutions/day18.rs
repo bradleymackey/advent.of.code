@@ -1,4 +1,3 @@
-
 #[derive(Debug, Copy, Clone)]
 enum Operation {
     Add,
@@ -28,23 +27,26 @@ fn sequence_parser(input: &str) -> (Vec<Item>, Option<usize>) {
                     i += next;
                 }
             }
-            ')' => return (result, Some(i+1)),
+            ')' => return (result, Some(i + 1)),
             '+' => result.push(Op(Operation::Add)),
             '*' => result.push(Op(Operation::Mul)),
             '0'..='9' => result.push(Digit(c.to_digit(10).unwrap() as u8)),
-            _ => {},
+            _ => {}
         }
         i += 1;
     }
     (result, None)
-}       
+}
 
 #[aoc_generator(day18)]
 fn parse_input(input: &str) -> Vec<Vec<Item>> {
-    input.lines().map(|line| {
-        let (result, _) = sequence_parser(line);
-        result
-    }).collect()
+    input
+        .lines()
+        .map(|line| {
+            let (result, _) = sequence_parser(line);
+            result
+        })
+        .collect()
 }
 
 fn compute_row(input: &Vec<Item>) -> u64 {
@@ -85,7 +87,7 @@ fn force_addition_precedence(input: Vec<Item>) -> Vec<Item> {
                 result.push(Nested(temp.clone()));
                 result.push(item);
                 temp.clear();
-            },
+            }
             Nested(items) => temp.push(Nested(force_addition_precedence(items))),
             _ => temp.push(item),
         }

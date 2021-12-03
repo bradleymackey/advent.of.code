@@ -152,7 +152,11 @@ fn part2(input: &Manifest) -> u64 {
     // Maps key indexes to ticket value indexes -> this is where the result is stored.
     let mut indexes = [None; FIELD_COUNT];
 
-    let tickets: Vec<_> = input.other_tickets.iter().filter(|t| input.is_valid(t)).collect();
+    let tickets: Vec<_> = input
+        .other_tickets
+        .iter()
+        .filter(|t| input.is_valid(t))
+        .collect();
     while !possible.is_empty() {
         for i in 0..FIELD_COUNT {
             if indexes[i] != None {
@@ -171,7 +175,8 @@ fn part2(input: &Manifest) -> u64 {
             }
         }
 
-        let confirmed_candidates = possible.iter()
+        let confirmed_candidates = possible
+            .iter()
             .filter(|(_, v)| v.len() == 1)
             .flat_map(|(k, v)| Some((*k, *v.iter().next()?)))
             .collect::<Vec<_>>();
