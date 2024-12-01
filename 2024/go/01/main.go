@@ -27,7 +27,14 @@ func main() {
 	fmt.Println("Part 2: ", ans2)
 }
 
-func Part1(input string) int {
+func absInt(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
+func getLists(input string) ([]int, []int) {
 	var list1 []int
 	var list2 []int
 	for _, line := range strings.Split(input, "\n") {
@@ -39,6 +46,19 @@ func Part1(input string) int {
 	}
 	sort.Ints(list1)
 	sort.Ints(list2)
+	return list1, list2
+}
+
+func countOccurrences(slice []int) map[int]int {
+	result := make(map[int]int)
+	for _, v := range slice {
+		result[v]++
+	}
+	return result
+}
+
+func Part1(input string) int {
+	list1, list2 := getLists(input)
 
 	var total int
 	for i := 0; i < len(list1); i++ {
@@ -48,13 +68,14 @@ func Part1(input string) int {
 	return total
 }
 
-func absInt(x int) int {
-	if x < 0 {
-		return -x
-	}
-	return x
-}
-
 func Part2(input string) int {
-	return 0
+	list1, list2 := getLists(input)
+	list2Count := countOccurrences(list2)
+
+	var total int
+	for i := 0; i < len(list1); i++ {
+		total += list1[i] * list2Count[list1[i]]
+	}
+
+	return total
 }
