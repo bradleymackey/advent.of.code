@@ -55,25 +55,13 @@ func replaceRange(s string, start, end int, replacementChar rune) string {
 
 func Part2(input string) int {
 	cleanInput := input
+	// Blank out the disabled parts
 	unneededRegex := regexp.MustCompile(`don't\(\).*?do\(\)`)
 
 	unneededIndexes := unneededRegex.FindAllStringIndex(input, -1)
 	for _, indexRange := range unneededIndexes {
 		cleanInput = replaceRange(cleanInput, indexRange[0], indexRange[1], '*')
 	}
-	fmt.Println(cleanInput)
 
-	pattern := `mul\((\d+),(\d+)\)`
-	re := regexp.MustCompile(pattern)
-	matches := re.FindAllStringSubmatch(cleanInput, -1)
-	total := 0
-	for _, match := range matches {
-		n1, err1 := strconv.Atoi(match[1])
-		n2, err2 := strconv.Atoi(match[2])
-		if err1 != nil || err2 != nil {
-			continue
-		}
-		total += n1 * n2
-	}
-	return total
+	return Part1(cleanInput)
 }
