@@ -9,20 +9,27 @@ import (
 type Coordinate struct {
 	X int
 	Y int
-	/// The data that is expected at this coordinate.
+}
+
+func (c Coordinate) translatedXY(x, y int) Coordinate {
+	return Coordinate{X: c.X + x, Y: c.Y + y}
+}
+
+func (c Coordinate) translatedX(value int) Coordinate {
+	return Coordinate{X: c.X + value, Y: c.Y}
+}
+
+func (c Coordinate) translatedY(value int) Coordinate {
+	return Coordinate{X: c.X, Y: c.Y + value}
+}
+
+func (c Coordinate) expect(expected rune) ExpectedDataCoordinate {
+	return ExpectedDataCoordinate{C: c, Expected: expected}
+}
+
+type ExpectedDataCoordinate struct {
+	C        Coordinate
 	Expected rune
-}
-
-func (c Coordinate) translatedXY(x, y int, expected rune) Coordinate {
-	return Coordinate{X: c.X + x, Y: c.Y + y, Expected: expected}
-}
-
-func (c Coordinate) translatedX(value int, expected rune) Coordinate {
-	return Coordinate{X: c.X + value, Y: c.Y, Expected: expected}
-}
-
-func (c Coordinate) translatedY(value int, expected rune) Coordinate {
-	return Coordinate{X: c.X, Y: c.Y + value, Expected: expected}
 }
 
 //go:embed input.txt
@@ -52,69 +59,60 @@ func makeCharMap(s string) [][]rune {
 	return charMap
 }
 
-func part1Potential(start Coordinate, rows, cols int) [][]Coordinate {
-	result := make([][]Coordinate, 0)
-	result = append(result, []Coordinate{start, start.translatedX(1, 'M'), start.translatedX(2, 'A'), start.translatedX(3, 'S')})
-	result = append(result, []Coordinate{start, start.translatedX(-1, 'M'), start.translatedX(-2, 'A'), start.translatedX(-3, 'S')})
-	result = append(result, []Coordinate{start, start.translatedXY(1, 1, 'M'), start.translatedXY(2, 2, 'A'), start.translatedXY(3, 3, 'S')})
-	result = append(result, []Coordinate{start, start.translatedXY(-1, -1, 'M'), start.translatedXY(-2, -2, 'A'), start.translatedXY(-3, -3, 'S')})
-	result = append(result, []Coordinate{start, start.translatedXY(1, -1, 'M'), start.translatedXY(2, -2, 'A'), start.translatedXY(3, -3, 'S')})
-	result = append(result, []Coordinate{start, start.translatedXY(-1, 1, 'M'), start.translatedXY(-2, 2, 'A'), start.translatedXY(-3, 3, 'S')})
-	result = append(result, []Coordinate{start, start.translatedY(1, 'M'), start.translatedY(2, 'A'), start.translatedY(3, 'S')})
-	result = append(result, []Coordinate{start, start.translatedY(-1, 'M'), start.translatedY(-2, 'A'), start.translatedY(-3, 'S')})
-	for i, coordinates := range result {
-		for _, c := range coordinates {
-			if c.X < 0 || c.X >= rows || c.Y < 0 || c.Y >= cols {
-				result[i] = nil
-			}
-		}
-	}
+func part1Potential(start Coordinate, rows, cols int) [][]ExpectedDataCoordinate {
+	result := make([][]ExpectedDataCoordinate, 0)
+	result = append(result, []ExpectedDataCoordinate{start.expect('X'), start.translatedX(1).expect('M'), start.translatedX(2).expect('A'), start.translatedX(3).expect('S')})
+	result = append(result, []ExpectedDataCoordinate{start.expect('X'), start.translatedX(-1).expect('M'), start.translatedX(-2).expect('A'), start.translatedX(-3).expect('S')})
+	result = append(result, []ExpectedDataCoordinate{start.expect('X'), start.translatedXY(1, 1).expect('M'), start.translatedXY(2, 2).expect('A'), start.translatedXY(3, 3).expect('S')})
+	result = append(result, []ExpectedDataCoordinate{start.expect('X'), start.translatedXY(-1, -1).expect('M'), start.translatedXY(-2, -2).expect('A'), start.translatedXY(-3, -3).expect('S')})
+	result = append(result, []ExpectedDataCoordinate{start.expect('X'), start.translatedXY(1, -1).expect('M'), start.translatedXY(2, -2).expect('A'), start.translatedXY(3, -3).expect('S')})
+	result = append(result, []ExpectedDataCoordinate{start.expect('X'), start.translatedXY(-1, 1).expect('M'), start.translatedXY(-2, 2).expect('A'), start.translatedXY(-3, 3).expect('S')})
+	result = append(result, []ExpectedDataCoordinate{start.expect('X'), start.translatedY(1).expect('M'), start.translatedY(2).expect('A'), start.translatedY(3).expect('S')})
+	result = append(result, []ExpectedDataCoordinate{start.expect('X'), start.translatedY(-1).expect('M'), start.translatedY(-2).expect('A'), start.translatedY(-3).expect('S')})
 	return result
 }
 
-func part2Potential(start Coordinate, rows, cols int) [][]Coordinate {
-	first := []Coordinate{
-		start,
-		start.translatedXY(-1, -1, 'M'),
-		start.translatedXY(1, 1, 'S'),
-		start.translatedXY(-1, 1, 'M'),
-		start.translatedXY(1, -1, 'S'),
+func part2Potential(start Coordinate, rows, cols int) [][]ExpectedDataCoordinate {
+	first := []ExpectedDataCoordinate{
+		start.expect('A'),
+		start.translatedXY(-1, -1).expect('M'),
+		start.translatedXY(1, 1).expect('S'),
+		start.translatedXY(-1, 1).expect('M'),
+		start.translatedXY(1, -1).expect('S'),
 	}
-	second := []Coordinate{
-		start,
-		start.translatedXY(-1, -1, 'S'),
-		start.translatedXY(1, 1, 'M'),
-		start.translatedXY(-1, 1, 'M'),
-		start.translatedXY(1, -1, 'S'),
+	second := []ExpectedDataCoordinate{
+		start.expect('A'),
+		start.translatedXY(-1, -1).expect('S'),
+		start.translatedXY(1, 1).expect('M'),
+		start.translatedXY(-1, 1).expect('M'),
+		start.translatedXY(1, -1).expect('S'),
 	}
-	third := []Coordinate{
-		start,
-		start.translatedXY(-1, -1, 'S'),
-		start.translatedXY(1, 1, 'M'),
-		start.translatedXY(-1, 1, 'S'),
-		start.translatedXY(1, -1, 'M'),
+	third := []ExpectedDataCoordinate{
+		start.expect('A'),
+		start.translatedXY(-1, -1).expect('S'),
+		start.translatedXY(1, 1).expect('M'),
+		start.translatedXY(-1, 1).expect('S'),
+		start.translatedXY(1, -1).expect('M'),
 	}
-	fourth := []Coordinate{
-		start,
-		start.translatedXY(-1, -1, 'M'),
-		start.translatedXY(1, 1, 'S'),
-		start.translatedXY(-1, 1, 'S'),
-		start.translatedXY(1, -1, 'M'),
+	fourth := []ExpectedDataCoordinate{
+		start.expect('A'),
+		start.translatedXY(-1, -1).expect('M'),
+		start.translatedXY(1, 1).expect('S'),
+		start.translatedXY(-1, 1).expect('S'),
+		start.translatedXY(1, -1).expect('M'),
 	}
-	result := [][]Coordinate{first, second, third, fourth}
-	for i, coordinates := range result {
-		for _, c := range coordinates {
-			if c.X < 0 || c.X >= rows || c.Y < 0 || c.Y >= cols {
-				result[i] = nil
-			}
-		}
-	}
-	return result
+	return [][]ExpectedDataCoordinate{first, second, third, fourth}
 }
 
-func matchesExpected(runeMap [][]rune, coordinates []Coordinate) bool {
+/**
+ * Verifies if the runeMap matches the expected items at the given coordinates.
+ */
+func matchesExpected(runeMap [][]rune, coordinates []ExpectedDataCoordinate) bool {
 	for _, c := range coordinates {
-		if runeMap[c.Y][c.X] != c.Expected {
+		if c.C.X < 0 || c.C.X >= len(runeMap[0]) || c.C.Y < 0 || c.C.Y >= len(runeMap) {
+			return false
+		}
+		if runeMap[c.C.Y][c.C.X] != c.Expected {
 			return false
 		}
 	}
@@ -129,10 +127,10 @@ func Part1(input string) int {
 			if letter != 'X' {
 				continue
 			}
-			start := Coordinate{X: x, Y: y, Expected: letter}
+			start := Coordinate{X: x, Y: y}
 			potential := part1Potential(start, len(runes), len(line))
 			for _, p := range potential {
-				if p != nil && matchesExpected(runes, p) {
+				if matchesExpected(runes, p) {
 					result += 1
 				}
 			}
@@ -149,10 +147,10 @@ func Part2(input string) int {
 			if letter != 'A' {
 				continue
 			}
-			start := Coordinate{X: x, Y: y, Expected: letter}
+			start := Coordinate{X: x, Y: y}
 			potential := part2Potential(start, len(runes), len(line))
 			for _, p := range potential {
-				if p != nil && matchesExpected(runes, p) {
+				if matchesExpected(runes, p) {
 					result += 1
 				}
 			}
