@@ -59,7 +59,7 @@ func makeCharMap(s string) [][]rune {
 	return charMap
 }
 
-func part1Potential(start Coordinate, rows, cols int) [][]ExpectedDataCoordinate {
+func part1ExpectedPattern(start Coordinate) [][]ExpectedDataCoordinate {
 	result := make([][]ExpectedDataCoordinate, 0)
 	result = append(result, []ExpectedDataCoordinate{start.expect('X'), start.translatedX(1).expect('M'), start.translatedX(2).expect('A'), start.translatedX(3).expect('S')})
 	result = append(result, []ExpectedDataCoordinate{start.expect('X'), start.translatedX(-1).expect('M'), start.translatedX(-2).expect('A'), start.translatedX(-3).expect('S')})
@@ -72,7 +72,7 @@ func part1Potential(start Coordinate, rows, cols int) [][]ExpectedDataCoordinate
 	return result
 }
 
-func part2Potential(start Coordinate, rows, cols int) [][]ExpectedDataCoordinate {
+func part2ExpectedPattern(start Coordinate) [][]ExpectedDataCoordinate {
 	first := []ExpectedDataCoordinate{
 		start.expect('A'),
 		start.translatedXY(-1, -1).expect('M'),
@@ -123,12 +123,9 @@ func Part1(input string) int {
 	var result int
 	runes := makeCharMap(input)
 	for y, line := range runes {
-		for x, letter := range line {
-			if letter != 'X' {
-				continue
-			}
+		for x, _ := range line {
 			start := Coordinate{X: x, Y: y}
-			potential := part1Potential(start, len(runes), len(line))
+			potential := part1ExpectedPattern(start)
 			for _, p := range potential {
 				if matchesExpected(runes, p) {
 					result += 1
@@ -143,12 +140,9 @@ func Part2(input string) int {
 	var result int
 	runes := makeCharMap(input)
 	for y, line := range runes {
-		for x, letter := range line {
-			if letter != 'A' {
-				continue
-			}
+		for x, _ := range line {
 			start := Coordinate{X: x, Y: y}
-			potential := part2Potential(start, len(runes), len(line))
+			potential := part2ExpectedPattern(start)
 			for _, p := range potential {
 				if matchesExpected(runes, p) {
 					result += 1
