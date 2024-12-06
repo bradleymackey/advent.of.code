@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"fmt"
 	"slices"
-	"sort"
 	"strconv"
 	"strings"
 )
