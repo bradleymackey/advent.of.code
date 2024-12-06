@@ -55,6 +55,18 @@ const (
 	Left
 )
 
+type Action int
+
+const (
+	Moved Action = iota
+	Rotated
+	OutOfBounds
+)
+
+func (a Action) canProceed() bool {
+	return a != OutOfBounds
+}
+
 func (d Direction) turnRight() Direction {
 	return (d + 1) % 4
 }
@@ -96,16 +108,16 @@ func (arena *Arena) nextGuardPosition() Coordinate {
 }
 
 // Returns whether the guard was able to move.
-func (arena *Arena) moveGuard() bool {
+func (arena *Arena) moveGuard() Action {
 	nextPos := arena.nextGuardPosition()
 	if arena.obstacles[nextPos] {
 		arena.guard.turnRight()
-		return true
+		return Rotated
 	} else if nextPos.X < 0 || nextPos.X >= arena.width || nextPos.Y < 0 || nextPos.Y >= arena.height {
-		return false
+		return OutOfBounds
 	} else {
 		arena.guard.c = nextPos
-		return true
+		return Moved
 	}
 }
 
@@ -113,8 +125,8 @@ func (arena *Arena) visitedLocations() int {
 	visited := make(map[Coordinate]bool)
 	for {
 		visited[arena.guard.c] = true
-		didMove := arena.moveGuard()
-		if !didMove {
+		action := arena.moveGuard()
+		if !action.canProceed() {
 			return len(visited)
 		}
 	}
@@ -124,8 +136,8 @@ func (arena *Arena) doesLoop() bool {
 	visited := make(map[Guard]bool)
 	for {
 		visited[*arena.guard] = true
-		didMove := arena.moveGuard()
-		if !didMove {
+		action := arena.moveGuard()
+		if !action.canProceed() {
 			return false
 		}
 		if visited[*arena.guard] {
