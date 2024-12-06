@@ -24,8 +24,110 @@ func main() {
 	fmt.Println("Part 2:", ans2)
 }
 
+type Coordinate struct {
+	X int
+	Y int
+}
+
+func (c Coordinate) String() string {
+	return fmt.Sprintf("(%d, %d)", c.X, c.Y)
+}
+
+func (c Coordinate) translate(x, y int) Coordinate {
+	return Coordinate{c.X + x, c.Y + y}
+}
+
+type Guard struct {
+	c   Coordinate
+	dir Direction
+}
+
+func (g *Guard) turnRight() {
+	g.dir = g.dir.turnRight()
+}
+
+type Direction int
+
+const (
+	Up Direction = iota
+	Right
+	Down
+	Left
+)
+
+func (d Direction) turnRight() Direction {
+	return (d + 1) % 4
+}
+
+type Arena struct {
+	width     int
+	height    int
+	obstacles map[Coordinate]bool
+	guard     *Guard
+}
+
+func (arena *Arena) nextGuardPosition() Coordinate {
+	c := arena.guard.c
+	switch arena.guard.dir {
+	case Up:
+		return c.translate(0, -1)
+	case Left:
+		return c.translate(-1, 0)
+	case Down:
+		return c.translate(0, 1)
+	case Right:
+		return c.translate(1, 0)
+	default:
+		panic("Invalid Direction")
+	}
+}
+
+func (arena *Arena) moveGuard() *Coordinate {
+	nextPos := arena.nextGuardPosition()
+	if arena.obstacles[nextPos] {
+		arena.guard.turnRight()
+		return &arena.guard.c
+	} else if nextPos.X < 0 || nextPos.X >= arena.width || nextPos.Y < 0 || nextPos.Y >= arena.height {
+		return nil
+	} else {
+		arena.guard.c = nextPos
+		return &nextPos
+	}
+}
+
+func makeArena(input string) *Arena {
+	lines := strings.Split(input, "\n")
+	arena := &Arena{
+		width:     len(lines[0]),
+		height:    len(lines),
+		obstacles: make(map[Coordinate]bool),
+	}
+	for y, line := range lines {
+		for x, c := range line {
+			switch c {
+			case '#':
+				arena.obstacles[Coordinate{x, y}] = true
+			case '^':
+				arena.guard = &Guard{Coordinate{x, y}, Up}
+			}
+		}
+	}
+
+	return arena
+}
+
 func Part1(input string) int {
-	return 0
+	arena := makeArena(input)
+	visited := make(map[Coordinate]bool)
+	currentPos := arena.guard.c
+	for {
+		visited[currentPos] = true
+		nextPos := arena.moveGuard()
+		if nextPos == nil {
+			return len(visited)
+		}
+		currentPos = *nextPos
+	}
 }
 
 func Part2(input string) int {
