@@ -39,6 +39,42 @@ type OrderingRules struct {
 	Before map[int][]int
 }
 
+func (rules OrderingRules) rebuilt(pageList []int) []int {
+	slices.SortFunc(pageList, func(a, b int) int {
+		if slices.Contains(rules.After[a], b) {
+			// a < b
+			return -1
+		} else if slices.Contains(rules.Before[a], b) {
+			// a > b
+			return 1
+		} else {
+			// a == b or does not matter
+			return 0
+		}
+	})
+	return pageList
+}
+
+func (rules OrderingRules) isValidOrdering(pageList []int) bool {
+	for i, value := range pageList {
+		for _, itemAfter := range pageList[i+1:] {
+			// check for violations
+			violates := slices.Contains(rules.Before[value], itemAfter)
+			if violates {
+				return false
+			}
+		}
+		for _, itemBefore := range pageList[:i] {
+			// check for violations
+			violates := slices.Contains(rules.After[value], itemBefore)
+			if violates {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func makeOrderingRules(rules []string) OrderingRules {
 	before := make(map[int][]int)
 	after := make(map[int][]int)
@@ -59,27 +95,6 @@ func makeOrderingRules(rules []string) OrderingRules {
 	return OrderingRules{After: after, Before: before}
 }
 
-func isValidOrdering(pageList []int, orderingRules OrderingRules) bool {
-	for i, value := range pageList {
-		for _, itemAfter := range pageList[i+1:] {
-			// check for violations
-			violates := slices.Contains(orderingRules.Before[value], itemAfter)
-			if violates {
-				return false
-			}
-		}
-
-		for _, itemBefore := range pageList[:i] {
-			// check for violations
-			violates := slices.Contains(orderingRules.After[value], itemBefore)
-			if violates {
-				return false
-			}
-		}
-	}
-	return true
-}
-
 func Part1(input string) int {
 	sections := strings.Split(input, "\n\n")
 	orderingRules := makeOrderingRules(strings.Split(sections[0], "\n"))
@@ -87,7 +102,7 @@ func Part1(input string) int {
 
 	for _, list := range strings.Split(sections[1], "\n") {
 		page := Map(strings.Split(list, ","), func(item string) int { n, _ := strconv.Atoi(item); return n })
-		if isValidOrdering(page, orderingRules) {
+		if orderingRules.isValidOrdering(page) {
 			result += page[len(page)/2]
 		}
 	}
@@ -96,5 +111,17 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	return 0
+	sections := strings.Split(input, "\n\n")
+	orderingRules := makeOrderingRules(strings.Split(sections[0], "\n"))
+	result := 0
+
+	for _, list := range strings.Split(sections[1], "\n") {
+		page := Map(strings.Split(list, ","), func(item string) int { n, _ := strconv.Atoi(item); return n })
+		if !orderingRules.isValidOrdering(page) {
+			fixed := orderingRules.rebuilt(page)
+			result += fixed[len(fixed)/2]
+		}
+	}
+
+	return result
 }
