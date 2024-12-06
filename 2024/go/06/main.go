@@ -66,6 +66,19 @@ type Arena struct {
 	guard     *Guard
 }
 
+func (arena *Arena) clone() *Arena {
+	newArena := &Arena{
+		width:     arena.width,
+		height:    arena.height,
+		obstacles: make(map[Coordinate]bool),
+		guard:     &Guard{arena.guard.c, arena.guard.dir},
+	}
+	for k, v := range arena.obstacles {
+		newArena.obstacles[k] = v
+	}
+	return newArena
+}
+
 func (arena *Arena) nextGuardPosition() Coordinate {
 	c := arena.guard.c
 	switch arena.guard.dir {
@@ -82,16 +95,42 @@ func (arena *Arena) nextGuardPosition() Coordinate {
 	}
 }
 
-func (arena *Arena) moveGuard() *Coordinate {
+// Returns whether the guard was able to move.
+func (arena *Arena) moveGuard() bool {
 	nextPos := arena.nextGuardPosition()
 	if arena.obstacles[nextPos] {
 		arena.guard.turnRight()
-		return &arena.guard.c
+		return true
 	} else if nextPos.X < 0 || nextPos.X >= arena.width || nextPos.Y < 0 || nextPos.Y >= arena.height {
-		return nil
+		return false
 	} else {
 		arena.guard.c = nextPos
-		return &nextPos
+		return true
+	}
+}
+
+func (arena *Arena) visitedLocations() int {
+	visited := make(map[Coordinate]bool)
+	for {
+		visited[arena.guard.c] = true
+		didMove := arena.moveGuard()
+		if !didMove {
+			return len(visited)
+		}
+	}
+}
+
+func (arena *Arena) doesLoop() bool {
+	visited := make(map[Guard]bool)
+	for {
+		visited[*arena.guard] = true
+		didMove := arena.moveGuard()
+		if !didMove {
+			return false
+		}
+		if visited[*arena.guard] {
+			return true
+		}
 	}
 }
 
@@ -118,18 +157,24 @@ func makeArena(input string) *Arena {
 
 func Part1(input string) int {
 	arena := makeArena(input)
-	visited := make(map[Coordinate]bool)
-	currentPos := arena.guard.c
-	for {
-		visited[currentPos] = true
-		nextPos := arena.moveGuard()
-		if nextPos == nil {
-			return len(visited)
-		}
-		currentPos = *nextPos
-	}
+	return arena.visitedLocations()
 }
 
 func Part2(input string) int {
-	return 0
+	result := 0
+	arena := makeArena(input)
+	for x := range arena.width {
+		for y := range arena.height {
+			testArena := arena.clone()
+			pos := Coordinate{x, y}
+			if arena.guard.c == pos || testArena.obstacles[pos] {
+				continue
+			}
+			testArena.obstacles[pos] = true
+			if testArena.doesLoop() {
+				result += 1
+			}
+		}
+	}
+	return result
 }
