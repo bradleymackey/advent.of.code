@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 	"slices"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -35,12 +36,15 @@ func Map[T, V any](ts []T, fn func(T) V) []V {
 }
 
 type OrderingRules struct {
-	After  map[int][]int
+	// After 'key', the pages that should come after it.
+	After map[int][]int
+	// Before 'key', the pages that should come before it.
 	Before map[int][]int
 }
 
-func (rules OrderingRules) rebuilt(pageList []int) []int {
-	slices.SortFunc(pageList, func(a, b int) int {
+// The comparison function that enforces the ordering rules.
+func (rules OrderingRules) comparator() func(a, b int) int {
+	return func(a, b int) int {
 		if slices.Contains(rules.After[a], b) {
 			// a < b
 			return -1
@@ -51,28 +55,13 @@ func (rules OrderingRules) rebuilt(pageList []int) []int {
 			// a == b or does not matter
 			return 0
 		}
-	})
-	return pageList
+	}
 }
 
-func (rules OrderingRules) isValidOrdering(pageList []int) bool {
-	for i, value := range pageList {
-		for _, itemAfter := range pageList[i+1:] {
-			// check for violations
-			violates := slices.Contains(rules.Before[value], itemAfter)
-			if violates {
-				return false
-			}
-		}
-		for _, itemBefore := range pageList[:i] {
-			// check for violations
-			violates := slices.Contains(rules.After[value], itemBefore)
-			if violates {
-				return false
-			}
-		}
-	}
-	return true
+// Sorts the given list according to the rules.
+func (rules OrderingRules) sorted(pageList []int) []int {
+	slices.SortFunc(pageList, rules.comparator())
+	return pageList
 }
 
 func makeOrderingRules(rules []string) OrderingRules {
@@ -102,7 +91,7 @@ func Part1(input string) int {
 
 	for _, list := range strings.Split(sections[1], "\n") {
 		page := Map(strings.Split(list, ","), func(item string) int { n, _ := strconv.Atoi(item); return n })
-		if orderingRules.isValidOrdering(page) {
+		if slices.IsSortedFunc(page, orderingRules.comparator()) {
 			result += page[len(page)/2]
 		}
 	}
@@ -117,8 +106,8 @@ func Part2(input string) int {
 
 	for _, list := range strings.Split(sections[1], "\n") {
 		page := Map(strings.Split(list, ","), func(item string) int { n, _ := strconv.Atoi(item); return n })
-		if !orderingRules.isValidOrdering(page) {
-			fixed := orderingRules.rebuilt(page)
+		if !slices.IsSortedFunc(page, orderingRules.comparator()) {
+			fixed := orderingRules.sorted(page)
 			result += fixed[len(fixed)/2]
 		}
 	}
