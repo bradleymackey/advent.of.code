@@ -3,6 +3,8 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"maps"
+	"slices"
 	"strings"
 )
 
@@ -55,6 +57,10 @@ const (
 	Left
 )
 
+func (d Direction) turnRight() Direction {
+	return (d + 1) % 4
+}
+
 type Action int
 
 const (
@@ -67,28 +73,11 @@ func (a Action) canProceed() bool {
 	return a != OutOfBounds
 }
 
-func (d Direction) turnRight() Direction {
-	return (d + 1) % 4
-}
-
 type Arena struct {
 	width     int
 	height    int
 	obstacles map[Coordinate]bool
 	guard     *Guard
-}
-
-func (arena *Arena) clone() *Arena {
-	newArena := &Arena{
-		width:     arena.width,
-		height:    arena.height,
-		obstacles: make(map[Coordinate]bool),
-		guard:     &Guard{arena.guard.c, arena.guard.dir},
-	}
-	for k, v := range arena.obstacles {
-		newArena.obstacles[k] = v
-	}
-	return newArena
 }
 
 func (arena *Arena) nextGuardPosition() Coordinate {
@@ -121,13 +110,13 @@ func (arena *Arena) moveGuard() Action {
 	}
 }
 
-func (arena *Arena) visitedLocations() int {
+func (arena *Arena) visitedLocations() []Coordinate {
 	visited := make(map[Coordinate]bool)
 	for {
 		visited[arena.guard.c] = true
 		action := arena.moveGuard()
 		if !action.canProceed() {
-			return len(visited)
+			return slices.Collect(maps.Keys(visited))
 		}
 	}
 }
@@ -169,24 +158,24 @@ func makeArena(input string) *Arena {
 
 func Part1(input string) int {
 	arena := makeArena(input)
-	return arena.visitedLocations()
+	return len(arena.visitedLocations())
 }
 
 func Part2(input string) int {
 	result := 0
 	arena := makeArena(input)
-	for x := range arena.width {
-		for y := range arena.height {
-			testArena := arena.clone()
-			pos := Coordinate{x, y}
-			if arena.guard.c == pos || testArena.obstacles[pos] {
-				continue
-			}
-			testArena.obstacles[pos] = true
-			if testArena.doesLoop() {
-				result += 1
-			}
+	visted := arena.visitedLocations()
+
+	for _, pos := range visted {
+		testArena := makeArena(input)
+		if testArena.guard.c == pos {
+			continue
+		}
+		testArena.obstacles[pos] = true
+		if testArena.doesLoop() {
+			result += 1
 		}
 	}
+
 	return result
 }
