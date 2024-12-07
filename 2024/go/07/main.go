@@ -31,9 +31,10 @@ type Operator int
 const (
 	Add Operator = iota
 	Multiply
+	Concat
 )
 
-func generatePermutations(length int, current []Operator) [][]Operator {
+func generatePermutations(set []Operator, length int, current []Operator) [][]Operator {
 	if len(current) == length {
 		perm := make([]Operator, len(current))
 		copy(perm, current)
@@ -41,8 +42,8 @@ func generatePermutations(length int, current []Operator) [][]Operator {
 	}
 
 	var result [][]Operator
-	for _, op := range []Operator{Add, Multiply} {
-		newPermutations := generatePermutations(length, append(current, op))
+	for _, op := range set {
+		newPermutations := generatePermutations(set, length, append(current, op))
 		result = append(result, newPermutations...)
 	}
 
@@ -55,6 +56,9 @@ func (op Operator) apply(a, b int) int {
 		return a + b
 	case Multiply:
 		return a * b
+	case Concat:
+		a, _ := strconv.Atoi(strconv.Itoa(a) + strconv.Itoa(b))
+		return a
 	default:
 		panic("invalid operator")
 	}
@@ -65,8 +69,8 @@ type equation struct {
 	parts  []int
 }
 
-func (e equation) hasAnySolutions() bool {
-	operatorPerms := generatePermutations(len(e.parts)-1, []Operator{})
+func (e equation) hasAnySolutions(operators []Operator) bool {
+	operatorPerms := generatePermutations(operators, len(e.parts)-1, []Operator{})
 	for _, ops := range operatorPerms {
 		intermediate := e.parts[0]
 		for index, part := range e.parts[1:] {
@@ -101,7 +105,7 @@ func Part1(input string) int {
 	total := 0
 	for _, line := range strings.Split(input, "\n") {
 		equation := parseEquation(line)
-		if equation.hasAnySolutions() {
+		if equation.hasAnySolutions([]Operator{Add, Multiply}) {
 			total += equation.result
 		}
 	}
@@ -109,5 +113,12 @@ func Part1(input string) int {
 }
 
 func Part2(input string) int {
-	return 0
+	total := 0
+	for _, line := range strings.Split(input, "\n") {
+		equation := parseEquation(line)
+		if equation.hasAnySolutions([]Operator{Add, Multiply, Concat}) {
+			total += equation.result
+		}
+	}
+	return total
 }
