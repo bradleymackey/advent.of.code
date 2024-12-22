@@ -23,6 +23,11 @@ type Antenna struct {
 	Coord   Coordinate
 }
 
+type AntennaPair struct {
+	First  Antenna
+	Second Antenna
+}
+
 type Coordinate struct {
 	X int
 	Y int
@@ -89,6 +94,23 @@ func (a Arena) IsInBounds(coord Coordinate) bool {
 	return coord.X >= 0 && coord.Y >= 0 && coord.X < a.Width() && coord.Y < a.Height()
 }
 
+func (a Arena) AllAntennaPairs() []AntennaPair {
+	pairs := make([]AntennaPair, 0)
+	antennas := a.AllAntennas()
+	for _, scanner := range antennas {
+		for _, target := range antennas {
+			if scanner == target {
+				continue
+			}
+			if scanner.Antenna != target.Antenna {
+				continue
+			}
+			pairs = append(pairs, AntennaPair{First: scanner, Second: target})
+		}
+	}
+	return pairs
+}
+
 func main() {
 	ans1 := Part1(input)
 	fmt.Println("Part 1:", ans1)
@@ -98,30 +120,32 @@ func main() {
 
 func Part1(input string) int {
 	arena := makeArena(input)
-	antennas := arena.AllAntennas()
 	locations := make(map[Coordinate]bool)
-	for _, scanner := range antennas {
-		for _, target := range antennas {
-			if scanner == target {
-				continue
-			}
-			if scanner.Antenna != target.Antenna {
-				continue
-			}
-			vector := arena.DistanceToMatching(scanner.Coord, target.Coord)
-			first := target.Coord.Add(vector)
-			second := scanner.Coord.Sub(vector)
-			if arena.IsInBounds(first) {
-				locations[first] = true
-			}
-			if arena.IsInBounds(second) {
-				locations[second] = true
-			}
+	for _, pair := range arena.AllAntennaPairs() {
+		vector := arena.DistanceToMatching(pair.First.Coord, pair.Second.Coord)
+		first := pair.First.Coord.Sub(vector)
+		second := pair.Second.Coord.Add(vector)
+		if arena.IsInBounds(first) {
+			locations[first] = true
+		}
+		if arena.IsInBounds(second) {
+			locations[second] = true
 		}
 	}
 	return len(locations)
 }
 
 func Part2(input string) int {
-	return 0
+	arena := makeArena(input)
+	locations := make(map[Coordinate]bool)
+	for _, pair := range arena.AllAntennaPairs() {
+		vector := arena.DistanceToMatching(pair.First.Coord, pair.Second.Coord)
+		for added := pair.First.Coord.Add(vector); arena.IsInBounds(added); added = added.Add(vector) {
+			locations[added] = true
+		}
+		for subbed := pair.Second.Coord.Sub(vector); arena.IsInBounds(subbed); subbed = subbed.Sub(vector) {
+			locations[subbed] = true
+		}
+	}
+	return len(locations)
 }
