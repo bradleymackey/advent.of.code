@@ -41,6 +41,10 @@ func (c Coordinate) Sub(v Vector) Coordinate {
 	return Coordinate{X: c.X - v.X, Y: c.Y - v.Y}
 }
 
+func (c Coordinate) DistanceTo(other Coordinate) Vector {
+	return Vector{X: other.X - c.X, Y: other.Y - c.Y}
+}
+
 type Vector struct {
 	X int
 	Y int
@@ -60,10 +64,6 @@ func (a Arena) Height() int {
 
 func (a Arena) Get(coord Coordinate) Item {
 	return a.Grid[coord.Y][coord.X]
-}
-
-func (a Arena) DistanceToMatching(from Coordinate, to Coordinate) Vector {
-	return Vector{X: to.X - from.X, Y: to.Y - from.Y}
 }
 
 func makeArena(input string) Arena {
@@ -122,13 +122,11 @@ func Part1(input string) int {
 	arena := makeArena(input)
 	locations := make(map[Coordinate]bool)
 	for _, pair := range arena.AllAntennaPairs() {
-		vector := arena.DistanceToMatching(pair.First.Coord, pair.Second.Coord)
-		first := pair.First.Coord.Sub(vector)
-		second := pair.Second.Coord.Add(vector)
-		if arena.IsInBounds(first) {
+		vector := pair.First.Coord.DistanceTo(pair.Second.Coord)
+		if first := pair.First.Coord.Sub(vector); arena.IsInBounds(first) {
 			locations[first] = true
 		}
-		if arena.IsInBounds(second) {
+		if second := pair.Second.Coord.Add(vector); arena.IsInBounds(second) {
 			locations[second] = true
 		}
 	}
@@ -139,7 +137,7 @@ func Part2(input string) int {
 	arena := makeArena(input)
 	locations := make(map[Coordinate]bool)
 	for _, pair := range arena.AllAntennaPairs() {
-		vector := arena.DistanceToMatching(pair.First.Coord, pair.Second.Coord)
+		vector := pair.First.Coord.DistanceTo(pair.Second.Coord)
 		for added := pair.First.Coord.Add(vector); arena.IsInBounds(added); added = added.Add(vector) {
 			locations[added] = true
 		}
